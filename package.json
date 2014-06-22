@@ -1,0 +1,22 @@
+{
+  "name": "mib",
+  "version": "0.0.0",
+  "description": "Movable Issue Board: a Kanban board app for Github issues",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec --recursive test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/keyvanfatehi/mib.git"
+  },
+  "keywords": [
+    "kanban"
+  ],
+  "author": "Keyvan Fatehi <keyvanfatehi@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/keyvanfatehi/mib/issues"
+  },
+  "homepage": "https://github.com/keyvanfatehi/mib"
+}
