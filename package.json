@@ -2,9 +2,13 @@
   "name": "mib",
   "version": "0.0.0",
   "description": "Movable Issue Board: a Kanban board app for Github issues",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "mocha -R spec --recursive test"
+    "start": "node server.js",
+    "test": "mocha -R spec --recursive test",
+    "tdd": "mocha -R spec -w --recursive test",
+    "build": "browserify src/client/main.js -o public/bundle.js",
+    "watch": "watchify src/client/main.js -o public/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -18,5 +22,13 @@
   "bugs": {
     "url": "https://github.com/keyvanfatehi/mib/issues"
   },
-  "homepage": "https://github.com/keyvanfatehi/mib"
+  "homepage": "https://github.com/keyvanfatehi/mib",
+  "devDependencies": {
+    "mocha": "^1.20.1",
+    "browserify": "^4.1.10",
+    "watchify": "^0.10.2"
+  },
+  "dependencies": {
+    "express": "^4.4.3"
+  }
 }
