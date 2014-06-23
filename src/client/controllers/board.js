@@ -9,5 +9,12 @@ module.exports = function(app) {
         board.columns = data.board.columns;
       }
     });
+    this.removeCard = function(row, col) {
+      $http.delete('/boards/1/cards/'+row+'/'+col).success(function(data) {
+        console.log(data);
+        if (data.board)
+          board.columns = data.board.columns;
+      });
+    }
   }]);
 }

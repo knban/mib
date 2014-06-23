@@ -39,8 +39,9 @@
               <th ng-repeat="column in board.columns">{{column.name}}</th>
             </thead>
             <tbody>
-              <td ng-repeat="column in board.columns">
-                <div class="card" ng-repeat="card in column.cards">
+              <td ng-repeat="column in board.columns" ng-init="col = $index">
+                <div class="card" ng-repeat="card in column.cards" ng-init="row = $index">
+                  <a ng-click="board.removeCard(row, col)" href="#">[x]</a>
                   {{card.title}}
                 </div>
               </td>
