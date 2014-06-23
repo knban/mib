@@ -13,8 +13,10 @@ module.exports = function(app) {
     this.columns = [];
     var board = this;
     $http.get('/board/1').success(function(data) {
-      board.name = data.board.name;
-      board.columns = data.board.columns;
+      if (data.board) {
+        board.name = data.board.name;
+        board.columns = data.board.columns;
+      }
     });
   }]);
 }
