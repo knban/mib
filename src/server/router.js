@@ -19,7 +19,26 @@ r.get('/boards/:id', function(req, res, next) {
   });
 });
 
-r.delete('/boards/:id/cards/:row/:col', function(req, res, next) {
+// Deleting columns
+r.delete('/boards/:id/columns/:col', function (req, res, next) {
+  Board.find({ id: req.params.id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      board.columns.splice(req.params.col, 1);
+      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ board: board }); }
+      });
+    }
+  });
+});
+
+// Deleting cards
+r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
   Board.find({ id: req.params.id }, function(err, boards) {
     if (err) {
       res.send(500);

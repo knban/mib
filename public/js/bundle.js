@@ -18,9 +18,14 @@ module.exports = function(app) {
         board.columns = data.board.columns;
       }
     });
-    this.removeCard = function(row, col) {
-      $http.delete('/boards/1/cards/'+row+'/'+col).success(function(data) {
-        console.log(data);
+    this.removeColumn = function(col) {
+      $http.delete('/boards/1/columns/'+col).success(function(data) {
+        if (data.board)
+          board.columns = data.board.columns;
+      });
+    }
+    this.removeCard = function(col, row) {
+      $http.delete('/boards/1/columns/'+col+'/cards/'+row).success(function(data) {
         if (data.board)
           board.columns = data.board.columns;
       });
