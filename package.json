@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/keyvanfatehi/mib",
   "devDependencies": {
-    "mocha": "^1.20.1",
     "browserify": "^4.1.10",
+    "mocha": "^1.20.1",
     "watchify": "^0.10.2"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "dotenv": "^0.2.8",
     "everyauth": "^0.4.5",
     "express": "^4.4.3",
-    "morgan": "^1.1.1"
+    "morgan": "^1.1.1",
+    "socket.io": "^1.0.6"
   }
 }
