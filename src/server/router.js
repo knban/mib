@@ -7,7 +7,7 @@ r.get('/session.json', function(req, res, next) {
 
 var Board = require('./models/board');
 
-r.get('/board/:id', function(req, res, next) {
+r.get('/boards/:id', function(req, res, next) {
   Board.find({ id: '1' }, function(err, boards) {
     if (err) {
       res.send(500);

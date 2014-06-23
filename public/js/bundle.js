@@ -12,12 +12,19 @@ module.exports = function(app) {
     this.name = "Empty Board"; 
     this.columns = [];
     var board = this;
-    $http.get('/board/1').success(function(data) {
+    $http.get('/boards/1').success(function(data) {
       if (data.board) {
         board.name = data.board.name;
         board.columns = data.board.columns;
       }
     });
+    this.removeCard = function(row, col) {
+      $http.delete('/boards/1/cards/'+row+'/'+col).success(function(data) {
+        console.log(data);
+        if (data.board)
+          board.columns = data.board.columns;
+      });
+    }
   }]);
 }
 
@@ -27,6 +34,7 @@ module.exports = function(app) {
     var session = this.session = { loggedIn: false };
     $http.get('/session.json').success(function(data) {
       session.loggedIn = data.auth && data.auth.loggedIn;
+      session.uid = data.uid;
     });
   }]);
 }
