@@ -6,6 +6,10 @@
     <title>mib</title>
   </head>
   <body>
+    <div ng-controller="SessionController as session">
+      <a ng-hide="session.loggedIn" href="/auth/github">Sign in with github</a>
+      <a ng-show="session.loggedIn" href="/logout">Logout</a>
+    </div>
     <div ng-controller="BoardController as board">
       <p>{{board.name}}</p>
     </div>
