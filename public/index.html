@@ -45,6 +45,7 @@
                     <a ng-hide="$index === 0" ng-click="board.movColumnLeft($index)" href="#"><i class="glyphicon glyphicon-arrow-left"></i></a>
                     <a ng-click="board.addColumnLeft($index)" href="#"><i class="glyphicon glyphicon-plus-sign"></i></a>
                     <a ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></a>
+                    <a ng-click="board.importCards($index)" href="#"><i class="glyphicon glyphicon-import"></i></a>
                     <a ng-click="board.addColumnRight($index)" href="#"><i class="glyphicon glyphicon-plus-sign"></i></a>
                     <a ng-hide="$index === board.columns.length-1" ng-click="board.movColumnRight($index)" href="#"><i class="glyphicon glyphicon-arrow-right"></i></a>
                   </div>

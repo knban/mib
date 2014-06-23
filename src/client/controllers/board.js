@@ -22,5 +22,11 @@ module.exports = function(app) {
           board.columns = data.board.columns;
       });
     }
+    this.importCards = function(col) {
+      var repos_url = app.session.auth.github.user.repos_url;
+      $http.get(repos_url).success(function(data) {
+        console.log(data);
+      })
+    }
   }]);
 }
