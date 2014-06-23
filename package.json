@@ -7,8 +7,8 @@
     "start": "node server.js",
     "test": "mocha -R spec --recursive test",
     "tdd": "mocha -R spec -w --recursive test",
-    "build": "browserify src/client/main.js -o public/bundle.js",
-    "watch": "watchify src/client/main.js -o public/bundle.js"
+    "build": "browserify src/client/main.js -o public/js/bundle.js",
+    "watch": "watchify src/client/main.js -o public/js/bundle.js"
   },
   "repository": {
     "type": "git",
