@@ -8,25 +8,13 @@ r.get('/session.json', function(req, res, next) {
 var Board = require('./models/board');
 
 r.get('/board/:id', function(req, res, next) {
-  Board.find({ id: '1' }, function(err, board) {
-    if (err)
+  Board.find({ id: '1' }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
       res.send(404);
-    else
-      res.send(board);
+    } else {
+      res.send({ board: boards[0] });
+    }
   });
 });
-
-/*
-    board: {
-      columns: [{
-        name: "Inbox",
-        cards: [{
-          title: "Stuff"
-        }]   
-      }, {
-        name: "Doing"
-      }, {
-        name: "Done"
-      }]
-    }
-*/
