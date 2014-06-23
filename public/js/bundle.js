@@ -8,19 +8,15 @@ module.exports = app;
 
 },{"./controllers/board":2,"./controllers/nav":3}],2:[function(require,module,exports){
 module.exports = function(app) {
-  app.controller('BoardController', function() {
-    this.name = "New Board"; 
-    this.columns = [{
-      name: "Inbox",
-      cards: [{
-        title: "Stuff"
-      }]   
-    }, {
-      name: "Doing"
-    }, {
-      name: "Done"
-    }]
-  });
+  app.controller('BoardController', ['$http', function($http) {
+    this.name = "Empty Board"; 
+    this.columns = [];
+    var board = this;
+    $http.get('/board/1').success(function(data) {
+      board.name = data.board.name;
+      board.columns = data.board.columns;
+    });
+  }]);
 }
 
 },{}],3:[function(require,module,exports){
