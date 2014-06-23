@@ -2,14 +2,28 @@
 var app = angular.module('app', []);
 
 require('./controllers/nav')(app);
-
-app.controller('BoardController', function() {
-  this.name = "MyBoard"; 
-});
+require('./controllers/board')(app);
 
 module.exports = app;
 
-},{"./controllers/nav":2}],2:[function(require,module,exports){
+},{"./controllers/board":2,"./controllers/nav":3}],2:[function(require,module,exports){
+module.exports = function(app) {
+  app.controller('BoardController', function() {
+    this.name = "New Board"; 
+    this.columns = [{
+      name: "Inbox",
+      cards: [{
+        title: "Stuff"
+      }]   
+    }, {
+      name: "Doing"
+    }, {
+      name: "Done"
+    }]
+  });
+}
+
+},{}],3:[function(require,module,exports){
 module.exports = function(app) {
   app.controller('NavigationController', ['$http', function($http) {
     var session = this.session = { loggedIn: false };
@@ -19,8 +33,8 @@ module.exports = function(app) {
   }]);
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var app = require('./app');
 
 
-},{"./app":1}]},{},[3])
+},{"./app":1}]},{},[4])

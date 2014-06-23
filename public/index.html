@@ -33,7 +33,19 @@
 
       <div class="content">
         <div ng-controller="BoardController as board">
-          <p class="lead">{{board.name}}</p>
+          <h4>{{board.name}}</h4>
+          <table class="table">
+            <thead>
+              <th ng-repeat="column in board.columns">{{column.name}}</th>
+            </thead>
+            <tbody>
+              <td ng-repeat="column in board.columns">
+                <div class="card" ng-repeat="card in column.cards">
+                  {{card.title}}
+                </div>
+              </td>
+            </tbody>
+          </table>
         </div>
       </div>
 
