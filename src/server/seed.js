@@ -10,14 +10,15 @@ module.exports = function() {
         columns: [{
           name: "Inbox",
           cards: [{
-            title: "Stuff"
-          }]   
+            title: 'deployment'
+          }]
         },{
           name: "Doing",
-          cards: []
-        },{
-          name: "Done",
-          cards: []
+          cards: [{
+            title: 'development'
+          },{
+            title: "debugging"
+          }]
         }]
       });
       board.save(function(err, res) {
