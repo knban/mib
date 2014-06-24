@@ -77,7 +77,7 @@ r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) 
 })
 
 // Move a card
-r.put('/boards/:id/columns/:col/cards/:row/move', function(req, res, next) {
+r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
   Board.find({ id: req.params.id }, function(err, boards) {
     if (err) {
       res.send(500);
@@ -85,13 +85,20 @@ r.put('/boards/:id/columns/:col/cards/:row/move', function(req, res, next) {
       res.send(404);
     } else {
       var board = boards[0];
-      var directions = {
-        right: function(popCard, done) {
-          board.columns[parseInt(req.params.col)+1].cards.push(popCard());
-          done();
-        }
-      }
-      directions[req.body.direction](function() {
+      var Mover = function(popCard, done) {
+        var directions = {
+          left: function() {
+            board.columns[parseInt(req.params.col)-1].cards.push(popCard());
+            done();
+          },
+          right: function() {
+            board.columns[parseInt(req.params.col)+1].cards.push(popCard());
+            done();
+          }
+        };
+        directions[req.params.direction]()
+      };
+      Mover(function() {
         return board.columns[req.params.col].cards.splice(req.params.row, 1)[0];
       }, function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
