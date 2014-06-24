@@ -42,11 +42,8 @@
       </div>
       <table class="table">
         <thead>
-          <th ng-repeat="column in board.columns">
-            <div class="btn-group">
-              <button class="btn btn-default btn-xs" ng-if="false" ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
-              <button class="btn btn-default btn-xs">{{column.name}}</button>
-            </div>
+          <th style="text-align:center" ng-repeat="column in board.columns">
+            <b>{{column.name}}</b>
           </th>
         </thead>
         <tbody>
