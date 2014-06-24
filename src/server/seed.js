@@ -9,16 +9,13 @@ module.exports = function() {
         name: "Default Board",
         columns: [{
           name: "Inbox",
-          cards: [{
-            title: 'deployment'
-          }]
+          cards: []
         },{
           name: "Doing",
-          cards: [{
-            title: 'development'
-          },{
-            title: "debugging"
-          }]
+          cards: []
+        },{
+          name: "Done",
+          cards: []
         }]
       });
       board.save(function(err, res) {
