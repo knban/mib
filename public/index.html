@@ -19,11 +19,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">{{board.name}}</a>
+          <a class="navbar-brand" href="#" ng-click="board.closeImport()">{{board.name}}</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li><a ng-hide="nav.session.loggedIn" href="/auth/github">Login</a></li>
+            <li><a ng-show="nav.session.loggedIn" ng-click="board.startImport()" href="#">Import</a></li>
             <li><a ng-show="nav.session.loggedIn" href="/logout">Logout {{nav.session.uid}}</a></li>
           </ul>
         </div><!--/.nav-collapse -->
@@ -31,7 +32,6 @@
     </div>
     <div class="container-fluid">
       <div ng-show="board.importing" id="import">
-        <button class="pull-right btn btn-default btn-xs" ng-click="board.closeImport()"><i class="glyphicon glyphicon-remove-sign"></i></button>
         <h4>Importing into: <b>{{board.columns[board.importCol].name}}</b></h4>
         <p>{{board.importHelp}}</p>
         <a href="#" ng-hide="board.importProvider" ng-repeat="provider in board.availableImportProviders" ng-click="provider.next()">{{provider.name}}</a>
@@ -42,28 +42,28 @@
       </div>
       <table class="table">
         <thead>
-          <th ng-hide="board.unfocused($index)" ng-repeat="column in board.columns">
+          <th ng-repeat="column in board.columns">
             <div class="btn-group">
-              <button class="btn btn-default btn-xs" ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
-              <button class="btn btn-default btn-xs" ng-click="board.focusColumn($index)">{{column.name}}</button>
-              <button class="btn btn-default btn-xs" ng-click="board.importCards($index)" href="#"><i class="glyphicon glyphicon-import"></i></button>
+              <button class="btn btn-default btn-xs" ng-if="false" ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
+              <button class="btn btn-default btn-xs">{{column.name}}</button>
             </div>
           </th>
         </thead>
         <tbody>
           <tr>
-            <td ng-repeat="column in board.columns" ng-init="col = $index" ng-hide="board.unfocused(col)">
+            <td ng-repeat="column in board.columns" ng-init="col = $index">
               <ul class="list-group">
                 <li class="list-group-item" ng-repeat="card in column.cards" ng-init="row = $index">
                   <span class="badge">{{card.comments}}</span>
                   <a class="pull-left" href="{{card.html_url}}" target="_blank">{{card.title}}</a>
                   <br>
                   <div class="btn-group">
-                    <button class="btn btn-default btn-xs" ng-click="board.removeCard(col, row)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
+                    <button class="btn btn-default btn-xs" ng-if="col > 0" ng-click="board.moveCard('left', col, row)"><i class="glyphicon glyphicon-arrow-left" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-if="false" ng-click="board.removeCard(col, row)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
                     <button class="btn btn-default btn-xs" ng-click="board.logCard(card)"><i class="glyphicon glyphicon-wrench" style="color:green"></i></button>
-                    <button class="btn btn-default btn-xs" ng-hide="row === column.cards.length-1" ng-click="board.moveCardDown(card)"><i class="glyphicon glyphicon-arrow-down" style="color:green"></i></button>
-                    <button class="btn btn-default btn-xs" ng-hide="row === 0" ng-click="board.moveCardUp(card)"><i class="glyphicon glyphicon-arrow-up" style="color:green"></i></button>
-                    <button class="btn btn-default btn-xs" ng-click="board.moveCardRight(col, row)"><i class="glyphicon glyphicon-arrow-right" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-hide="row === column.cards.length-1" ng-click="board.moveCard('down', col, row)"><i class="glyphicon glyphicon-arrow-down" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-hide="row === 0" ng-click="board.moveCard('up', col, row)"><i class="glyphicon glyphicon-arrow-up" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-click="board.moveCard('right', col, row)"><i class="glyphicon glyphicon-arrow-right" style="color:green"></i></button>
                   </div>
                 </li>   
               </ul>

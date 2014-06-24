@@ -42,38 +42,24 @@ module.exports = ['$http', function($http) {
   this.availableImportProviders = [
     GithubProvider(board, $http)
   ];
-  this.importCards = function(col) {
+  this.startImport = function() {
     board.importing = true;
     board.importProvider = null;
     board.importPersonalOrOrg = null;
     board.importOrgs = null;
     board.importRepos = null;
     board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
-    board.importCol = col;
+    board.importCol = 0;
   }
   this.closeImport = function() {
     board.importing = null;
     board.importCol = null;
   }
-  this.focusColumn = function(col) {
-    if (board.showOnly === col) {
-      board.showOnly = null;
-      board.focusMode = false;
-    } else {
-      board.showOnly = col;
-      board.focusMode = true;
-    }
-  }
-  this.unfocused = function(col) {
-    return board.focusMode && board.showOnly !== col;
-  }
   this.logCard = function(card) {
     console.log(card);
   }
-  this.moveCardRight = function(col, row) {
-    $http.put('/boards/'+board.id+'/columns/'+col+'/cards/'+row+'/move', {
-      direction: 'right'
-    }).success(function(data) {
+  this.moveCard = function(direction, col, row) {
+    $http.put('/boards/'+board.id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
       if (data.board)
         board.columns = data.board.columns;
     });
