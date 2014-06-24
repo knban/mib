@@ -10,16 +10,20 @@ module.exports = ['$http', function($http) {
     }
   });
   this.removeColumn = function(col) {
-    $http.delete('/boards/'+board.id+'/columns/'+col).success(function(data) {
-      if (data.board)
-        board.columns = data.board.columns;
-    });
+    if (confirm("Are you sure you wish to delete this column and all its cards?")) {
+      $http.delete('/boards/'+board.id+'/columns/'+col).success(function(data) {
+        if (data.board)
+          board.columns = data.board.columns;
+      });
+    }
   }
   this.removeCard = function(col, row) {
-    $http.delete('/boards/'+board.id+'/columns/'+col+'/cards/'+row).success(function(data) {
-      if (data.board)
-        board.columns = data.board.columns;
-    });
+    if (confirm("Are you sure you wish to delete this card?")) {
+      $http.delete('/boards/'+board.id+'/columns/'+col+'/cards/'+row).success(function(data) {
+        if (data.board)
+          board.columns = data.board.columns;
+      });
+    }
   },
   this.addCard = function(col, body) {
     $http.post('/boards/'+board.id+'/columns/'+col+'/cards', body).success(function(data) {
@@ -42,7 +46,7 @@ module.exports = ['$http', function($http) {
       board.importPersonalOrOrg = false;
       board.importHelp = "Fetching organizations...";
       $http.get(app.session.auth.github.user.organizations_url).success(function(data) {
-        board.importHelp = "Which organization owns the repository you wish to import issues from?";
+        board.importHelp = "Which organization owns the repository from which you wish to import open issues?";
         board.importOrgs = data;
       })
     },
@@ -58,7 +62,7 @@ module.exports = ['$http', function($http) {
       })
     },
     importRepoIssues: function(repo) {
-      board.closeImport();
+      repo.imported = true;
       var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
       $http.get(repo.issues_url.replace('{/number}','')+'?state=open').success(function(data) {
         console.log(data);
@@ -74,12 +78,27 @@ module.exports = ['$http', function($http) {
   }];
   this.importCards = function(col) {
     board.importing = true;
-    board.importProvider = false;
+    board.importProvider = null;
+    board.importPersonalOrOrg = null;
+    board.importOrgs = null;
+    board.importRepos = null;
+    board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
     board.importCol = col;
-    board.importOrgs = [];
-    board.importHelp = "Choose the provider containing the repository whose issues you wish to import."
   }
   this.closeImport = function() {
-    board.importing = false;
+    board.importing = null;
+    board.importCol = null;
+  },
+  this.focusColumn = function(col) {
+    if (board.showOnly === col) {
+      board.showOnly = null;
+      board.focusMode = false;
+    } else {
+      board.showOnly = col;
+      board.focusMode = true;
+    }
+  },
+  this.unfocused = function(col) {
+    return board.focusMode && board.showOnly !== col;
   }
 }]
