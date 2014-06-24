@@ -1,2 +1,2 @@
-var app = require('./app');
+window.app = require('./app');
 

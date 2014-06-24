@@ -1,4 +1,3 @@
-var app = window.app = angular.module('app', []);
-require('./controllers/nav')(app);
-require('./controllers/board')(app);
-module.exports = app;
+module.exports = angular.module('app', [])
+.controller('BoardController', require('./controllers/board'))
+.controller('NavigationController', require('./controllers/nav'))
