@@ -4,6 +4,8 @@ module.exports = angular.module('app', [])
 .controller('NavigationController', require('./controllers/nav'))
 
 },{"./controllers/board":2,"./controllers/nav":3}],2:[function(require,module,exports){
+var GithubProvider = require('../../providers/github');
+
 module.exports = ['$http', function($http) {
   this.id = '1';
   this.name = "Empty Board"; 
@@ -37,7 +39,61 @@ module.exports = ['$http', function($http) {
         board.columns[col] = data.board.columns[col];
     });
   }
-  this.availableImportProviders = [{
+  this.availableImportProviders = [
+    GithubProvider(board, $http)
+  ];
+  this.importCards = function(col) {
+    board.importing = true;
+    board.importProvider = null;
+    board.importPersonalOrOrg = null;
+    board.importOrgs = null;
+    board.importRepos = null;
+    board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
+    board.importCol = col;
+  }
+  this.closeImport = function() {
+    board.importing = null;
+    board.importCol = null;
+  }
+  this.focusColumn = function(col) {
+    if (board.showOnly === col) {
+      board.showOnly = null;
+      board.focusMode = false;
+    } else {
+      board.showOnly = col;
+      board.focusMode = true;
+    }
+  }
+  this.unfocused = function(col) {
+    return board.focusMode && board.showOnly !== col;
+  }
+  this.logCard = function(card) {
+    console.log(card);
+  }
+  this.moveCardRight = function(card) {
+    $http.put
+  }
+}]
+
+},{"../../providers/github":5}],3:[function(require,module,exports){
+module.exports = ['$http', function($http) {
+  var session = this.session = { loggedIn: false };
+  $http.get('/session.json').success(function(data) {
+    if (data.auth && data.auth.loggedIn) {
+      session.loggedIn = true;
+      session.uid = data.uid;
+      app.session = data;
+    }
+  });
+}]
+
+},{}],4:[function(require,module,exports){
+window.app = require('./app');
+
+
+},{"./app":1}],5:[function(require,module,exports){
+module.exports = function(board, $http) {
+  return  {
     name: "GitHub",
     next: function() {
       board.importProvider = this;
@@ -81,51 +137,7 @@ module.exports = ['$http', function($http) {
     canImport: function(repo) {
       return repo.has_issues && repo.open_issues_count > 0;
     }
-  }];
-  this.importCards = function(col) {
-    board.importing = true;
-    board.importProvider = null;
-    board.importPersonalOrOrg = null;
-    board.importOrgs = null;
-    board.importRepos = null;
-    board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
-    board.importCol = col;
   }
-  this.closeImport = function() {
-    board.importing = null;
-    board.importCol = null;
-  },
-  this.focusColumn = function(col) {
-    if (board.showOnly === col) {
-      board.showOnly = null;
-      board.focusMode = false;
-    } else {
-      board.showOnly = col;
-      board.focusMode = true;
-    }
-  },
-  this.unfocused = function(col) {
-    return board.focusMode && board.showOnly !== col;
-  },
-  this.logCard = function(card) {
-    console.log(card);
-  }
-}]
+}
 
-},{}],3:[function(require,module,exports){
-module.exports = ['$http', function($http) {
-  var session = this.session = { loggedIn: false };
-  $http.get('/session.json').success(function(data) {
-    if (data.auth && data.auth.loggedIn) {
-      session.loggedIn = true;
-      session.uid = data.uid;
-      app.session = data;
-    }
-  });
-}]
-
-},{}],4:[function(require,module,exports){
-window.app = require('./app');
-
-
-},{"./app":1}]},{},[4])
+},{}]},{},[4])
