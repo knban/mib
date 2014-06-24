@@ -60,7 +60,7 @@
                     <button class="btn btn-default btn-xs" ng-click="board.logCard(card)"><i class="glyphicon glyphicon-wrench" style="color:green"></i></button>
                     <button class="btn btn-default btn-xs" ng-hide="row === column.cards.length-1" ng-click="board.moveCard('down', col, row)"><i class="glyphicon glyphicon-arrow-down" style="color:green"></i></button>
                     <button class="btn btn-default btn-xs" ng-hide="row === 0" ng-click="board.moveCard('up', col, row)"><i class="glyphicon glyphicon-arrow-up" style="color:green"></i></button>
-                    <button class="btn btn-default btn-xs" ng-click="board.moveCard('right', col, row)"><i class="glyphicon glyphicon-arrow-right" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-if="col !== board.columns.length-1" ng-click="board.moveCard('right', col, row)"><i class="glyphicon glyphicon-arrow-right" style="color:green"></i></button>
                   </div>
                 </li>   
               </ul>
