@@ -8,7 +8,10 @@ module.exports = function() {
         id: "1",
         name: "Default Board",
         columns: [{
-          name: "Inbox",
+          name: "Icebox",
+          cards: []
+        },{
+          name: "Backlog",
           cards: []
         },{
           name: "Doing",
