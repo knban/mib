@@ -1,5 +1,6 @@
 var express = require('express');
 var r = module.exports = express.Router();
+var _ = require('lodash');
 
 r.get('/session.json', function(req, res, next) {
   res.send(req.session);
@@ -55,8 +56,6 @@ r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
   });
 });
 
-var _ = require('lodash');
-
 // Importing cards from Github
 r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) {
   Board.find({ id: req.params.id }, function(err, boards) {
@@ -76,3 +75,30 @@ r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) 
     }
   });
 })
+
+// Move a card
+r.put('/boards/:id/columns/:col/cards/:row/move', function(req, res, next) {
+  Board.find({ id: req.params.id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      var directions = {
+        right: function(popCard, done) {
+          board.columns[parseInt(req.params.col)+1].cards.push(popCard());
+          done();
+        }
+      }
+      directions[req.body.direction](function() {
+        return board.columns[req.params.col].cards.splice(req.params.row, 1)[0];
+      }, function() {
+        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+          if (err) { res.send(500, err.message); }
+          else { res.send({ board: { columns: board.columns } }) }
+        });
+      })
+    }
+  });
+});

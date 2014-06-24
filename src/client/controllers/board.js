@@ -64,7 +64,12 @@ module.exports = ['$http', function($http) {
   this.logCard = function(card) {
     console.log(card);
   }
-  this.moveCardRight = function(card) {
-    $http.put
+  this.moveCardRight = function(col, row) {
+    $http.put('/boards/'+board.id+'/columns/'+col+'/cards/'+row+'/move', {
+      direction: 'right'
+    }).success(function(data) {
+      if (data.board)
+        board.columns = data.board.columns;
+    });
   }
 }]
