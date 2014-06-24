@@ -53,4 +53,28 @@ r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
       });
     }
   });
+});
+
+var _ = require('lodash');
+
+// Importing cards from Github
+r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) {
+  Board.find({ id: req.params.id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      _.each(req.body.openIssues, function(issue) {
+        board.columns[req.params.col].cards.push({
+          title: issue.title
+        });
+      });
+      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ board: { columns: board.columns } }) }
+      });
+    }
+  });
 })
