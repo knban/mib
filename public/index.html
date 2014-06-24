@@ -33,7 +33,17 @@
 
       <div class="content">
         <div ng-controller="BoardController as board">
-          <h4>{{board.name}}</h4>
+          <h3>{{board.name}}</h3>
+          <div ng-show="board.importing" id="import">
+            <a ng-click="board.closeImport()" class="pull-right" href="#"><i class="glyphicon glyphicon-remove-sign"></i></a>
+            <h4>Importing into: <b>{{board.columns[board.importCol].name}}</b></h4>
+            <p>{{board.importHelp}}</p>
+            <a href="#" ng-hide="board.importProvider" ng-repeat="provider in board.availableImportProviders" ng-click="provider.next()">{{provider.name}}</a>
+            <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.personal()">Personal</a>
+            <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.org()">Organization</a>
+            <a href="#" ng-show="board.importOrgs" ng-repeat="org in board.importOrgs" ng-click="board.importProvider.selectOrg(org)" style="display:block">{{org.login}}</a>
+            <a href="#" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-if="board.importProvider.canImport(repo)" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block">{{repo.full_name}}</a>
+          </div>
           <table class="table">
             <thead>
               <th ng-repeat="column in board.columns">
