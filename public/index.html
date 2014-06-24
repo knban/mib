@@ -30,39 +30,47 @@
       </div>
     </div>
     <div class="container-fluid">
-      <div class="content">
-        <div ng-show="board.importing" id="import">
-          <button class="pull-right btn btn-default btn-xs" ng-click="board.closeImport()"><i class="glyphicon glyphicon-remove-sign"></i></button>
-          <h4>Importing into: <b>{{board.columns[board.importCol].name}}</b></h4>
-          <p>{{board.importHelp}}</p>
-          <a href="#" ng-hide="board.importProvider" ng-repeat="provider in board.availableImportProviders" ng-click="provider.next()">{{provider.name}}</a>
-          <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.personal()">Personal</a>
-          <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.org()">Organization</a>
-          <a href="#" ng-show="board.importOrgs" ng-repeat="org in board.importOrgs" ng-click="board.importProvider.selectOrg(org)" style="display:block">{{org.login}}</a>
-          <button ng-disabled="repo.imported" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-if="board.importProvider.canImport(repo)" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block" class="btn btn-default btn-lg btn-block">{{repo.full_name}}</button>
-        </div>
-        <table class="table">
-          <thead>
-            <th style="text-align:center" ng-hide="board.unfocused($index)" ng-repeat="column in board.columns">
-              <div class="btn-group">
-                <button class="btn btn-default btn-xs" ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
-                <button class="btn btn-default btn-xs" ng-click="board.focusColumn($index)">{{column.name}}</button>
-                <button class="btn btn-default btn-xs" ng-click="board.importCards($index)" href="#"><i class="glyphicon glyphicon-import"></i></button>
-              </div>
-            </th>
-          </thead>
-          <tbody>
-            <tr>
-              <td ng-repeat="column in board.columns" ng-init="col = $index" ng-hide="board.unfocused(col)">
-                <div class="card" ng-repeat="card in column.cards" ng-init="row = $index">
-                  <a ng-click="board.removeCard(col, row)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></a>
-                  {{card.title}}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div ng-show="board.importing" id="import">
+        <button class="pull-right btn btn-default btn-xs" ng-click="board.closeImport()"><i class="glyphicon glyphicon-remove-sign"></i></button>
+        <h4>Importing into: <b>{{board.columns[board.importCol].name}}</b></h4>
+        <p>{{board.importHelp}}</p>
+        <a href="#" ng-hide="board.importProvider" ng-repeat="provider in board.availableImportProviders" ng-click="provider.next()">{{provider.name}}</a>
+        <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.personal()">Personal</a>
+        <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.org()">Organization</a>
+        <a href="#" ng-show="board.importOrgs" ng-repeat="org in board.importOrgs" ng-click="board.importProvider.selectOrg(org)" style="display:block">{{org.login}}</a>
+        <button ng-disabled="repo.imported" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-if="board.importProvider.canImport(repo)" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block" class="btn btn-default btn-lg btn-block">{{repo.full_name}}</button>
       </div>
+      <table class="table">
+        <thead>
+          <th ng-hide="board.unfocused($index)" ng-repeat="column in board.columns">
+            <div class="btn-group">
+              <button class="btn btn-default btn-xs" ng-click="board.removeColumn($index)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
+              <button class="btn btn-default btn-xs" ng-click="board.focusColumn($index)">{{column.name}}</button>
+              <button class="btn btn-default btn-xs" ng-click="board.importCards($index)" href="#"><i class="glyphicon glyphicon-import"></i></button>
+            </div>
+          </th>
+        </thead>
+        <tbody>
+          <tr>
+            <td ng-repeat="column in board.columns" ng-init="col = $index" ng-hide="board.unfocused(col)">
+              <ul class="list-group">
+                <li class="list-group-item" ng-repeat="card in column.cards" ng-init="row = $index">
+                  <span class="badge">{{card.comments}}</span>
+                  <a class="pull-left" href="{{card.html_url}}" target="_blank">{{card.title}}</a>
+                  <br>
+                  <div class="btn-group">
+                    <button class="btn btn-default btn-xs" ng-click="board.removeCard(col, row)" href="#" style="color:red"><i class="glyphicon glyphicon-remove-sign"></i></button>
+                    <button class="btn btn-default btn-xs" ng-click="board.logCard(card)"><i class="glyphicon glyphicon-wrench" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-hide="row === column.cards.length-1" ng-click="board.moveCardDown(card)"><i class="glyphicon glyphicon-arrow-down" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-hide="row === 0" ng-click="board.moveCardUp(card)"><i class="glyphicon glyphicon-arrow-up" style="color:green"></i></button>
+                    <button class="btn btn-default btn-xs" ng-click="board.moveCardRight(card)"><i class="glyphicon glyphicon-arrow-right" style="color:green"></i></button>
+                  </div>
+                </li>   
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
     </div><!-- /.container -->
     <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>

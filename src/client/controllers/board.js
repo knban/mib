@@ -100,5 +100,8 @@ module.exports = ['$http', function($http) {
   },
   this.unfocused = function(col) {
     return board.focusMode && board.showOnly !== col;
+  },
+  this.logCard = function(card) {
+    console.log(card);
   }
 }]
