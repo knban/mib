@@ -6,6 +6,17 @@ var stubbedModels = [];
 module.exports = {
   sinon: sinon,
   expect: chai.expect,
+  supertest: require('supertest'),
+  /*
+   * Create an express app and use the
+   * specified file as its router
+   */
+  appWithRouter: function(routerFile) {
+    var app = require('express')();
+    app.use(require('body-parser').json());
+    app.use(this.require(routerFile));
+    return app;
+  },
   /*
    * Stub a mongoose model with sinon
    */
