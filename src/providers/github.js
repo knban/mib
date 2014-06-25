@@ -29,7 +29,6 @@ module.exports = function(board, $http) {
       this.getRepos(board.importReposLinks.prev);
     },
     getReposNext: function() {
-      console.log(board.importReposLinks.next);
       this.getRepos(board.importReposLinks.next);
     },
     getRepos: function(url, pageNum) {
