@@ -63,26 +63,55 @@ describe("GitHub Provider", function() {
 
   describe("importRepoIssues", function() {
     var stub = null;
-    beforeEach(function() {
-      $http = helper.fake$http();
-      $http.stub('get', function(stub) {
-        return stub.yields([
-          { id: 222 }
-        ], 200, function linkHeaders() {return ''});
+
+    describe("issues not paginated", function() {
+      beforeEach(function() {
+        $http = helper.fake$http();
+        $http.stub('get', function(stub) {
+          return stub.yields([
+            { id: 222 }
+          ], 200, function linkHeaders() {return ''});
+        });
+        stub = $http.stub('post', function(stub) {
+          return stub.yields({}, 200);
+        });
+        board.id = 2;
+        board.importCol = 1;
+        provider = Provider(board, $http);
+        provider.importRepoIssues({ id: 111, issues_url: "test" });
       });
-      stub = $http.stub('post', function(stub) {
-        return stub.yields({}, 200);
+      it("uses the correct URL", function() {
+        expect(stub.getCall(0).args[0]).to.eq("/boards/2/columns/1/cards/import/github");
       });
-      board.id = 2;
-      board.importCol = 1;
-      provider = Provider(board, $http);
-      provider.importRepoIssues({ id: 111, issues_url: "test" });
+      it("supplies an id field sufficient for uniqueness matching", function() {
+        expect(stub.getCall(0).args[1].openIssues[0].id).to.eq(222);
+      });
     });
-    it("uses the correct URL", function() {
-      expect(stub.getCall(0).args[0]).to.eq("/boards/2/columns/1/cards/import/github");
-    });
-    it("supplies an id field sufficient for uniqueness matching", function() {
-      expect(stub.getCall(0).args[1].openIssues[0].id).to.eq(222);
+
+    describe("with paginated issues", function() {
+      beforeEach(function() {
+        $http = helper.fake$http();
+        $http.stub('get', function(stub) {
+          return stub.yields([
+            { id: 222 }
+          ], 200, function linkHeaders() {
+            return li.stringify({
+              next: 'whatever'
+            });
+          });
+        });
+        stub = $http.stub('post', function(stub) {
+          return stub.yields({}, 200);
+        });
+        board.id = 2;
+        board.importCol = 1;
+        provider = Provider(board, $http);
+        provider.importRepoIssues({ id: 111, issues_url: "test" });
+      });
+
+      it("posts the issues to the backend in multiple calls", function() {
+        expect(stub.callCount).to.eq(2);
+      });
     });
   });
 });

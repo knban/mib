@@ -78,10 +78,6 @@ describe("Router", function() {
           done();
         });
       });
-
-      it("handles pagination", function() {
-        
-      });
     });
   });
 });

@@ -68,12 +68,22 @@ module.exports = {
       },
       importRepoIssues: function(repo) {
         repo.imported = true;
+        var url = repo.issues_url.replace('{/number}','')+'?state=open';
+        this.importIssues(url);
+      },
+      importIssues: function(url) {
+        $http.get(url).success(function(data, status, headers) {
+          this.postIssues(data);
+          var next = headers('Link').next;
+          if (next)
+            this.importIssues(openIssues, next);
+        }.bind(this));
+      },
+      postIssues: function(openIssues) {
         var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
-        $http.get(repo.issues_url.replace('{/number}','')+'?state=open').success(function(data) {
-          $http.post(importUrl, { openIssues: data }).success(function(data) {
-            if (data.board)
-              board.columns = data.board.columns;
-          });
+        $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
+          if (data.board)
+            board.columns = data.board.columns;
         });
       },
       canImport: function(repo) {
