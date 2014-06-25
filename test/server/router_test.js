@@ -1,23 +1,54 @@
 var helper = require('../test_helper'),
 expect = helper.expect,
+request = helper.supertest,
 sinon = helper.sinon;
 
 
 describe("Router", function() {
-  var router = null,
+  var app = null,
+  board = null,
   Board = null;
 
-  beforeEach(function() {
-    helper.stubModel('Board').returns('hi');
-    router = helper.require('server/router');
+  before(function() {
+    board = {
+      name: "a board",
+      columns: [{
+        cards: []
+      }]
+    };
+
+    helper.stubModel('Board').returns({
+      find: sinon.stub().yields(null, [board]),
+      update: sinon.stub().yields(null)
+    });
+
+    app = helper.appWithRouter('server/router');
+
     Board = helper.require('server/models/board');
-  });
+  })
 
-  afterEach(helper.restoreModels);
+  after(helper.restoreModels);
 
-  describe("", function() {
-    it("does stuff", function() {
-      
+  describe("POST /boards/:id/columns/:col/cards/import/github", function() {
+
+    // TODO add provider.
+    // TODO scope issue object under a key within the card
+    it("adds the cards the board and returns the new board", function(done) {
+      var card1 = { title: "foo" };
+      var card2 = { title: "bar" };
+      request(app)
+      .post('/boards/1/columns/0/cards/import/github')
+      .send({
+        openIssues: [card1, card2]
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err, res){
+        if (err) throw err;
+        expect(res.body.board.columns[0].cards[0]).to.deep.eq(card1);
+        expect(res.body.board.columns[0].cards[1]).to.deep.eq(card2);
+        done();
+      });
     });
   });
 });
