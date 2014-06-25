@@ -1,3 +1,5 @@
+var li = require('li');
+
 module.exports = function(board, $http) {
   return  {
     name: "GitHub",
@@ -24,9 +26,12 @@ module.exports = function(board, $http) {
     },
     getRepos: function(url, pageNum) {
       board.importHelp = "Fetching repositories...";
-      $http.get(url+'?page='+pageNum).success(function(data) {
+      $http.get(url+'?page='+pageNum+'&type=all').success(function(data, status, headers, config) {
         board.importHelp = "Which repository do you wish to import issues from?";
         board.importRepos = data;
+        board.importReposNext = null;
+        board.importReposLast = null;
+        board.importReposLinks = li.parse(headers('Link'));
       })
     },
     importRepoIssues: function(repo) {

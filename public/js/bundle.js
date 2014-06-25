@@ -1,9 +1,58 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (name, definition, context) {
+
+  //try CommonJS, then AMD (require.js), then use global.
+
+  if (typeof module != 'undefined' && module.exports) module.exports = definition();
+  else if (typeof context['define'] == 'function' && context['define']['amd']) define(definition);
+  else context[name] = definition();
+
+})('li', function () {
+
+
+  return {
+    parse: function (linksHeader) {
+      var result = {};
+      var entries = linksHeader.split(',');
+      // compile regular expressions ahead of time for efficiency
+      var relsRegExp = /\brel="?([^"]+)"?\s*;?/;
+      var keysRegExp = /(\b[0-9a-z\.-]+\b)/g;
+      var sourceRegExp = /^<(.*)>/;
+
+      for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i].trim();
+        var rels = relsRegExp.exec(entry);
+        if (rels) {
+          var keys = rels[1].match(keysRegExp);
+          var source = sourceRegExp.exec(entry)[1];
+          var k, kLength = keys.length;
+          for (k = 0; k < kLength; k += 1) {
+            result[keys[k]] = source
+          }
+        }
+      }
+
+      return result;
+    },
+    stringify: function (headerObject, callback) {
+      var result = "";
+      for (var x in headerObject) {
+        result += '<' + headerObject[x] + '>; rel="' + x + '", ';
+      }
+      result = result.substring(0, result.length - 2);
+
+      return result;
+    }
+  };
+
+}, this);
+
+},{}],2:[function(require,module,exports){
 module.exports = angular.module('app', [])
 .controller('BoardController', require('./controllers/board'))
 .controller('NavigationController', require('./controllers/nav'))
 
-},{"./controllers/board":2,"./controllers/nav":3}],2:[function(require,module,exports){
+},{"./controllers/board":3,"./controllers/nav":4}],3:[function(require,module,exports){
 var GithubProvider = require('../../providers/github');
 
 module.exports = ['$http', function($http) {
@@ -66,7 +115,7 @@ module.exports = ['$http', function($http) {
   }
 }]
 
-},{"../../providers/github":5}],3:[function(require,module,exports){
+},{"../../providers/github":6}],4:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   var session = this.session = { loggedIn: false };
   $http.get('/session.json').success(function(data) {
@@ -78,11 +127,13 @@ module.exports = ['$http', function($http) {
   });
 }]
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 window.app = require('./app');
 
 
-},{"./app":1}],5:[function(require,module,exports){
+},{"./app":2}],6:[function(require,module,exports){
+var li = require('li');
+
 module.exports = function(board, $http) {
   return  {
     name: "GitHub",
@@ -109,9 +160,12 @@ module.exports = function(board, $http) {
     },
     getRepos: function(url, pageNum) {
       board.importHelp = "Fetching repositories...";
-      $http.get(url+'?page='+pageNum).success(function(data) {
+      $http.get(url+'?page='+pageNum+'&type=all').success(function(data, status, headers, config) {
         board.importHelp = "Which repository do you wish to import issues from?";
         board.importRepos = data;
+        board.importReposNext = null;
+        board.importReposLast = null;
+        board.importReposLinks = li.parse(headers('Link'));
       })
     },
     importRepoIssues: function(repo) {
@@ -131,4 +185,4 @@ module.exports = function(board, $http) {
   }
 }
 
-},{}]},{},[4])
+},{"li":1}]},{},[5])
