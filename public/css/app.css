@@ -3,7 +3,7 @@ body {
 }
 
 table tr td {
-  border-right: 2px solid #ddd;
+  border-right: 2px solid #ddd; 
 }
 
 table tr td:last-child {
