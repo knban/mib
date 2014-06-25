@@ -42,7 +42,7 @@
           <button class="btn btn-default" ng-if="board.importReposLinks.prev" ng-click="board.importProvider.getReposPrev()">previous</button>
           <button class="btn btn-default" ng-if="board.importReposLinks.next" ng-click="board.importProvider.getReposNext()">next</button>
         </div>
-        <button ng-disabled="repo.imported" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-if="board.importProvider.canImport(repo)" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block" class="btn btn-default btn-lg btn-block">{{repo.full_name}}</button>
+        <button ng-disabled="repo.imported" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block" class="btn btn-default btn-lg btn-block">{{repo.full_name}}</button>
       </div>
       <table class="table">
         <thead>

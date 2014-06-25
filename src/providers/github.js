@@ -4,6 +4,7 @@ module.exports = function(board, $http) {
   return  {
     name: "GitHub",
     next: function() {
+      $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
       board.importProvider = this;
       board.importHelp = "Is it a personal repository or part of an organization?"
       board.importPersonalOrOrg = true;
