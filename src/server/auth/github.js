@@ -1,7 +1,11 @@
 module.exports = function(everyauth) {
+  var id = process.env.GITHUB_CLIENT_ID;
+  var secret = process.env.GITHUB_CLIENT_SECRET;
+  if (! id) throw new Error("Missing environment variable GITHUB_CLIENT_ID");
+  if (! secret) throw new Error("Missing environment variable GITHUB_CLIENT_SECRET");
   everyauth.github
-  .appId(process.env.GITHUB_CLIENT_ID)
-  .appSecret(process.env.GITHUB_CLIENT_SECRET)
+  .appId(id)
+  .appSecret(secret)
   .entryPath('/auth/github')
   .callbackPath('/auth/github/callback')
   .scope('repo') // Can be set to a combination of: 'user', 'public_repo', 'repo', 'gist'
