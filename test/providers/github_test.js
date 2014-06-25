@@ -95,6 +95,9 @@ describe("GitHub Provider", function() {
           return stub.yields([
             { id: 222 }
           ], 200, function linkHeaders() {
+            $http.restub('get', function(stub) {
+              return stub.yields([ { id: 333 } ], 200, function(){});
+            });
             return li.stringify({
               next: 'whatever'
             });

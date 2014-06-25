@@ -137,7 +137,8 @@ window.app = require('./app');
 var li = require('li');
 
 module.exports = {
-  cardHandler: function() {
+  // Inject the lodash dependency in this way to avoid bringing it in on the browser
+  cardHandler: function(_) {
     return {
       batchImport: function(board, issues, done) {
         var cards = board.columns[0].cards;
@@ -147,21 +148,21 @@ module.exports = {
         _.each(issues, function(issue) {
           // Determine if we already represent this issue with a card
           var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.provider_id === issue.provider_id
+            return c.id === issue.id
           });
           if (existingIssueCard) {
             _.merge(existingIssueCard, issue);
           } else {
             cards.push(issue);
           }
-          done();
         });
+        done();
       }
     }
   },
   cardProvider: function(board, $http) {
     return  {
-      name: "GitHub",
+      name: "github",
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
         board.importProvider = this;
@@ -203,12 +204,23 @@ module.exports = {
       },
       importRepoIssues: function(repo) {
         repo.imported = true;
+        var url = repo.issues_url.replace('{/number}','')+'?state=open';
+        this.importIssues(url);
+      },
+      importIssues: function(url) {
+        $http.get(url).success(function(data, status, headers) {
+          this.postIssues(data);
+          var next = headers('Link') ? li.parse(headers('Link')) : null;
+          if (next) {
+            this.importIssues(next);
+          }
+        }.bind(this));
+      },
+      postIssues: function(openIssues) {
         var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
-        $http.get(repo.issues_url.replace('{/number}','')+'?state=open').success(function(data) {
-          $http.post(importUrl, { openIssues: data }).success(function(data) {
-            if (data.board)
-              board.columns = data.board.columns;
-          });
+        $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
+          if (data.board)
+            board.columns = data.board.columns;
         });
       },
       canImport: function(repo) {

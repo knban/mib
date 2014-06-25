@@ -74,9 +74,10 @@ module.exports = {
       importIssues: function(url) {
         $http.get(url).success(function(data, status, headers) {
           this.postIssues(data);
-          var next = headers('Link').next;
-          if (next)
-            this.importIssues(openIssues, next);
+          var next = headers('Link') ? li.parse(headers('Link')) : null;
+          if (next) {
+            this.importIssues(next);
+          }
         }.bind(this));
       },
       postIssues: function(openIssues) {
