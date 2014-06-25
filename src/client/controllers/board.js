@@ -42,6 +42,8 @@ module.exports = ['$http', function($http) {
     board.importPersonalOrOrg = null;
     board.importOrgs = null;
     board.importRepos = null;
+    board.importReposCurPage = null;
+    board.importReposLinks = null;
     board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
     board.importCol = 0;
   }

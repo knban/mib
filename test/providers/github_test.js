@@ -24,13 +24,13 @@ describe("GitHub Provider", function() {
         { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
       ]);
       provider = Provider(board, $http);
-      provider.getRepos('url', 1);
+      provider.getRepos('url');
     });
     it("populates board.importRepos with 3 repos", function() {
       expect(board.importRepos.length).to.eq(3);
     });
-    it("board.importReposLinks is empty", function() {
-      expect(board.importReposLinks).to.deep.eq({});
+    it("board.importReposLinks is null", function() {
+      expect(board.importReposLinks).to.eq(null);
     });
   });
 
@@ -43,7 +43,7 @@ describe("GitHub Provider", function() {
         last: 'link2'
       }));
       provider = Provider(board, $http);
-      provider.getRepos('url', 1);
+      provider.getRepos('url');
     });
     it("populates board.importRepos with 3 repos", function() {
       expect(board.importRepos.length).to.eq(3);

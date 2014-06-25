@@ -38,6 +38,10 @@
         <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.personal()">Personal</a>
         <a href="#" ng-show="board.importPersonalOrOrg" ng-click="board.importProvider.org()">Organization</a>
         <a href="#" ng-show="board.importOrgs" ng-repeat="org in board.importOrgs" ng-click="board.importProvider.selectOrg(org)" style="display:block">{{org.login}}</a>
+        <div class="btn-group" ng-if="board.importReposLinks">
+          <button class="btn btn-default" ng-if="board.importReposLinks.prev" ng-click="board.importProvider.getReposPrev()">previous</button>
+          <button class="btn btn-default" ng-if="board.importReposLinks.next" ng-click="board.importProvider.getReposNext()">next</button>
+        </div>
         <button ng-disabled="repo.imported" ng-show="board.importRepos" ng-repeat="repo in board.importRepos" ng-if="board.importProvider.canImport(repo)" ng-click="board.importProvider.importRepoIssues(repo)" style="display:block" class="btn btn-default btn-lg btn-block">{{repo.full_name}}</button>
       </div>
       <table class="table">

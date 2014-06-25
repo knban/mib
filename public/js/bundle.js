@@ -97,6 +97,8 @@ module.exports = ['$http', function($http) {
     board.importPersonalOrOrg = null;
     board.importOrgs = null;
     board.importRepos = null;
+    board.importReposCurPage = null;
+    board.importReposLinks = null;
     board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
     board.importCol = 0;
   }
@@ -144,7 +146,7 @@ module.exports = function(board, $http) {
     },
     personal: function() {
       board.importPersonalOrOrg = false;
-      this.getRepos(app.session.auth.github.user.repos_url, 1);
+      this.getRepos(app.session.auth.github.user.repos_url);
     },
     org: function() {
       board.importPersonalOrOrg = false;
@@ -156,16 +158,24 @@ module.exports = function(board, $http) {
     },
     selectOrg: function(org) {
       board.importOrgs = false;
-      this.getRepos(org.repos_url, 1);
+      this.getRepos(org.repos_url);
+    },
+    getReposPrev: function() {
+      this.getRepos(board.importReposLinks.prev);
+    },
+    getReposNext: function() {
+      console.log(board.importReposLinks.next);
+      this.getRepos(board.importReposLinks.next);
     },
     getRepos: function(url, pageNum) {
       board.importHelp = "Fetching repositories...";
-      $http.get(url+'?page='+pageNum+'&type=all').success(function(data, status, headers, config) {
+      $http.get(url).success(function(data, status, headers, config) {
         board.importHelp = "Which repository do you wish to import issues from?";
         board.importRepos = data;
         board.importReposNext = null;
         board.importReposLast = null;
-        board.importReposLinks = li.parse(headers('Link'));
+        board.importReposCurPage = pageNum;
+        board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
       })
     },
     importRepoIssues: function(repo) {
