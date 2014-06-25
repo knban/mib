@@ -2,13 +2,19 @@ var helper = require('../test_helper'),
 expect = helper.expect,
 sinon = helper.sinon;
 
-var mongoose = require('mongoose');
-mongoose.model = sinon.stub();
-mongoose.model.withArgs('Board').returns('hi');
-var router = helper.require('server/router');
-var Board = helper.require('server/models/board');
 
 describe("Router", function() {
+  var router = null,
+  Board = null;
+
+  beforeEach(function() {
+    helper.stubModel('Board').returns('hi');
+    router = helper.require('server/router');
+    Board = helper.require('server/models/board');
+  });
+
+  afterEach(helper.restoreModels);
+
   describe("", function() {
     it("does stuff", function() {
       
