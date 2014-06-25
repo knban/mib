@@ -1,7 +1,7 @@
 var helper = require('../test_helper'),
 expect = helper.expect;
 
-var Provider = helper.require('providers/github');
+var Provider = helper.require('providers/github').cardProvider;
 
 var li = require('li');
 
@@ -20,9 +20,12 @@ describe("GitHub Provider", function() {
 
   describe("getRepos without pagination", function() {
     beforeEach(function() {
-      $http = helper.fake$http([
-        { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
-      ]);
+      $http = helper.fake$http();
+      $http.stub('get', function(stub) {
+        return stub.yields([
+          { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
+        ], 200, function linkHeaders() {return ''});
+      });
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
@@ -36,12 +39,14 @@ describe("GitHub Provider", function() {
 
   describe("getRepos with pagination", function() {
     beforeEach(function() {
-      $http = helper.fake$http([
-        { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
-      ], li.stringify({
-        next: 'link1',
-        last: 'link2'
-      }));
+      $http = helper.fake$http();
+      $http.stub('get', function(stub) {
+        return stub.yields([
+          { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
+        ], 200, function linkHeaders() {
+          return li.stringify({ next: 'link1', last: 'link2' })
+        });
+      });
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
@@ -53,6 +58,31 @@ describe("GitHub Provider", function() {
         next: 'link1',
         last: 'link2'
       });
+    });
+  });
+
+  describe("importRepoIssues", function() {
+    var stub = null;
+    beforeEach(function() {
+      $http = helper.fake$http();
+      $http.stub('get', function(stub) {
+        return stub.yields([
+          { id: 222 }
+        ], 200, function linkHeaders() {return ''});
+      });
+      stub = $http.stub('post', function(stub) {
+        return stub.yields({}, 200);
+      });
+      board.id = 2;
+      board.importCol = 1;
+      provider = Provider(board, $http);
+      provider.importRepoIssues({ id: 111, issues_url: "test" });
+    });
+    it("uses the correct URL", function() {
+      expect(stub.getCall(0).args[0]).to.eq("/boards/2/columns/1/cards/import/github");
+    });
+    it("supplies an id field sufficient for uniqueness matching", function() {
+      expect(stub.getCall(0).args[1].openIssues[0].id).to.eq(222);
     });
   });
 });

@@ -1,4 +1,4 @@
-var GithubProvider = require('../../providers/github');
+var GithubProvider = require('../../providers/github').cardProvider;
 
 module.exports = ['$http', function($http) {
   this.id = '1';
