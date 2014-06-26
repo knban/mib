@@ -1,0 +1,47 @@
+<h4>Importing into: 
+  <b>{{board.columns[board.importCol].name}}</b>
+</h4>
+<p>{{board.importHelp}}</p>
+<a href="#"
+  ng-hide="board.importProvider"
+  ng-repeat="provider in board.availableImportProviders"
+  ng-click="provider.next()">
+  {{provider.name}}
+</a>
+<a href="#"
+  ng-show="board.importPersonalOrOrg"
+  ng-click="board.importProvider.personal()">
+  Personal
+</a>
+<a href="#"
+  ng-show="board.importPersonalOrOrg"
+  ng-click="board.importProvider.org()">
+  Organization
+</a>
+<a href="#" style="display:block"
+  ng-show="board.importOrgs"
+  ng-repeat="org in board.importOrgs"
+  ng-click="board.importProvider.selectOrg(org)">
+  {{org.login}}
+</a>
+<div class="btn-group" ng-if="board.importReposLinks">
+  <button class="btn btn-default pull-left"
+    ng-if="board.importReposLinks.prev"
+    ng-click="board.importProvider.getReposPrev()">
+    Previous Page
+  </button>
+  <button class="btn btn-default pull-right"
+    ng-if="board.importReposLinks.next"
+    ng-click="board.importProvider.getReposNext()">
+    Next Page
+  </button>
+</div>
+<button
+  style="display:block"
+  class="btn btn-default btn-lg btn-block"
+  ng-disabled="repo.imported"
+  ng-show="board.importRepos"
+  ng-repeat="repo in board.importRepos"
+  ng-click="board.importProvider.importRepo(repo)">
+  {{repo.full_name}}
+</button>
