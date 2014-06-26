@@ -87,21 +87,23 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
     } else {
       var board = boards[0];
       var Mover = function(popCard, done) {
+        var row = parseInt(req.params.row);
+        var col = parseInt(req.params.col);
         var directions = {
           up: function() {
-            board.columns[parseInt(req.params.col)].cards.splice(req.params.row-1, 0, popCard());
+            board.columns[col].cards.splice(row-1, 0, popCard());
             done();
           },
           down: function() {
-            board.columns[parseInt(req.params.col)].cards.splice(req.params.row+1, 0, popCard());
+            board.columns[col].cards.splice(row+1, 0, popCard());
             done();
           },
           left: function() {
-            board.columns[parseInt(req.params.col)-1].cards.push(popCard());
+            board.columns[col-1].cards.push(popCard());
             done();
           },
           right: function() {
-            board.columns[parseInt(req.params.col)+1].cards.push(popCard());
+            board.columns[col+1].cards.push(popCard());
             done();
           }
         };
