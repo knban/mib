@@ -48,7 +48,7 @@
 }, this);
 
 },{}],2:[function(require,module,exports){
-module.exports = angular.module('app', [])
+window.app = angular.module('app', [])
 .controller('BoardController', require('./controllers/board'))
 .controller('NavigationController', require('./controllers/nav'))
 
@@ -117,7 +117,7 @@ module.exports = ['$http', function($http) {
   }
 }]
 
-},{"../../providers/github":6}],4:[function(require,module,exports){
+},{"../../providers/github":5}],4:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   var session = this.session = { loggedIn: false };
   $http.get('/session.json').success(function(data) {
@@ -130,10 +130,6 @@ module.exports = ['$http', function($http) {
 }]
 
 },{}],5:[function(require,module,exports){
-window.app = require('./app');
-
-
-},{"./app":2}],6:[function(require,module,exports){
 var li = require('li');
 
 module.exports = {
@@ -252,4 +248,4 @@ module.exports = {
   }
 }
 
-},{"li":1}]},{},[5])
+},{"li":1}]},{},[2])
