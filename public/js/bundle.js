@@ -202,6 +202,28 @@ module.exports = {
           board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
         })
       },
+      importRepo: function(repo) {
+        this.importRepoIssues(repo);
+        this.installWebhook(repo);
+      },
+      installWebhook: function(repo) {
+        var url = repo.hooks_url;
+        // https://developer.github.com/v3/repos/hooks/#create-a-hook
+        $http.post(repo.hooks_url, {
+          // full list here: https://api.github.com/hooks
+          name: "web",
+          active: true,
+          // more info about events here: https://developer.github.com/webhooks/#events
+          events: [
+            "issue_comment",
+            "issues"
+          ],
+          config: {
+            url: window.location.origin+'/webhook/github',
+            content_type: "json"
+          }
+        });
+      },
       importRepoIssues: function(repo) {
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?state=open';
