@@ -13,6 +13,7 @@ describe("GitHub Provider", function() {
   beforeEach(function() {
     $http = helper.fake$http();
     board = {
+      id: 1,
       importRepos: [],
       importReposNext: 'test',
       importReposLast: 'test'
