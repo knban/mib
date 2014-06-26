@@ -120,3 +120,27 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
     }
   });
 });
+
+r.post('/boards/:id/webhooks/github', function(req, res, next) {
+  Board.find({ id: 1 }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      var persistColumns = function() {
+        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+          if (err) { res.send(500, err.message); }
+          else { res.send(204) }
+        });
+      }
+      if (req.body.action === "opened") {
+        board.columns[0].cards.push(req.body.issue);
+        persistColumns();
+      } else {
+        res.send(204)
+      }
+    }
+  })
+});
