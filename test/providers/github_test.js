@@ -11,6 +11,7 @@ describe("GitHub Provider", function() {
   var $http = null;
 
   beforeEach(function() {
+    $http = helper.fake$http();
     board = {
       importRepos: [],
       importReposNext: 'test',
@@ -18,9 +19,30 @@ describe("GitHub Provider", function() {
     };
   });
 
+  describe("installWebhook", function() {
+    var hook = null;
+    var origin = "https://example.com";
+    beforeEach(function() {
+      $http.stub('post', function(stub) {});
+      global.window = { location: { origin: origin } };
+      provider = Provider(board, $http);
+      provider.installWebhook({ hooks_url: "hooks" });
+      hook = $http.post.getCall(0).args[1];
+    });
+    it("adds a webhook correctly", function() {
+      expect($http.post.callCount).to.eq(1);
+      expect($http.post.getCall(0).args[0]).to.eq("hooks");
+      expect(hook.name).to.eq("web");
+      expect(hook.active).to.eq(true);
+      expect(hook.events).to.include("issues");
+      expect(hook.events).to.include("issue_comment");
+      expect(hook.config.url).to.eq(origin+"/boards/1/webhooks/github");
+      expect(hook.config.content_type).to.eq("json");
+    });
+  });
+
   describe("getRepos without pagination", function() {
     beforeEach(function() {
-      $http = helper.fake$http();
       $http.stub('get', function(stub) {
         return stub.yields([
           { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
@@ -39,7 +61,6 @@ describe("GitHub Provider", function() {
 
   describe("getRepos with pagination", function() {
     beforeEach(function() {
-      $http = helper.fake$http();
       $http.stub('get', function(stub) {
         return stub.yields([
           { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
@@ -66,7 +87,6 @@ describe("GitHub Provider", function() {
 
     describe("issues not paginated", function() {
       beforeEach(function() {
-        $http = helper.fake$http();
         $http.stub('get', function(stub) {
           return stub.yields([
             { id: 222 }
@@ -90,7 +110,6 @@ describe("GitHub Provider", function() {
 
     describe("with paginated issues", function() {
       beforeEach(function() {
-        $http = helper.fake$http();
         $http.stub('get', function(stub) {
           return stub.yields([
             { id: 222 }
