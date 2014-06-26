@@ -19,20 +19,26 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#" ng-click="board.closeImport()">{{board.name}}</a>
+          <a class="navbar-brand" href="#">{{board.name}}</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li><a ng-hide="nav.session.loggedIn" href="/auth/github">Login</a></li>
-            <li><a ng-show="nav.session.loggedIn" ng-click="board.startImport()" href="#">Import</a></li>
-            <li><a ng-show="nav.session.loggedIn" href="/logout">Logout {{nav.session.uid}}</a></li>
+            <li><a href="#"
+              ng-show="nav.session.loggedIn"
+              ng-click="board.importing ? board.closeImport() : board.startImport()">
+              {{board.importing ? "Close Importer" : "Open Importer"}}</a>
+            </li>
+            <li><a href="/logout"
+              ng-show="nav.session.loggedIn">
+              Logout {{nav.session.uid}}</a>
+            </li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
     <div class="container-fluid">
       <div ng-show="board.importing" id="import">
-        <a href="#" style="color:black;" class="pull-right" ng-click="board.closeImport()"><i class="glyphicon glyphicon-remove"></i></a>
         <h4>Importing into: <b>{{board.columns[board.importCol].name}}</b></h4>
         <p>{{board.importHelp}}</p>
         <a href="#" ng-hide="board.importProvider" ng-repeat="provider in board.availableImportProviders" ng-click="provider.next()">{{provider.name}}</a>
