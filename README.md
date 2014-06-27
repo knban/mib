@@ -4,19 +4,71 @@ _Movable issue board_
 
 **work in progress**
 
-**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board that uses Github issues as cards.
+**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board prototype that uses Github issues as cards.
+
 
 It does not try to create 1:1 relations between boards and github projects.
 
-It is designed in such a way as to allow multiple Provider sources to collect into a single board.
+It is designed in such a way as to allow projects from different providers to collect into a single board.
 
-This means you can have cards from issues in Bitbucket, Github, Gitlab together on one board.
+This means your cards can be issues from projects in Bitbucket, Github, or Gitlab -- all on one board.
 
-Card comments are placed on Provider objects. **mib** simply brings these in.
+Webhooks are automatically installed to keep cards and issues in sync.
 
-**mib** only adds a thin layer of metadata on top of the Provider objects for the purposes of kanban.
+## Supported Providers
 
-**mib** currently supports only Github. More providers will be added once the prototype is complete, starting with Bitbucket.
+- [x] Github
+- [ ] Gitlab
+- [ ] Bitbucket
 
-Slack integration will also be first-class.
+## Usage
 
+There are (will be) two ways to use **mib**
+
+### Hosted
+
+**mib** will be operated professionally and include a free plan.
+
+Open source projects will be 100% free of charge.
+
+More information coming soon.
+
+### Self-Hosting
+
+**mib** is and will always be free and open source software. As such you may clone and run the project yourself.
+Here's how:
+
+* Clone the repo to your server (it's not on npm yet, I'll do that at 1.0.0)
+* Create a github application in your user settings page and take note of the keys
+* Create a `.env` file wherever you cloned the project and add the keys. Example provided below.
+* Tell supervisor or whatever you're using to run `server.js` with `node`
+* Setup a reverse proxy, do SSL, whatever
+
+Example `.env` file:
+
+```
+GITHUB_CLIENT_ID=stuff
+GITHUB_CLIENT_SECRET=morestuff
+```
+
+Better (read: more opinionated) instructions can be provided if requested.
+
+## Development
+
+**mib** uses the MEAN stack (MongoDB, Express, Angular, NodeJS)
+
+It's easy to get started hacking features (maybe you want to help get Bitbucket/Gitlab supported sooner?)
+
+* Fork the project
+* Clone your fork
+* `npm install`
+* Examine the tests and go from there
+* Pull request!
+
+## Community
+
+There isn't one yet. Reach out by creating an issue and I'll put some effort into creating one, like setting up an IRC channel.
+
+## Special Thanks
+
+DigitalFilm Tree & DFTi
