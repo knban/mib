@@ -1,10 +1,13 @@
 module.exports = ['$http', function($http) {
-  var session = this.session = { loggedIn: false };
+  session = this;
   $http.get('/session.json').success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.loggedIn = true;
       session.uid = data.uid;
-      app.session = data;
-    }
+      session.data = data;
+    } else
+      session.notLoggedIn = true;
+  }).error(function () {
+    session.notLoggedIn = true;
   });
-}]
+}];

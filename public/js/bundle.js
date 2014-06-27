@@ -12208,10 +12208,10 @@ App.Models.Board = require('./models/board_model'),
 App.Collections.Board = require('./collections/board_collection')
 
 window.app = angular.module('app', [])
+.controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
-.controller('NavigationController', require('./controllers/navigation_controller'))
 
-},{"./collections/board_collection":8,"./controllers/board_controller":9,"./controllers/navigation_controller":10,"./models/board_model":11,"backbone":1,"jquery":3,"underscore":5}],7:[function(require,module,exports){
+},{"./collections/board_collection":8,"./controllers/board_controller":9,"./controllers/session_controller":10,"./models/board_model":11,"backbone":1,"jquery":3,"underscore":5}],7:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   this.toggle = function() {
     this.isOpen = (this.isOpen ? false : true)
@@ -12307,15 +12307,18 @@ module.exports = ['$http', function($http) {
 
 },{"../board_creator":7,"../project_linker":12}],10:[function(require,module,exports){
 module.exports = ['$http', function($http) {
-  var session = this.session = { loggedIn: false };
+  session = this;
   $http.get('/session.json').success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.loggedIn = true;
       session.uid = data.uid;
-      app.session = data;
-    }
+      session.data = data;
+    } else
+      session.notLoggedIn = true;
+  }).error(function () {
+    session.notLoggedIn = true;
   });
-}]
+}];
 
 },{}],11:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
