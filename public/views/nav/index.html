@@ -13,15 +13,19 @@
   </div>
   <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav" ng-if="nav.session.loggedIn">
-      <li ng-hide="board.model"><a href="#" ng-click="board.create()">Create Board</a></li>
-      <li ng-if="board.model" ng-include="'views/nav/project_linker.html'"></li>
-      <li ng-show="board.model">
+
+      <li ng-hide="board.model.isLoaded()"><a href="#" ng-click="board.creator.toggle()">Create New Board</a></li>
+
+      <li ng-if="board.model.isLoaded()" ng-include="'views/nav/project_linker.html'"></li>
+
+      <li ng-show="board.model.isLoaded()">
         <div class="fileUpload">
-          <span>Import Board</span>
+          <span>Import Board Data</span>
           <input ng-init="board.setupBoardImportFileField()" name="importFileField" type="file" class="upload" />
         </a>
       </li>
-      <li ng-show="board.id"><a href="/boards/{{board.id}}/export.json">Export Board</a></li>
+
+      <li ng-show="board.model.id"><a href="/boards/{{board.model.id}}/export.json">Export Board Data</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li ng-show="nav.session.loggedIn"><a href="/logout">Logout {{nav.session.uid}}</a></li>
