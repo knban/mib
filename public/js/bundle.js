@@ -12195,14 +12195,23 @@ return jQuery;
 }, this);
 
 },{}],5:[function(require,module,exports){
+module.exports=require(2)
+},{}],6:[function(require,module,exports){
 window.$ = require('jquery');
+window._ = require('underscore');
 window.Backbone = require('backbone');
-window._ = Backbone._
+window.App = {
+  Models: {},
+  Collections: {}
+}
+App.Models.Board = require('./models/board_model'),
+App.Collections.Board = require('./collections/board_collection')
+
 window.app = angular.module('app', [])
 .controller('BoardController', require('./controllers/board_controller'))
 .controller('NavigationController', require('./controllers/navigation_controller'))
 
-},{"./controllers/board_controller":7,"./controllers/navigation_controller":8,"backbone":1,"jquery":3}],6:[function(require,module,exports){
+},{"./collections/board_collection":8,"./controllers/board_controller":9,"./controllers/navigation_controller":10,"./models/board_model":11,"backbone":1,"jquery":3,"underscore":5}],7:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   this.toggle = function() {
     this.isOpen = (this.isOpen ? false : true)
@@ -12225,10 +12234,14 @@ module.exports = function BoardCreator(board, $http) {
   };
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+module.exports = Backbone.Collection.extend({
+  model: App.Models.Board
+})
+
+},{}],9:[function(require,module,exports){
 var ProjectLinker = require('../project_linker');
 var BoardCreator = require('../board_creator');
-var BoardModel = require('../models/board');
 
 module.exports = ['$http', function($http) {
   var board = this;
@@ -12236,10 +12249,6 @@ module.exports = ['$http', function($http) {
   //this.id = '1';
   //this.name = "Empty Board"; 
   //this.columns = [];
-  this.model = new BoardModel();
-  this.collection = this.model.collection();
-
-  this.collection.fetch();
 
   this.creator = new BoardCreator(this, $http);
 
@@ -12296,7 +12305,7 @@ module.exports = ['$http', function($http) {
   }
 }]
 
-},{"../board_creator":6,"../models/board":9,"../project_linker":10}],8:[function(require,module,exports){
+},{"../board_creator":7,"../project_linker":12}],10:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   var session = this.session = { loggedIn: false };
   $http.get('/session.json').success(function(data) {
@@ -12308,28 +12317,12 @@ module.exports = ['$http', function($http) {
   });
 }]
 
-},{}],9:[function(require,module,exports){
-module.exports = function BoardModel(attrs) {
-  this.attributes = {};
-  this.isLoaded = function () {
-    return this.attributes.id;
-  };
-  this.restore = function () {
-    if (this.isLoaded()) {
-      $http.get('/boards/'+this.attributes.id).success(function(data) {
-        if (data.board) {
-          board.name = data.board.name;
-          board.columns = data.board.columns;
-        }
-      });
-    }
-  };
-  this.collection = function () {
-    
-  };
-};
+},{}],11:[function(require,module,exports){
+module.exports = Backbone.Model.extend({
 
-},{}],10:[function(require,module,exports){
+})
+
+},{}],12:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -12353,7 +12346,7 @@ module.exports = function (board, $http) {
   }
 };
 
-},{"../providers/github":11}],11:[function(require,module,exports){
+},{"../providers/github":13}],13:[function(require,module,exports){
 var li = require('li');
 
 var providerInfo = {
@@ -12478,4 +12471,4 @@ module.exports = {
   }
 }
 
-},{"li":4}]},{},[5])
+},{"li":4}]},{},[6])
