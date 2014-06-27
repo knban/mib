@@ -7,6 +7,12 @@ bodyParser = require('body-parser'),
 cookieSession = require('cookie-session'),
 everyauth = require('everyauth');
 
+app.use(express.static(__dirname + '/../../public'));
+
+if (process.env.NODE_ENV === "development") {
+  app.use('/cov', express.static(__dirname + '/../../coverage/lcov-report'));
+}
+
 require('./auth/github.js')(everyauth);
 
 app.use(logger());
@@ -16,7 +22,6 @@ app.use(cookieSession({
 }));
 app.use(bodyParser.json());
 app.use(everyauth.middleware());
-app.use(express.static(__dirname + '/../../public'));
 app.use(require('./router'));
 
 var mongoose = require('mongoose');
