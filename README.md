@@ -2,10 +2,9 @@
 
 _Movable issue board_
 
-**work in progress**
+**work in progress** there is no proper security right now, please do not use it yet
 
 **mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board prototype that uses Github issues as cards.
-
 
 It does not try to create 1:1 relations between boards and github projects.
 
@@ -20,6 +19,11 @@ Webhooks are automatically installed to keep cards and issues in sync.
 - [x] Github
 - [ ] Gitlab
 - [ ] Bitbucket
+
+## Freedom Features
+
+* Export board data as a JSON file
+* Import board data via JSON file
 
 ## Usage
 
