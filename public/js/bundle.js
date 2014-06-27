@@ -48,11 +48,11 @@
 }, this);
 
 },{}],2:[function(require,module,exports){
-module.exports = angular.module('app', [])
-.controller('BoardController', require('./controllers/board'))
-.controller('NavigationController', require('./controllers/nav'))
+window.app = angular.module('app', [])
+.controller('BoardController', require('./controllers/board_controller'))
+.controller('NavigationController', require('./controllers/navigation_controller'))
 
-},{"./controllers/board":3,"./controllers/nav":4}],3:[function(require,module,exports){
+},{"./controllers/board_controller":3,"./controllers/navigation_controller":4}],3:[function(require,module,exports){
 var GithubProvider = require('../../providers/github').cardProvider;
 
 module.exports = ['$http', function($http) {
@@ -60,12 +60,37 @@ module.exports = ['$http', function($http) {
   this.name = "Empty Board"; 
   this.columns = [];
   var board = this;
-  $http.get('/boards/'+board.id).success(function(data) {
-    if (data.board) {
-      board.name = data.board.name;
-      board.columns = data.board.columns;
-    }
-  });
+
+  this.restore = function () {
+    $http.get('/boards/'+board.id).success(function(data) {
+      if (data.board) {
+        board.name = data.board.name;
+        board.columns = data.board.columns;
+      }
+    });
+  };
+
+  this.setupBoardImportFileField = function () {
+    document.getElementsByName('importFileField')[0].onchange = function (e) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var data = {};
+        try {
+          data = JSON.parse(reader.result);
+          $http.post('/boards/'+board.id+'/import', data)
+          .success(board.restore)
+          .error(function (err) { throw err });
+        } catch (e) {
+          console.error(e);
+          alert(e);
+        }
+      };
+      reader.readAsText(e.target.files[0]);
+    };
+  };
+
+
+
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
       $http.delete('/boards/'+board.id+'/columns/'+col).success(function(data) {
@@ -117,7 +142,7 @@ module.exports = ['$http', function($http) {
   }
 }]
 
-},{"../../providers/github":6}],4:[function(require,module,exports){
+},{"../../providers/github":5}],4:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   var session = this.session = { loggedIn: false };
   $http.get('/session.json').success(function(data) {
@@ -130,14 +155,17 @@ module.exports = ['$http', function($http) {
 }]
 
 },{}],5:[function(require,module,exports){
-window.app = require('./app');
-
-
-},{"./app":2}],6:[function(require,module,exports){
 var li = require('li');
 
+var providerInfo = {
+  name: "github",
+  displayName: "GitHub",
+  iconUrl: "/images/github_48px.png"
+};
+
 module.exports = {
-  cardHandler: function() {
+  // Inject the lodash dependency in this way to avoid bringing it in on the browser
+  cardHandler: function(_) {
     return {
       batchImport: function(board, issues, done) {
         var cards = board.columns[0].cards;
@@ -147,21 +175,21 @@ module.exports = {
         _.each(issues, function(issue) {
           // Determine if we already represent this issue with a card
           var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.provider_id === issue.provider_id
+            return c.id === issue.id
           });
           if (existingIssueCard) {
             _.merge(existingIssueCard, issue);
           } else {
             cards.push(issue);
           }
-          done();
         });
+        done();
       }
     }
   },
   cardProvider: function(board, $http) {
     return  {
-      name: "GitHub",
+      info: providerInfo,
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
         board.importProvider = this;
@@ -201,14 +229,47 @@ module.exports = {
           board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
         })
       },
+      importRepo: function(repo) {
+        this.importRepoIssues(repo);
+        this.installWebhook(repo);
+      },
+      installWebhook: function(repo) {
+        var url = repo.hooks_url;
+        // https://developer.github.com/v3/repos/hooks/#create-a-hook
+        $http.post(repo.hooks_url, {
+          // full list here: https://api.github.com/hooks
+          name: "web",
+          active: true,
+          // more info about events here: https://developer.github.com/webhooks/#events
+          events: [
+            "issue_comment",
+            "issues"
+          ],
+          config: {
+            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
+            content_type: "json"
+          }
+        });
+      },
       importRepoIssues: function(repo) {
         repo.imported = true;
+        var url = repo.issues_url.replace('{/number}','')+'?state=open';
+        this.importIssues(url);
+      },
+      importIssues: function(url) {
+        $http.get(url).success(function(data, status, headers) {
+          this.postIssues(data);
+          var next = headers('Link') ? li.parse(headers('Link')) : null;
+          if (next) {
+            this.importIssues(next);
+          }
+        }.bind(this));
+      },
+      postIssues: function(openIssues) {
         var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
-        $http.get(repo.issues_url.replace('{/number}','')+'?state=open').success(function(data) {
-          $http.post(importUrl, { openIssues: data }).success(function(data) {
-            if (data.board)
-              board.columns = data.board.columns;
-          });
+        $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
+          if (data.board)
+            board.columns = data.board.columns;
         });
       },
       canImport: function(repo) {
@@ -218,4 +279,4 @@ module.exports = {
   }
 }
 
-},{"li":1}]},{},[5])
+},{"li":1}]},{},[2])

@@ -1,3 +1,3 @@
-module.exports = angular.module('app', [])
-.controller('BoardController', require('./controllers/board'))
-.controller('NavigationController', require('./controllers/nav'))
+window.app = angular.module('app', [])
+.controller('BoardController', require('./controllers/board_controller'))
+.controller('NavigationController', require('./controllers/navigation_controller'))

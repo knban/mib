@@ -1,5 +1,11 @@
 var li = require('li');
 
+var providerInfo = {
+  name: "github",
+  displayName: "GitHub",
+  iconUrl: "/images/github_48px.png"
+};
+
 module.exports = {
   // Inject the lodash dependency in this way to avoid bringing it in on the browser
   cardHandler: function(_) {
@@ -26,7 +32,7 @@ module.exports = {
   },
   cardProvider: function(board, $http) {
     return  {
-      name: "github",
+      info: providerInfo,
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
         board.importProvider = this;
@@ -66,14 +72,47 @@ module.exports = {
           board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
         })
       },
+      importRepo: function(repo) {
+        this.importRepoIssues(repo);
+        this.installWebhook(repo);
+      },
+      installWebhook: function(repo) {
+        var url = repo.hooks_url;
+        // https://developer.github.com/v3/repos/hooks/#create-a-hook
+        $http.post(repo.hooks_url, {
+          // full list here: https://api.github.com/hooks
+          name: "web",
+          active: true,
+          // more info about events here: https://developer.github.com/webhooks/#events
+          events: [
+            "issue_comment",
+            "issues"
+          ],
+          config: {
+            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
+            content_type: "json"
+          }
+        });
+      },
       importRepoIssues: function(repo) {
         repo.imported = true;
+        var url = repo.issues_url.replace('{/number}','')+'?state=open';
+        this.importIssues(url);
+      },
+      importIssues: function(url) {
+        $http.get(url).success(function(data, status, headers) {
+          this.postIssues(data);
+          var next = headers('Link') ? li.parse(headers('Link')) : null;
+          if (next) {
+            this.importIssues(next);
+          }
+        }.bind(this));
+      },
+      postIssues: function(openIssues) {
         var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
-        $http.get(repo.issues_url.replace('{/number}','')+'?state=open').success(function(data) {
-          $http.post(importUrl, { openIssues: data }).success(function(data) {
-            if (data.board)
-              board.columns = data.board.columns;
-          });
+        $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
+          if (data.board)
+            board.columns = data.board.columns;
         });
       },
       canImport: function(repo) {

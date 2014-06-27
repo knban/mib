@@ -55,11 +55,12 @@ module.exports = {
         if (! this[method]) this[method] = function(){};
         var stub = sinon.stub(this, method);
         stub.returns({ success: successCase(sinon.stub()) })
-        return stub
+        return stub;
+      },
+      restub: function(method, successCase) {
+        this[method].restore();
+        this.stub(method, successCase);
       }
-      /*get: sinon.stub().returns({
-        success: sinon.stub().yields(data, 200, sinon.stub().returns(linkHeader || ''))
-      })*/
     };
   }
 }

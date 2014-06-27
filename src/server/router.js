@@ -87,21 +87,23 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
     } else {
       var board = boards[0];
       var Mover = function(popCard, done) {
+        var row = parseInt(req.params.row);
+        var col = parseInt(req.params.col);
         var directions = {
           up: function() {
-            board.columns[parseInt(req.params.col)].cards.splice(req.params.row-1, 0, popCard());
+            board.columns[col].cards.splice(row-1, 0, popCard());
             done();
           },
           down: function() {
-            board.columns[parseInt(req.params.col)].cards.splice(req.params.row+1, 0, popCard());
+            board.columns[col].cards.splice(row+1, 0, popCard());
             done();
           },
           left: function() {
-            board.columns[parseInt(req.params.col)-1].cards.push(popCard());
+            board.columns[col-1].cards.push(popCard());
             done();
           },
           right: function() {
-            board.columns[parseInt(req.params.col)+1].cards.push(popCard());
+            board.columns[col+1].cards.push(popCard());
             done();
           }
         };
@@ -118,3 +120,60 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
     }
   });
 });
+
+r.post('/boards/:id/webhooks/github', function(req, res, next) {
+  Board.find({ id: 1 }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      var persistColumns = function() {
+        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+          if (err) { res.send(500, err.message); }
+          else { res.send(204) }
+        });
+      }
+      if (req.body.action === "opened") {
+        board.columns[0].cards.push(req.body.issue);
+        persistColumns();
+      } else {
+        res.send(204)
+      }
+    }
+  })
+});
+
+// Export a board as JSON
+r.get('/boards/:id/export.json', function(req, res, next) {
+  Board.find({ id: req.params.id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var beautify = require('js-beautify').js_beautify;
+      output = beautify(JSON.stringify(boards[0]), { indent_size: 2});
+      res.set("Content-Disposition", 'attachment; filename="board.json"');
+      res.send(output);
+    }
+  })
+});
+
+// Importing a board via JSON
+r.post('/boards/:id/import', function(req, res, next) {
+  Board.find({ id: req.params.id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      Board.update({ _id: board._id }, req.body, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send(204) }
+      });
+    }
+  });
+})
