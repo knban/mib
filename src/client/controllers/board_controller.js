@@ -2,9 +2,9 @@ var ProjectLinker = require('../project_linker');
 
 module.exports = ['$http', function($http) {
   this.projectLinker = new ProjectLinker(this, $http);
-  this.id = '1';
-  this.name = "Empty Board"; 
-  this.columns = [];
+  //this.id = '1';
+  //this.name = "Empty Board"; 
+  //this.columns = [];
   var board = this;
 
   this.restore = function () {
@@ -15,6 +15,8 @@ module.exports = ['$http', function($http) {
       }
     });
   };
+
+  this.restore();
 
   this.setupBoardImportFileField = function () {
     document.getElementsByName('importFileField')[0].onchange = function (e) {
@@ -34,9 +36,6 @@ module.exports = ['$http', function($http) {
       reader.readAsText(e.target.files[0]);
     };
   };
-
-
-
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
       $http.delete('/boards/'+board.id+'/columns/'+col).success(function(data) {

@@ -23,6 +23,5 @@ var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/mib");
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Mongo connection error:'));
-db.once('open', require('./seed'));
 module.exports = http;
 
