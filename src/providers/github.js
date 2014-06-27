@@ -1,5 +1,11 @@
 var li = require('li');
 
+var providerInfo = {
+  name: "github",
+  displayName: "GitHub",
+  iconUrl: "/images/github_48px.png"
+};
+
 module.exports = {
   // Inject the lodash dependency in this way to avoid bringing it in on the browser
   cardHandler: function(_) {
@@ -26,7 +32,7 @@ module.exports = {
   },
   cardProvider: function(board, $http) {
     return  {
-      name: "github",
+      info: providerInfo,
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
         board.importProvider = this;
