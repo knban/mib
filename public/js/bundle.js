@@ -53,9 +53,10 @@ window.app = angular.module('app', [])
 .controller('NavigationController', require('./controllers/navigation_controller'))
 
 },{"./controllers/board_controller":3,"./controllers/navigation_controller":4}],3:[function(require,module,exports){
-var GithubProvider = require('../../providers/github').cardProvider;
+var ProjectLinker = require('../project_linker');
 
 module.exports = ['$http', function($http) {
+  this.projectLinker = new ProjectLinker(this, $http);
   this.id = '1';
   this.name = "Empty Board"; 
   this.columns = [];
@@ -113,24 +114,8 @@ module.exports = ['$http', function($http) {
         board.columns[col] = data.board.columns[col];
     });
   }
-  this.availableImportProviders = [
-    GithubProvider(board, $http)
-  ];
-  this.startImport = function() {
-    board.importing = true;
-    board.importProvider = null;
-    board.importPersonalOrOrg = null;
-    board.importOrgs = null;
-    board.importRepos = null;
-    board.importReposCurPage = null;
-    board.importReposLinks = null;
-    board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
-    board.importCol = 0;
-  }
-  this.closeImport = function() {
-    board.importing = null;
-    board.importCol = null;
-  }
+
+
   this.logCard = function(card) {
     console.log(card);
   }
@@ -142,7 +127,7 @@ module.exports = ['$http', function($http) {
   }
 }]
 
-},{"../../providers/github":5}],4:[function(require,module,exports){
+},{"../project_linker":5}],4:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   var session = this.session = { loggedIn: false };
   $http.get('/session.json').success(function(data) {
@@ -155,6 +140,30 @@ module.exports = ['$http', function($http) {
 }]
 
 },{}],5:[function(require,module,exports){
+var GithubProvider = require('../providers/github').cardProvider;
+
+module.exports = function (board, $http) {
+  this.providers = [
+    GithubProvider(board, $http)
+  ];
+  this.open = function() {
+    this.isOpen = true;
+    this._Provider = null;
+    this._PersonalOrOrg = null;
+    this._Orgs = null;
+    this._Repos = null;
+    this._ReposCurPage = null;
+    this._ReposLinks = null;
+    this._Help = "Choose the provider containing the repository from which you wish to import open issues.";
+    this._Col = 0;
+  }
+  this.close = function() {
+    this.isOpen = false;
+    this._Col = null;
+  }
+};
+
+},{"../providers/github":6}],6:[function(require,module,exports){
 var li = require('li');
 
 var providerInfo = {
@@ -192,41 +201,41 @@ module.exports = {
       info: providerInfo,
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
-        board.importProvider = this;
-        board.importHelp = "Is it a personal repository or part of an organization?"
-        board.importPersonalOrOrg = true;
+        board.projectLinker._Provider = this;
+        board.projectLinker._Help = "Is it a personal repository or part of an organization?"
+        board.projectLinker._PersonalOrOrg = true;
       },
       personal: function() {
-        board.importPersonalOrOrg = false;
+        board.projectLinker._PersonalOrOrg = false;
         this.getRepos(app.session.auth.github.user.repos_url);
       },
       org: function() {
-        board.importPersonalOrOrg = false;
-        board.importHelp = "Fetching organizations...";
+        board.projectLinker._PersonalOrOrg = false;
+        board.projectLinker._Help = "Fetching organizations...";
         $http.get(app.session.auth.github.user.organizations_url).success(function(data) {
-          board.importHelp = "Which organization owns the repository from which you wish to import open issues?";
-          board.importOrgs = data;
+          board.projectLinker._Help = "Which organization owns the repository from which you wish to import open issues?";
+          board.projectLinker._Orgs = data;
         })
       },
       selectOrg: function(org) {
-        board.importOrgs = false;
+        board.projectLinker._Orgs = false;
         this.getRepos(org.repos_url);
       },
       getReposPrev: function() {
-        this.getRepos(board.importReposLinks.prev);
+        this.getRepos(board.projectLinker._ReposLinks.prev);
       },
       getReposNext: function() {
-        this.getRepos(board.importReposLinks.next);
+        this.getRepos(board.projectLinker._ReposLinks.next);
       },
       getRepos: function(url, pageNum) {
-        board.importHelp = "Fetching repositories...";
+        board.projectLinker._Help = "Fetching repositories...";
         $http.get(url).success(function(data, status, headers, config) {
-          board.importHelp = "Which repository do you wish to import issues from?";
-          board.importRepos = data;
-          board.importReposNext = null;
-          board.importReposLast = null;
-          board.importReposCurPage = pageNum;
-          board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
+          board.projectLinker._Help = "Which repository do you wish to import issues from?";
+          board.projectLinker._Repos = data;
+          board.projectLinker._ReposNext = null;
+          board.projectLinker._ReposLast = null;
+          board.projectLinker._ReposCurPage = pageNum;
+          board.projectLinker._ReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
         })
       },
       importRepo: function(repo) {
@@ -266,7 +275,7 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
+        var importUrl = '/boards/'+board.id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
             board.columns = data.board.columns;

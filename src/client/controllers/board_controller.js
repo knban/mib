@@ -1,6 +1,7 @@
-var GithubProvider = require('../../providers/github').cardProvider;
+var ProjectLinker = require('../project_linker');
 
 module.exports = ['$http', function($http) {
+  this.projectLinker = new ProjectLinker(this, $http);
   this.id = '1';
   this.name = "Empty Board"; 
   this.columns = [];
@@ -58,24 +59,8 @@ module.exports = ['$http', function($http) {
         board.columns[col] = data.board.columns[col];
     });
   }
-  this.availableImportProviders = [
-    GithubProvider(board, $http)
-  ];
-  this.startImport = function() {
-    board.importing = true;
-    board.importProvider = null;
-    board.importPersonalOrOrg = null;
-    board.importOrgs = null;
-    board.importRepos = null;
-    board.importReposCurPage = null;
-    board.importReposLinks = null;
-    board.importHelp = "Choose the provider containing the repository from which you wish to import open issues.";
-    board.importCol = 0;
-  }
-  this.closeImport = function() {
-    board.importing = null;
-    board.importCol = null;
-  }
+
+
   this.logCard = function(card) {
     console.log(card);
   }

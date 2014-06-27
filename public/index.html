@@ -15,9 +15,9 @@
       ng-controller="NavigationController as nav">
     </div>
     <div class="container-fluid">
-      <div id="import"
-        ng-show="board.importing"
-        ng-include="'views/import.html'">
+      <div
+        ng-show="board.projectLinker.isOpen"
+        ng-include="'views/project_linker.html'">
       </div>
       <table class="table">
         <thead>

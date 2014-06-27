@@ -1,6 +1,7 @@
 var helper = require('../test_helper'),
 expect = helper.expect;
 
+var BoardController = helper.require('client/controllers/board_controller');
 var Provider = helper.require('providers/github').cardProvider;
 
 var li = require('li');
@@ -12,12 +13,7 @@ describe("GitHub Provider", function() {
 
   beforeEach(function() {
     $http = helper.fake$http();
-    board = {
-      id: 1,
-      importRepos: [],
-      importReposNext: 'test',
-      importReposLast: 'test'
-    };
+    board = new BoardController[BoardController.length-1]($http);
   });
 
   describe("installWebhook", function() {
@@ -52,11 +48,11 @@ describe("GitHub Provider", function() {
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
-    it("populates board.importRepos with 3 repos", function() {
-      expect(board.importRepos.length).to.eq(3);
+    it("populates board.projectLinker._Repos with 3 repos", function() {
+      expect(board.projectLinker._Repos.length).to.eq(3);
     });
-    it("board.importReposLinks is null", function() {
-      expect(board.importReposLinks).to.eq(null);
+    it("board.projectLinker._ReposLinks is null", function() {
+      expect(board.projectLinker._ReposLinks).to.eq(null);
     });
   });
 
@@ -72,11 +68,11 @@ describe("GitHub Provider", function() {
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
-    it("populates board.importRepos with 3 repos", function() {
-      expect(board.importRepos.length).to.eq(3);
+    it("populates board.projectLinker._Repos with 3 repos", function() {
+      expect(board.projectLinker._Repos.length).to.eq(3);
     });
-    it("it sets board.importReposLinks with the parsed links object", function() {
-      expect(board.importReposLinks).to.deep.eq({
+    it("it sets board.projectLinker._ReposLinks with the parsed links object", function() {
+      expect(board.projectLinker._ReposLinks).to.deep.eq({
         next: 'link1',
         last: 'link2'
       });
@@ -97,7 +93,7 @@ describe("GitHub Provider", function() {
           return stub.yields({}, 200);
         });
         board.id = 2;
-        board.importCol = 1;
+        board.projectLinker._Col = 1;
         provider = Provider(board, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" });
       });
@@ -127,7 +123,7 @@ describe("GitHub Provider", function() {
           return stub.yields({}, 200);
         });
         board.id = 2;
-        board.importCol = 1;
+        board.projectLinker._Col = 1;
         provider = Provider(board, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" });
       });
