@@ -7,7 +7,6 @@ bodyParser = require('body-parser'),
 cookieSession = require('cookie-session'),
 everyauth = require('everyauth');
 
-
 require('./auth/github.js')(everyauth);
 
 app.use(logger());
@@ -26,3 +25,4 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Mongo connection error:'));
 db.once('open', require('./seed'));
 module.exports = http;
+

@@ -9,3 +9,39 @@ table tr td {
 table tr td:last-child {
   border-right: none;
 }
+
+.nav > li > .fileUpload {
+  position: relative;
+  overflow: hidden;
+
+  /* Inherit the style of nav>li>a */
+  color: #999;
+  text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+  padding: 10px 15px;
+  padding-top:15px;
+  line-height: 20px;
+}
+
+.nav > li > .fileUpload:hover,
+.nav > li > .fileUpload:focus {
+  color: #fff;
+}
+
+.nav > li > .fileupload {
+  color: #2a6496;
+}
+
+.fileUpload input.upload {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  width: 100px;
+  font-size: 200px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
