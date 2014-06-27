@@ -16,8 +16,6 @@ module.exports = ['$http', function($http) {
     });
   };
 
-  this.restore();
-
   this.setupBoardImportFileField = function () {
     document.getElementsByName('importFileField')[0].onchange = function (e) {
       var reader = new FileReader();

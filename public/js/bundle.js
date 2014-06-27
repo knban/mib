@@ -71,8 +71,6 @@ module.exports = ['$http', function($http) {
     });
   };
 
-  this.restore();
-
   this.setupBoardImportFileField = function () {
     document.getElementsByName('importFileField')[0].onchange = function (e) {
       var reader = new FileReader();
@@ -254,7 +252,7 @@ module.exports = {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
+            url: window.location.origin+'/boards/'+board.model.id+'/webhooks/github',
             content_type: "json"
           }
         });

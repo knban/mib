@@ -14,6 +14,9 @@ describe("GitHub Provider", function() {
   beforeEach(function() {
     $http = helper.fake$http();
     board = new BoardController[BoardController.length-1]($http);
+    board.model = {
+      id: "1"
+    };
   });
 
   describe("installWebhook", function() {
@@ -33,7 +36,7 @@ describe("GitHub Provider", function() {
       expect(hook.active).to.eq(true);
       expect(hook.events).to.include("issues");
       expect(hook.events).to.include("issue_comment");
-      expect(hook.config.url).to.eq(origin+"/boards/1/webhooks/github");
+      expect(hook.config.url).to.eq(origin+"/boards/"+board.model.id+"/webhooks/github");
       expect(hook.config.content_type).to.eq("json");
     });
   });

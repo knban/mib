@@ -89,7 +89,7 @@ module.exports = {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
+            url: window.location.origin+'/boards/'+board.model.id+'/webhooks/github',
             content_type: "json"
           }
         });
