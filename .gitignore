@@ -1,2 +1,3 @@
+coverage/
 .env
 public/js/.bundle.js
