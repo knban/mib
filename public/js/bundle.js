@@ -215,7 +215,7 @@ module.exports = {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/webhook/github',
+            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
             content_type: "json"
           }
         });
