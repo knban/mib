@@ -8,6 +8,7 @@ module.exports = ['$http', function($http) {
   this.unload = function () {
     board.loaded = false;
     board.attributes = null;
+    this.projectLinker.close();
   };
   this.load = app.loadBoard = function (attributes) {
     board.attributes = attributes;

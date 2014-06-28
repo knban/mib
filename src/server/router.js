@@ -35,8 +35,8 @@ r.get('/boards/:_id', function(req, res, next) {
 });
 
 // Deleting columns
-r.delete('/boards/:id/columns/:col', function (req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.delete('/boards/:_id/columns/:col', function (req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -53,8 +53,8 @@ r.delete('/boards/:id/columns/:col', function (req, res, next) {
 });
 
 // Deleting cards
-r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -73,8 +73,8 @@ r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
 var handler = require('../providers/github').cardHandler(_);
 
 // Importing cards from Github
-r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -92,8 +92,8 @@ r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) 
 })
 
 // Move a card
-r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -135,7 +135,7 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
   });
 });
 
-r.post('/boards/:id/webhooks/github', function(req, res, next) {
+r.post('/boards/:_id/webhooks/github', function(req, res, next) {
   Board.find({ id: 1 }, function(err, boards) {
     if (err) {
       res.send(500);
@@ -160,8 +160,8 @@ r.post('/boards/:id/webhooks/github', function(req, res, next) {
 });
 
 // Export a board as JSON
-r.get('/boards/:id/export.json', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.get('/boards/:_id/export.json', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -176,8 +176,8 @@ r.get('/boards/:id/export.json', function(req, res, next) {
 });
 
 // Importing a board via JSON
-r.post('/boards/:id/import', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.post('/boards/:_id/import', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {

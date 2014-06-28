@@ -10,9 +10,9 @@ module.exports = {
   // Inject the lodash dependency in this way to avoid bringing it in on the browser
   cardHandler: function(_) {
     return {
-      batchImport: function(board, issues, done) {
-        var cards = board.columns[0].cards;
-        var allCards = _.flatten(_.pluck(board.columns, 'cards'));
+      batchImport: function(boardAttributes, issues, done) {
+        var cards = boardAttributes.columns[0].cards;
+        var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
         // Sort the cards by provider_id so testing dupes is quicker (Right?)
         var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
         _.each(issues, function(issue) {
@@ -89,7 +89,7 @@ module.exports = {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.model.id+'/webhooks/github',
+            url: window.location.origin+'/boards/'+board.attributes._id+'/webhooks/github',
             content_type: "json"
           }
         });
@@ -109,10 +109,10 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
+        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
-            board.columns = data.board.columns;
+            board.attributes.columns = data.board.columns;
         });
       },
       canImport: function(repo) {
