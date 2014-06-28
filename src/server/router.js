@@ -136,7 +136,7 @@ r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res,
 });
 
 r.post('/boards/:_id/webhooks/github', function(req, res, next) {
-  Board.find({ id: 1 }, function(err, boards) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {

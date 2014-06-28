@@ -21,4 +21,8 @@ module.exports = ['$http', function($http) {
       session.boards = data.boards;
     })
   };
+
+  if (localStorage.lastBoardId) {
+    app.loadBoardById(localStorage.lastBoardId);
+  }
 }];

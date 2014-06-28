@@ -100,15 +100,19 @@ module.exports = ['$http', function($http) {
     board.loaded = false;
     board.attributes = null;
     this.projectLinker.close();
+    localStorage.removeItem('lastBoardId')
   };
   this.load = app.loadBoard = function (attributes) {
     board.attributes = attributes;
     board.loaded = true;
+    localStorage.lastBoardId = attributes._id;
   };
-  this.loadBoardById = function (_id) {
+  this.loadBoardById = app.loadBoardById = function (_id) {
     board.loaded = false;
     $http.get('/boards/'+_id).success(function (data) {
       board.load(data.board)
+    }).error(function () {
+      localStorage.removeItem('lastBoardId')
     });
   };
   this.setupBoardImportFileField = function () {
@@ -198,6 +202,10 @@ module.exports = ['$http', function($http) {
       session.boards = data.boards;
     })
   };
+
+  if (localStorage.lastBoardId) {
+    app.loadBoardById(localStorage.lastBoardId);
+  }
 }];
 
 },{}],6:[function(require,module,exports){
