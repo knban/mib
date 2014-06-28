@@ -232,3 +232,22 @@ r.post('/boards', function(req, res, next) {
     res.send(401);
   }
 })
+
+
+// Deleting a board
+r.delete('/boards/:_id', function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    Board.find({
+      _id: req.params._id,
+      authorizedUsers: user.identifier
+    }).remove(function(err) {
+      if (err) { res.send(500) }
+      else {
+        res.send(204);
+      }
+    });
+  } else {
+    res.send(401);
+  }
+});

@@ -22,6 +22,7 @@ module.exports = function BoardCreator(board, $http) {
         form.success = "Board created!"
         app.updateBoardList();
         app.loadBoard(data.board);
+        form.toggle();
       }).error(function (err, status) {
         form.success = null;
         form.errors = status+" -- "+err;

@@ -77,6 +77,7 @@ module.exports = function BoardCreator(board, $http) {
         form.success = "Board created!"
         app.updateBoardList();
         app.loadBoard(data.board);
+        form.toggle();
       }).error(function (err, status) {
         form.success = null;
         form.errors = status+" -- "+err;
@@ -94,23 +95,21 @@ var BoardCreator = require('../board_creator');
 module.exports = ['$http', function($http) {
   var board = this;
   this.projectLinker = new ProjectLinker(board, $http);
-  //this.id = '1';
-  //this.name = "Empty Board"; 
-  //this.columns = [];
-
   this.creator = new BoardCreator(this, $http);
-
-  this.load = app.loadBoard = function (attributes) {
-    board.name = attributes.name;
-    board.columns = attributes.columns;
+  this.unload = function () {
+    board.loaded = false;
+    board.attributes = null;
   };
-
+  this.load = app.loadBoard = function (attributes) {
+    board.attributes = attributes;
+    board.loaded = true;
+  };
   this.loadBoardById = function (_id) {
+    board.loaded = false;
     $http.get('/boards/'+_id).success(function (data) {
       board.load(data.board)
     });
   };
-
   this.setupBoardImportFileField = function () {
     document.getElementsByName('importFileField')[0].onchange = function (e) {
       var reader = new FileReader();
@@ -118,7 +117,7 @@ module.exports = ['$http', function($http) {
         var data = {};
         try {
           data = JSON.parse(reader.result);
-          $http.post('/boards/'+board.model.id+'/import', data)
+          $http.post('/boards/'+board.attributes._id+'/import', data)
           .success(board.restore)
           .error(function (err) { throw err });
         } catch (e) {
@@ -131,24 +130,24 @@ module.exports = ['$http', function($http) {
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
-      $http.delete('/boards/'+board.model.id+'/columns/'+col).success(function(data) {
+      $http.delete('/boards/'+board.attributes._id+'/columns/'+col).success(function(data) {
         if (data.board)
-          board.columns = data.board.columns;
+          board.attributes.columns = data.board.attributes.columns;
       });
     }
   }
   this.removeCard = function(col, row) {
     if (confirm("Are you sure you wish to delete this card?")) {
-      $http.delete('/boards/'+board.model.id+'/columns/'+col+'/cards/'+row).success(function(data) {
+      $http.delete('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row).success(function(data) {
         if (data.board)
-          board.columns = data.board.columns;
+          board.attributes.columns = data.board.attributes.columns;
       });
     }
   },
   this.addCard = function(col, body) {
-    $http.post('/boards/'+board.model.id+'/columns/'+col+'/cards', body).success(function(data) {
+    $http.post('/boards/'+board.attributes._id+'/columns/'+col+'/cards', body).success(function(data) {
       if (data.board)
-        board.columns[col] = data.board.columns[col];
+        board.attributes.columns[col] = data.board.attributes.columns[col];
     });
   }
 
@@ -156,12 +155,22 @@ module.exports = ['$http', function($http) {
   this.logCard = function(card) {
     console.log(card);
   }
+
   this.moveCard = function(direction, col, row) {
-    $http.put('/boards/'+board.model.id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
+    $http.put('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
       if (data.board)
-        board.columns = data.board.columns;
+        board.attributes.columns = data.board.attributes.columns;
     });
   }
+
+  this.deleteBoard = function () {
+    if (confirm("Are you sure you wish to delete this board and all its cards? Make sure to backup using the export tool!")) {
+      $http.delete('/boards/'+board.attributes._id).success(function() {
+        board.unload();
+        app.updateBoardList();
+      });
+    }
+  };
 }]
 
 },{"../board_creator":3,"../project_linker":6}],5:[function(require,module,exports){
