@@ -7,6 +7,7 @@ var Provider = helper.require('providers/github').cardProvider;
 var li = require('li');
 
 describe("GitHub Provider", function() {
+  global.app = {};
   var board = null;
   var provider = null;
   var $http = null;
