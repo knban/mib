@@ -135,6 +135,7 @@ r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res,
   });
 });
 
+// FIXME secure this route https://developer.github.com/webhooks/securing/
 r.post('/boards/:_id/webhooks/github', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
@@ -152,6 +153,22 @@ r.post('/boards/:_id/webhooks/github', function(req, res, next) {
       if (req.body.action === "opened") {
         board.columns[0].cards.push(req.body.issue);
         persistColumns();
+      } else if (req.body.action === "created") {
+        var col, row, card, column = null;
+        column = _.find(board.columns, function (column, i) {
+          col = i;
+          return _.find(column.cards, function (c, j) {
+            row = j;
+            card = c
+            return card.id == req.body.issue.id;
+          })
+        })
+        if (card) {
+          board.columns[col].cards[row] = req.body.issue
+          persistColumns();
+        } else {
+          res.send(404);
+        }
       } else {
         res.send(204)
       }
