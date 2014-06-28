@@ -137,7 +137,7 @@ module.exports = ['$http', function($http) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
       $http.delete('/boards/'+board.attributes._id+'/columns/'+col).success(function(data) {
         if (data.board)
-          board.attributes.columns = data.board.attributes.columns;
+          board.attributes.columns = data.board.columns;
       });
     }
   }
@@ -145,14 +145,14 @@ module.exports = ['$http', function($http) {
     if (confirm("Are you sure you wish to delete this card?")) {
       $http.delete('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row).success(function(data) {
         if (data.board)
-          board.attributes.columns = data.board.attributes.columns;
+          board.attributes.columns = data.board.columns;
       });
     }
   },
   this.addCard = function(col, body) {
     $http.post('/boards/'+board.attributes._id+'/columns/'+col+'/cards', body).success(function(data) {
       if (data.board)
-        board.attributes.columns[col] = data.board.attributes.columns[col];
+        board.attributes.columns[col] = data.board.columns[col];
     });
   }
 
@@ -164,7 +164,7 @@ module.exports = ['$http', function($http) {
   this.moveCard = function(direction, col, row) {
     $http.put('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
       if (data.board)
-        board.attributes.columns = data.board.attributes.columns;
+        board.attributes.columns = data.board.columns;
     });
   }
 
@@ -175,6 +175,15 @@ module.exports = ['$http', function($http) {
         app.updateBoardList();
       });
     }
+  };
+
+  this.cardModal = function (card) {
+    board.card = card;
+    board.card.loading = true;
+    $http.get(card.comments_url).success(function (data) {
+      board.card.comments = data;
+      board.card.loading = false;
+    })
   };
 }]
 
