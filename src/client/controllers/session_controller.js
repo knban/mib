@@ -1,17 +1,19 @@
 module.exports = ['$http', function($http) {
   session = this;
+
   $http.get('/session.json').success(function(data) {
     if (data.auth && data.auth.loggedIn) {
+      session.anonymous = false;
       session.loggedIn = true;
       session.uid = data.uid;
       session.data = app.session = data;
       session.getBoardList();
     } else
-      session.over()
-  }).error(session.over);
+      session.destroy()
+  }).error(session.destroy);
 
-  this.over = function () {
-    session.notLoggedIn = true;
+  this.destroy = function () {
+    session.anonymous = true;
     session.loggedIn = false;
     app.session = null;
   };
