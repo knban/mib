@@ -5,9 +5,16 @@ module.exports = ['$http', function($http) {
       session.loggedIn = true;
       session.uid = data.uid;
       session.data = data;
+      session.getBoardList();
     } else
       session.notLoggedIn = true;
   }).error(function () {
     session.notLoggedIn = true;
   });
+
+  this.getBoardList = app.updateBoardList = function () {
+    $http.get('/boards/index').success(function(data) {
+      session.boards = data.boards;
+    })
+  };
 }];

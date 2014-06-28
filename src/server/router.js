@@ -1,15 +1,29 @@
 var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
+var User = require('./user');
+var Board = require('./models/board');
 
 r.get('/session.json', function(req, res, next) {
   res.send(req.session);
 });
 
-var Board = require('./models/board');
+r.get('/boards/index', function (req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    Board.find({ authorizedUsers: user.identifier }, { name:1 }, function (err, boards) {
+      if (err) { res.send(500) }
+      else {
+        res.send({boards: boards})
+      }
+    });
+  } else {
+    res.send(401);
+  }
+});
 
-r.get('/boards/:id', function(req, res, next) {
-  Board.find({ id: '1' }, function(err, boards) {
+r.get('/boards/:_id', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -176,4 +190,45 @@ r.post('/boards/:id/import', function(req, res, next) {
       });
     }
   });
+})
+
+
+
+// Creating a new board
+r.post('/boards', function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+
+    /* 
+     * This is how you get the data back out 
+    Board.find({ authorizedUsers: user.identifier }, function(error, models) {
+      //put code to process the results here
+      //});
+     */
+    var board = new Board({
+      name: req.body.name,
+      authorizedUsers: [ user.identifier ],
+      columns: [{
+        name: "Icebox",
+        cards: []
+      },{
+        name: "Backlog",
+        cards: []
+      },{
+        name: "Doing",
+        cards: []
+      },{
+        name: "Done",
+        cards: []
+      }]
+    });
+    board.save(function(err, board) {
+      if (err) 
+        res.send(500);
+      else
+        res.send({ board: board });
+    });
+  } else {
+    res.send(401);
+  }
 })

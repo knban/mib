@@ -11,6 +11,12 @@ app.use(express.static(__dirname + '/../../public'));
 
 if (process.env.NODE_ENV === "development") {
   app.use('/cov', express.static(__dirname + '/../../coverage/lcov-report'));
+
+  global.debug = function (obj) {
+    var beautify = require('js-beautify').js_beautify;
+    output = beautify(JSON.stringify(obj), { indent_size: 2});
+    console.log(output);
+  };
 }
 
 require('./auth/github.js')(everyauth);

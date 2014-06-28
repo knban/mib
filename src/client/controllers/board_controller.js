@@ -10,6 +10,17 @@ module.exports = ['$http', function($http) {
 
   this.creator = new BoardCreator(this, $http);
 
+  this.load = app.loadBoard = function (attributes) {
+    board.name = attributes.name;
+    board.columns = attributes.columns;
+  };
+
+  this.loadBoardById = function (_id) {
+    $http.get('/boards/'+_id).success(function (data) {
+      board.load(data.board)
+    });
+  };
+
   this.setupBoardImportFileField = function () {
     document.getElementsByName('importFileField')[0].onchange = function (e) {
       var reader = new FileReader();

@@ -8,37 +8,38 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
   </head>
-  <body
-    ng-controller="SessionController as session"
-    ng-controller="BoardController as board">
-    <div class="navbar navbar-inverse navbar-fixed-top"
-      role="navigation"
-      ng-include="'views/nav/index.html'">
-    </div>
+  <body ng-controller="BoardController as board">
+    <div ng-controller="SessionController as session">
+      <div class="navbar navbar-inverse navbar-fixed-top"
+        role="navigation"
+        ng-include="'views/nav/index.html'">
+      </div>
 
-    <div ng-if="session.notLoggedIn" class="container">
-      <div class="jumbotron">
-        <h1>Hello, world!</h1>
-        <p>Tired of kanban boards that miss the mark?</p>
-        <p>Login with your github account to get started.</p>
-        <p>Open source projects are always free.</p>
+      <div ng-if="session.notLoggedIn" class="container">
+        <div class="jumbotron">
+          <h1>Hello, world!</h1>
+          <p>Tired of kanban boards that miss the mark?</p>
+          <p>Login with your github account to get started.</p>
+          <p>Open source projects are always free.</p>
+        </div>
+      </div>
+
+      <div ng-if="session.loggedIn" class="container-fluid">
+        <div
+          ng-show="board.creator.isOpen"
+          ng-include="board.creator.template()">
+        </div>
+        <div
+          ng-show="board.projectLinker.isOpen"
+          ng-include="'views/project_linker.html'">
+        </div>
+        <table class="table" ng-include="'views/board.html'"></table>
       </div>
     </div>
-
-    <div ng-if="session.loggedIn" class="container-fluid">
-      <div
-        ng-show="board.creator.isOpen"
-        ng-include="'views/board_creator.html'">
-      </div>
-      <div
-        ng-show="board.projectLinker.isOpen"
-        ng-include="'views/project_linker.html'">
-      </div>
-      <table ng-include="'views/board.html'"></table>
-    </div>
-
-    <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/angular.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/bundle.js" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>
