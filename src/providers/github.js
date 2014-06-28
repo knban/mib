@@ -10,9 +10,9 @@ module.exports = {
   // Inject the lodash dependency in this way to avoid bringing it in on the browser
   cardHandler: function(_) {
     return {
-      batchImport: function(board, issues, done) {
-        var cards = board.columns[0].cards;
-        var allCards = _.flatten(_.pluck(board.columns, 'cards'));
+      batchImport: function(boardAttributes, issues, done) {
+        var cards = boardAttributes.columns[0].cards;
+        var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
         // Sort the cards by provider_id so testing dupes is quicker (Right?)
         var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
         _.each(issues, function(issue) {
@@ -35,41 +35,41 @@ module.exports = {
       info: providerInfo,
       next: function() {
         $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
-        board.importProvider = this;
-        board.importHelp = "Is it a personal repository or part of an organization?"
-        board.importPersonalOrOrg = true;
+        board.projectLinker._Provider = this;
+        board.projectLinker._Help = "Is it a personal repository or part of an organization?"
+        board.projectLinker._PersonalOrOrg = true;
       },
       personal: function() {
-        board.importPersonalOrOrg = false;
+        board.projectLinker._PersonalOrOrg = false;
         this.getRepos(app.session.auth.github.user.repos_url);
       },
       org: function() {
-        board.importPersonalOrOrg = false;
-        board.importHelp = "Fetching organizations...";
+        board.projectLinker._PersonalOrOrg = false;
+        board.projectLinker._Help = "Fetching organizations...";
         $http.get(app.session.auth.github.user.organizations_url).success(function(data) {
-          board.importHelp = "Which organization owns the repository from which you wish to import open issues?";
-          board.importOrgs = data;
+          board.projectLinker._Help = "Which organization owns the repository from which you wish to import open issues?";
+          board.projectLinker._Orgs = data;
         })
       },
       selectOrg: function(org) {
-        board.importOrgs = false;
+        board.projectLinker._Orgs = false;
         this.getRepos(org.repos_url);
       },
       getReposPrev: function() {
-        this.getRepos(board.importReposLinks.prev);
+        this.getRepos(board.projectLinker._ReposLinks.prev);
       },
       getReposNext: function() {
-        this.getRepos(board.importReposLinks.next);
+        this.getRepos(board.projectLinker._ReposLinks.next);
       },
       getRepos: function(url, pageNum) {
-        board.importHelp = "Fetching repositories...";
+        board.projectLinker._Help = "Fetching repositories...";
         $http.get(url).success(function(data, status, headers, config) {
-          board.importHelp = "Which repository do you wish to import issues from?";
-          board.importRepos = data;
-          board.importReposNext = null;
-          board.importReposLast = null;
-          board.importReposCurPage = pageNum;
-          board.importReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
+          board.projectLinker._Help = "Which repository do you wish to import issues from?";
+          board.projectLinker._Repos = data;
+          board.projectLinker._ReposNext = null;
+          board.projectLinker._ReposLast = null;
+          board.projectLinker._ReposCurPage = pageNum;
+          board.projectLinker._ReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
         })
       },
       importRepo: function(repo) {
@@ -89,7 +89,7 @@ module.exports = {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.id+'/webhooks/github',
+            url: window.location.origin+'/boards/'+board.attributes._id+'/webhooks/github',
             content_type: "json"
           }
         });
@@ -109,10 +109,10 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.id+'/columns/'+board.importCol+'/cards/import/github';
+        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
-            board.columns = data.board.columns;
+            board.attributes.columns = data.board.columns;
         });
       },
       canImport: function(repo) {

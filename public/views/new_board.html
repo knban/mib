@@ -1,0 +1,26 @@
+<div class="container-fluid">
+  <div class="well">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-danger"
+          ng-show="board.creator.errors" >{{board.creator.errors}}
+        </div>
+        <div class="alert alert-success"
+          ng-if="board.creator.success"
+          ng-show="board.creator.success">{{board.creator.success}}
+        </div>
+        <form role="form">
+          <div class="form-group">
+            <label for="boardName">Board Name</label>
+            <input type="text" id="boardNameInput" autofocus ng-model="board.creator.boardName" class="form-control" placeholder="My Kanban Project">
+          </div>
+          <button type="submit" class="btn btn-primary"
+            ng-click="board.creator.submit()">Submit
+          </button>  
+          <button ng-click="board.creator.toggle()" class="btn btn-default pull-right">Close</button>  
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

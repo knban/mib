@@ -1,22 +1,22 @@
 var helper = require('../test_helper'),
 expect = helper.expect;
 
+var BoardController = helper.require('client/controllers/board_controller');
 var Provider = helper.require('providers/github').cardProvider;
 
 var li = require('li');
 
 describe("GitHub Provider", function() {
+  global.app = {};
   var board = null;
   var provider = null;
   var $http = null;
 
   beforeEach(function() {
     $http = helper.fake$http();
-    board = {
-      id: 1,
-      importRepos: [],
-      importReposNext: 'test',
-      importReposLast: 'test'
+    board = new BoardController[BoardController.length-1]($http);
+    board.attributes = {
+      _id: "1"
     };
   });
 
@@ -37,7 +37,7 @@ describe("GitHub Provider", function() {
       expect(hook.active).to.eq(true);
       expect(hook.events).to.include("issues");
       expect(hook.events).to.include("issue_comment");
-      expect(hook.config.url).to.eq(origin+"/boards/1/webhooks/github");
+      expect(hook.config.url).to.eq(origin+"/boards/"+board.attributes._id+"/webhooks/github");
       expect(hook.config.content_type).to.eq("json");
     });
   });
@@ -52,11 +52,11 @@ describe("GitHub Provider", function() {
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
-    it("populates board.importRepos with 3 repos", function() {
-      expect(board.importRepos.length).to.eq(3);
+    it("populates board.projectLinker._Repos with 3 repos", function() {
+      expect(board.projectLinker._Repos.length).to.eq(3);
     });
-    it("board.importReposLinks is null", function() {
-      expect(board.importReposLinks).to.eq(null);
+    it("board.projectLinker._ReposLinks is null", function() {
+      expect(board.projectLinker._ReposLinks).to.eq(null);
     });
   });
 
@@ -72,11 +72,11 @@ describe("GitHub Provider", function() {
       provider = Provider(board, $http);
       provider.getRepos('url');
     });
-    it("populates board.importRepos with 3 repos", function() {
-      expect(board.importRepos.length).to.eq(3);
+    it("populates board.projectLinker._Repos with 3 repos", function() {
+      expect(board.projectLinker._Repos.length).to.eq(3);
     });
-    it("it sets board.importReposLinks with the parsed links object", function() {
-      expect(board.importReposLinks).to.deep.eq({
+    it("it sets board.projectLinker._ReposLinks with the parsed links object", function() {
+      expect(board.projectLinker._ReposLinks).to.deep.eq({
         next: 'link1',
         last: 'link2'
       });
@@ -90,14 +90,14 @@ describe("GitHub Provider", function() {
       beforeEach(function() {
         $http.stub('get', function(stub) {
           return stub.yields([
-            { id: 222 }
+            { _id: 222 }
           ], 200, function linkHeaders() {return ''});
         });
         stub = $http.stub('post', function(stub) {
           return stub.yields({}, 200);
         });
-        board.id = 2;
-        board.importCol = 1;
+        board.attributes._id = 2;
+        board.projectLinker._Col = 1;
         provider = Provider(board, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" });
       });
@@ -105,7 +105,7 @@ describe("GitHub Provider", function() {
         expect(stub.getCall(0).args[0]).to.eq("/boards/2/columns/1/cards/import/github");
       });
       it("supplies an id field sufficient for uniqueness matching", function() {
-        expect(stub.getCall(0).args[1].openIssues[0].id).to.eq(222);
+        expect(stub.getCall(0).args[1].openIssues[0]._id).to.eq(222);
       });
     });
 
@@ -127,7 +127,7 @@ describe("GitHub Provider", function() {
           return stub.yields({}, 200);
         });
         board.id = 2;
-        board.importCol = 1;
+        board.projectLinker._Col = 1;
         provider = Provider(board, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" });
       });

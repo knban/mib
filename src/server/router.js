@@ -1,15 +1,29 @@
 var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
+var User = require('./user');
+var Board = require('./models/board');
 
 r.get('/session.json', function(req, res, next) {
   res.send(req.session);
 });
 
-var Board = require('./models/board');
+r.get('/boards/index', function (req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    Board.find({ authorizedUsers: user.identifier }, { name:1 }, function (err, boards) {
+      if (err) { res.send(500) }
+      else {
+        res.send({boards: boards})
+      }
+    });
+  } else {
+    res.send(401);
+  }
+});
 
-r.get('/boards/:id', function(req, res, next) {
-  Board.find({ id: '1' }, function(err, boards) {
+r.get('/boards/:_id', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -21,8 +35,8 @@ r.get('/boards/:id', function(req, res, next) {
 });
 
 // Deleting columns
-r.delete('/boards/:id/columns/:col', function (req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.delete('/boards/:_id/columns/:col', function (req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -39,8 +53,8 @@ r.delete('/boards/:id/columns/:col', function (req, res, next) {
 });
 
 // Deleting cards
-r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -59,8 +73,8 @@ r.delete('/boards/:id/columns/:col/cards/:row', function(req, res, next) {
 var handler = require('../providers/github').cardHandler(_);
 
 // Importing cards from Github
-r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -78,8 +92,8 @@ r.post('/boards/:id/columns/:col/cards/import/github', function(req, res, next) 
 })
 
 // Move a card
-r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -121,13 +135,31 @@ r.put('/boards/:id/columns/:col/cards/:row/move/:direction', function(req, res, 
   });
 });
 
-r.post('/boards/:id/webhooks/github', function(req, res, next) {
-  Board.find({ id: 1 }, function(err, boards) {
+var findCardPosition = function (board, issue, cb) {
+  var col, row, card, column = null;
+  if (_.find(board.columns, function (column, i) {
+    col = i;
+    return _.find(column.cards, function (c, j) {
+      row = j;
+      card = c
+      return card.id == issue.id;
+    })
+  })) { 
+    cb(null, col, row);
+  } else {
+    cb(new Error("Card not found"));
+  }
+};
+
+// FIXME secure this route https://developer.github.com/webhooks/securing/
+r.post('/boards/:_id/webhooks/github', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
       res.send(404);
     } else {
+      var action = req.body.action;
       var board = boards[0];
       var persistColumns = function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
@@ -138,6 +170,14 @@ r.post('/boards/:id/webhooks/github', function(req, res, next) {
       if (req.body.action === "opened") {
         board.columns[0].cards.push(req.body.issue);
         persistColumns();
+      } else if (action === "created" || action === "closed" || action === "reopened") {
+        // TODO closed move to last column, reopened move to first column
+        findCardPosition(board, req.body.issue, function (err, col, row) {
+          if (err) { res.send(404) } else { 
+            board.columns[col].cards[row] = req.body.issue;
+            persistColumns();
+          }
+        })
       } else {
         res.send(204)
       }
@@ -146,8 +186,8 @@ r.post('/boards/:id/webhooks/github', function(req, res, next) {
 });
 
 // Export a board as JSON
-r.get('/boards/:id/export.json', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.get('/boards/:_id/export.json', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -162,8 +202,8 @@ r.get('/boards/:id/export.json', function(req, res, next) {
 });
 
 // Importing a board via JSON
-r.post('/boards/:id/import', function(req, res, next) {
-  Board.find({ id: req.params.id }, function(err, boards) {
+r.post('/boards/:_id/import', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
@@ -177,3 +217,63 @@ r.post('/boards/:id/import', function(req, res, next) {
     }
   });
 })
+
+
+
+// Creating a new board
+r.post('/boards', function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+
+    /* 
+     * This is how you get the data back out 
+    Board.find({ authorizedUsers: user.identifier }, function(error, models) {
+      //put code to process the results here
+      //});
+     */
+    var board = new Board({
+      name: req.body.name,
+      authorizedUsers: [ user.identifier ],
+      columns: [{
+        name: "Icebox",
+        cards: []
+      },{
+        name: "Backlog",
+        cards: []
+      },{
+        name: "Doing",
+        cards: []
+      },{
+        name: "Done",
+        cards: []
+      }]
+    });
+    board.save(function(err, board) {
+      if (err) 
+        res.send(500);
+      else
+        res.send({ board: board });
+    });
+  } else {
+    res.send(401);
+  }
+})
+
+
+// Deleting a board
+r.delete('/boards/:_id', function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    Board.find({
+      _id: req.params._id,
+      authorizedUsers: user.identifier
+    }).remove(function(err) {
+      if (err) { res.send(500) }
+      else {
+        res.send(204);
+      }
+    });
+  } else {
+    res.send(401);
+  }
+});

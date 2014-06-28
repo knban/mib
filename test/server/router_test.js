@@ -35,6 +35,22 @@ describe("Router", function() {
 
   afterEach(helper.restoreModels);
 
+  describe("POST /boards with a name", function () {
+    it.skip("creates a board with the name", function (done) {
+      request(app)
+      .post('/boards')
+      .send({
+        name: "foo"
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err, res){
+        if (err) throw err;
+        done();
+      });
+    });
+  });
+
   describe("Github", function() {
 
     describe("Importing Issues", function() {

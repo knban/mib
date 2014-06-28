@@ -7,6 +7,18 @@ bodyParser = require('body-parser'),
 cookieSession = require('cookie-session'),
 everyauth = require('everyauth');
 
+app.use(express.static(__dirname + '/../../public'));
+
+if (process.env.NODE_ENV === "development") {
+  app.use('/cov', express.static(__dirname + '/../../coverage/lcov-report'));
+
+  global.debug = function (obj) {
+    var beautify = require('js-beautify').js_beautify;
+    output = beautify(JSON.stringify(obj), { indent_size: 2});
+    console.log(output);
+  };
+}
+
 require('./auth/github.js')(everyauth);
 
 app.use(logger());
@@ -16,13 +28,11 @@ app.use(cookieSession({
 }));
 app.use(bodyParser.json());
 app.use(everyauth.middleware());
-app.use(express.static(__dirname + '/../../public'));
 app.use(require('./router'));
 
 var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/mib");
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Mongo connection error:'));
-db.once('open', require('./seed'));
 module.exports = http;
 

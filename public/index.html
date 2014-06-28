@@ -8,37 +8,38 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
   </head>
-  <body ng-init="board.restore()" ng-controller="BoardController as board">
-    <div class="navbar navbar-inverse navbar-fixed-top"
-      role="navigation"
-      ng-include="'views/nav/index.html'"
-      ng-controller="NavigationController as nav">
-    </div>
-    <div class="container-fluid">
-      <div id="import"
-        ng-show="board.importing"
-        ng-include="'views/import.html'">
+  <body ng-controller="BoardController as board">
+    <div ng-controller="SessionController as session">
+      <div class="navbar navbar-inverse navbar-fixed-top"
+        role="navigation"
+        ng-include="'views/nav/index.html'">
       </div>
-      <table class="table">
-        <thead>
-          <th style="text-align:center"
-            ng-repeat="column in board.columns">
-            <b>{{column.name}}</b>
-          </th>
-        </thead>
-        <tbody>
-          <tr>
-            <td
-              ng-init="col = $index"
-              ng-repeat="column in board.columns"
-              ng-include="'views/card.html'">
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div><!-- /.container -->
-    <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
+
+      <div ng-if="session.anonymous" class="container">
+        <div class="jumbotron">
+          <h1>Hello, world!</h1>
+          <p>Tired of kanban boards that miss the mark?</p>
+          <p>Login with your github account to get started.</p>
+          <p>Open source projects are always free.</p>
+        </div>
+      </div>
+
+      <div ng-if="session.loggedIn" class="container-fluid">
+        <div
+          ng-show="board.creator.isOpen"
+          ng-include="board.creator.template()">
+        </div>
+        <div
+          ng-show="board.projectLinker.isOpen"
+          ng-include="'views/project_linker.html'">
+        </div>
+        <table class="table" ng-include="'views/board.html'"></table>
+      </div>
+    </div>
+    <script src="/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/angular.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/bundle.js" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>
