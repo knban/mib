@@ -1,7 +1,7 @@
 <ul class="list-group">
   <li class="list-group-item"
   ng-init="row = $index"
-  ng-repeat="card in column.cards" >
+  ng-repeat="card in column.cards">
 
   <span class="badge alert-{{card.state === 'open' ? 'success' : 'danger'}}" >
     {{card.state}}
@@ -11,43 +11,9 @@
     #{{card.number}}
   </span>
 
-
-
-  <a class="pull-left" href="#" data-toggle="modal" data-target="#myModal" ng-click="board.cardModal(card)">{{card.title}}</a>
-
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">
-          {{board.card.title}}
-        </h4>
-        <span class="small">Issue created by {{board.card.user.login}} @ {{board.card.updated_at}}</span>
-      </div>
-      <div class="modal-body">
-        <p>{{board.card.body}}<p>
-        <hr ng-if="board.card.comments.length">
-        <div ng-if="board.card.comments.length" ng-show="board.card.loading">Loading comments...</div>
-        <ul class="list-group">
-          <li ng-repeat="comment in board.card.comments" class="list-group-item">
-          <p>{{comment.body}}<p>
-          <p class="small">Commented by {{comment.user.login}} @ {{comment.updated_at}}</p>
-          </li>
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <span class="badge pull-right alert-{{board.card.state === 'open' ? 'success' : 'danger'}}" >
-          {{board.card.state}}
-        </span>
-        <span class="badge pull-left alert-info" >
-          #{{board.card.number}}
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+  <a class="pull-left" href="{{card.html_url}}" 
+    ng-tooltip="{{card.body}}"
+    target="_blank">{{card.title}}</a>
 
   <br>
   <div class="btn-group">

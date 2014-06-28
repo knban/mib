@@ -52,6 +52,17 @@ window.app = angular.module('app', [])
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
 
+app.directive('ngTooltip', function () {
+  return {
+    link: function(scope, iElement, iAttrs) {
+      iElement.data('toggle', 'tooltip');
+      iElement.data('placement', 'bottom')
+      iElement.data('title', iAttrs.ngTooltip);
+      iElement.tooltip();
+    }
+  }
+});
+
 },{"./controllers/board_controller":4,"./controllers/session_controller":5}],3:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
@@ -177,13 +188,8 @@ module.exports = ['$http', function($http) {
     }
   };
 
-  this.cardModal = function (card) {
-    board.card = card;
-    board.card.loading = true;
-    $http.get(card.comments_url).success(function (data) {
-      board.card.comments = data;
-      board.card.loading = false;
-    })
+  this.doTooltip = function () {
+    console.log("af");
   };
 }]
 

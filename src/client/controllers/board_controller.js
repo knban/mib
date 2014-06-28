@@ -86,12 +86,7 @@ module.exports = ['$http', function($http) {
     }
   };
 
-  this.cardModal = function (card) {
-    board.card = card;
-    board.card.loading = true;
-    $http.get(card.comments_url).success(function (data) {
-      board.card.comments = data;
-      board.card.loading = false;
-    })
+  this.doTooltip = function () {
+    console.log("af");
   };
 }]
