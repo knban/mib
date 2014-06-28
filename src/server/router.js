@@ -135,6 +135,22 @@ r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res,
   });
 });
 
+var findCardPosition = function (board, issue, cb) {
+  var col, row, card, column = null;
+  if (_.find(board.columns, function (column, i) {
+    col = i;
+    return _.find(column.cards, function (c, j) {
+      row = j;
+      card = c
+      return card.id == issue.id;
+    })
+  })) { 
+    cb(null, col, row);
+  } else {
+    cb(new Error("Card not found"));
+  }
+};
+
 // FIXME secure this route https://developer.github.com/webhooks/securing/
 r.post('/boards/:_id/webhooks/github', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
@@ -143,6 +159,7 @@ r.post('/boards/:_id/webhooks/github', function(req, res, next) {
     } else if (boards.length === 0) {
       res.send(404);
     } else {
+      var action = req.body.action;
       var board = boards[0];
       var persistColumns = function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
@@ -153,22 +170,14 @@ r.post('/boards/:_id/webhooks/github', function(req, res, next) {
       if (req.body.action === "opened") {
         board.columns[0].cards.push(req.body.issue);
         persistColumns();
-      } else if (req.body.action === "created") {
-        var col, row, card, column = null;
-        column = _.find(board.columns, function (column, i) {
-          col = i;
-          return _.find(column.cards, function (c, j) {
-            row = j;
-            card = c
-            return card.id == req.body.issue.id;
-          })
+      } else if (action === "created" || action === "closed" || action === "reopened") {
+        // TODO closed move to last column, reopened move to first column
+        findCardPosition(board, req.body.issue, function (err, col, row) {
+          if (err) { res.send(404) } else { 
+            board.columns[col].cards[row] = req.body.issue;
+            persistColumns();
+          }
         })
-        if (card) {
-          board.columns[col].cards[row] = req.body.issue
-          persistColumns();
-        } else {
-          res.send(404);
-        }
       } else {
         res.send(204)
       }
