@@ -195,9 +195,10 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
     } else if (boards.length === 0) {
       res.send(404);
     } else {
+      var board = boards[0];
       var beautify = require('js-beautify').js_beautify;
-      output = beautify(JSON.stringify(boards[0]), { indent_size: 2});
-      res.set("Content-Disposition", 'attachment; filename="board.json"');
+      output = beautify(JSON.stringify(board), { indent_size: 2});
+      res.set("Content-Disposition", 'attachment; filename="'+board.name+'.json"');
       res.send(output);
     }
   })
@@ -276,3 +277,4 @@ r.put('/boards/:_id/links/:provider/:repo_id', function(req, res, next) {
     }
   });
 });
+

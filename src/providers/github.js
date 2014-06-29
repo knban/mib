@@ -123,7 +123,6 @@ module.exports = {
         });
       },
       importRepoIssues: function(repo) {
-        console.log(repo);
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
         this.importIssues(url);

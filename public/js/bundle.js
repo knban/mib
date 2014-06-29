@@ -7002,10 +7002,6 @@ module.exports = ['$http', function($http) {
       });
     }
   };
-
-  this.doTooltip = function () {
-    console.log("af");
-  };
 }]
 
 },{"../board_creator":4,"../project_linker":7}],6:[function(require,module,exports){
@@ -7196,7 +7192,6 @@ module.exports = {
         });
       },
       importRepoIssues: function(repo) {
-        console.log(repo);
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
         this.importIssues(url);

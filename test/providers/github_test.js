@@ -55,32 +55,6 @@ describe("GitHub Provider", function() {
     it("populates board.projectLinker._Repos with 3 repos", function() {
       expect(board.projectLinker._Repos.length).to.eq(3);
     });
-    it("board.projectLinker._ReposLinks is null", function() {
-      expect(board.projectLinker._ReposLinks).to.eq(null);
-    });
-  });
-
-  describe("getRepos with pagination", function() {
-    beforeEach(function() {
-      $http.stub('get', function(stub) {
-        return stub.yields([
-          { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
-        ], 200, function linkHeaders() {
-          return li.stringify({ next: 'link1', last: 'link2' })
-        });
-      });
-      provider = Provider(board, $http);
-      provider.getRepos('url');
-    });
-    it("populates board.projectLinker._Repos with 3 repos", function() {
-      expect(board.projectLinker._Repos.length).to.eq(3);
-    });
-    it("it sets board.projectLinker._ReposLinks with the parsed links object", function() {
-      expect(board.projectLinker._ReposLinks).to.deep.eq({
-        next: 'link1',
-        last: 'link2'
-      });
-    });
   });
 
   describe("importRepoIssues", function() {
