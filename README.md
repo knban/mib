@@ -1,6 +1,10 @@
 # mib
 
-_Movable issue board_
+[![Dependency Status][dep-img]][dep-link]
+[![devDependency Status][dev-dep-img]][dev-dep-link]
+[![NPM][npm-badge-img]][npm-badge-link]
+
+### mighty issue board
 
 **work in progress** there is no proper security right now, please do not use it yet
 
@@ -76,3 +80,10 @@ There isn't one yet. Reach out by creating an issue and I'll put some effort int
 ## Special Thanks
 
 DigitalFilm Tree & DFTi
+
+[dev-dep-img]: https://david-dm.org/keyvanfatehi/mib/dev-status.svg
+[dev-dep-link]: https://david-dm.org/keyvanfatehi/mib#info=devDependencies
+[dep-img]: https://david-dm.org/keyvanfatehi/mib.svg
+[dep-link]: https://david-dm.org/keyvanfatehi/mib
+[npm-badge-img]: https://nodei.co/npm/mib.svg
+[npm-badge-link]: https://nodei.co/npm/mib/

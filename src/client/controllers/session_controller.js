@@ -24,7 +24,11 @@ module.exports = ['$http', function($http) {
     })
   };
 
-  if (localStorage.lastBoardId) {
+  app.loadLastBoard = function () {
     app.loadBoardById(localStorage.lastBoardId);
+  };
+
+  if (localStorage.lastBoardId) {
+    app.loadLastBoard();
   }
 }];

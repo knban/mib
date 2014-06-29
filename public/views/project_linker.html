@@ -1,59 +1,64 @@
-<div class="row">
-  <div class="col-md-2" style="padding:40px">
-    <button
-      class="btn btn-default pull-left"
-      ng-if="board.projectLinker._ReposLinks.prev"
-      ng-click="board.projectLinker._Provider.getReposPrev()">
-      Previous Page
-    </button>
-  </div>
-  <div class="col-md-8" style="text-align: center">
-    <h4>Importing into: 
-      <b>{{board.columns[board.projectLinker._Col].name}}</b>
-    </h4>
-    <p>{{board.projectLinker._Help}}</p>
-    <a href="#"
-      ng-hide="board.projectLinker._Provider"
-      ng-repeat="provider in board.projectLinker.providers"
-      ng-click="provider.next()">
-      <img ng-src="{{provider.info.iconUrl}}" alt="{{provider.info.displayName}}"/>
-    </a>
-    <button
-      class="btn btn-default"
-      ng-show="board.projectLinker._PersonalOrOrg"
-      ng-click="board.projectLinker._Provider.personal()">
-      Personal
-    </button>
-    <button
-      class="btn btn-default"
-      ng-show="board.projectLinker._PersonalOrOrg"
-      ng-click="board.projectLinker._Provider.org()">
-      Organization
-    </button>
-    <a href="#" style="display:block"
-      ng-show="board.projectLinker._Orgs"
-      ng-repeat="org in board.projectLinker._Orgs"
-      ng-click="board.projectLinker._Provider.selectOrg(org)">
-      {{org.login}}
-    </a>
-    <button
-      style="display:block"
-      class="btn btn-default btn-block"
-      ng-disabled="repo.imported"
-      ng-show="board.projectLinker._Repos"
-      ng-repeat="repo in board.projectLinker._Repos"
-      ng-click="board.projectLinker._Provider.importRepo(repo)">
-      {{repo.full_name}}
-    </button>
-  </div>
-  <div class="col-md-2" style="padding:40px">
-    <button
-      class="btn btn-default pull-right"
-      ng-if="board.projectLinker._ReposLinks.next"
-      ng-click="board.projectLinker._Provider.getReposNext()">
-      Next Page
-    </button>
+<div class="container-fluid">
+  <div class="well">
+    <div class="row">
+      <div class="col-xs-3 col-sm-2">
+        <button
+          class="btn btn-default pull-left"
+          ng-if="board.projectLinker._ReposLinks.prev"
+          ng-click="board.projectLinker._Provider.getReposPrev()">
+          Previous Page
+        </button>
+      </div>
+      <div class="col-xs-6 col-sm-8 col-md-8" style="text-align: center">
+        <h4>Importing into
+          {{board.attributes.columns[board.projectLinker._Col].name}}
+        </h4>
+        <p>{{board.projectLinker._Help}}</p>
+        <button href="#"
+          class="btn btn-default"
+          ng-tooltip="{{provider.info.displayName}}"
+          ng-hide="board.projectLinker._Provider"
+          ng-repeat="provider in board.projectLinker.providers"
+          ng-click="provider.next()">
+          <img ng-src="{{provider.info.iconUrl}}" alt="{{provider.info.displayName}}"/>
+        </button>
+        <button
+          class="btn btn-default"
+          ng-show="board.projectLinker._PersonalOrOrg"
+          ng-click="board.projectLinker._Provider.personal()">
+          Personal
+        </button>
+        <button
+          class="btn btn-default"
+          ng-show="board.projectLinker._PersonalOrOrg"
+          ng-click="board.projectLinker._Provider.org()">
+          Organization
+        </button>
+        <a href="#" style="display:block"
+          ng-show="board.projectLinker._Orgs"
+          ng-repeat="org in board.projectLinker._Orgs"
+          ng-click="board.projectLinker._Provider.selectOrg(org)">
+          {{org.login}}
+        </a>
+        <button
+          style="display:block"
+          class="btn btn-default btn-block"
+          ng-disabled="repo.imported"
+          ng-show="board.projectLinker._Repos"
+          ng-repeat="repo in board.projectLinker._Repos"
+          ng-click="board.projectLinker._Provider.importRepo(repo)">
+          {{repo.full_name}}
+        </button>
+      </div>
+      <div class="col-xs-3 col-sm-2">
+        <button
+          class="btn btn-default pull-right"
+          ng-if="board.projectLinker._ReposLinks.next"
+          ng-click="board.projectLinker._Provider.getReposNext()">
+          Next Page
+        </button>
+      </div>
+    </div>
   </div>
 </div>
-
 
