@@ -1,6 +1,10 @@
 # mib
 
-_Movable issue board_
+[![Dependency Status][dep-img]][dep-link]
+[![devDependency Status][dev-dep-img]][dev-dep-link]
+[![NPM][npm-badge-img]][npm-badge-link]
+
+### mighty issue board
 
 **work in progress** there is no proper security right now, please do not use it yet
 
