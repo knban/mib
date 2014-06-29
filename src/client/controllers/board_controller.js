@@ -72,8 +72,4 @@ module.exports = ['$http', function($http) {
       });
     }
   };
-
-  this.doTooltip = function () {
-    console.log("af");
-  };
 }]
