@@ -3,5 +3,5 @@ module.exports = require('mongoose').Schema({
   name: String,
   columns: Array,
   links: Object,
-  authorizedUsers: Array // fold into links, provide a method to check
+  authorizedUsers: Array
 });
