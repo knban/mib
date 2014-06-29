@@ -83,18 +83,19 @@ module.exports = {
       },
       importWantedRepos: function() {
         var ids = board.projectLinker._WantedReposIds;
-        console.log(ids);
         var allRepos = board.projectLinker._Repos;
         var repos = _.map(ids, function (id) {
-          console.log(id);
           return _.where(allRepos, { id: parseInt(id) })[0];
         });
-//        var repos = _.filter(allRepos, function(r) { return _.contains(parseInt(ids), parseInt(r.id)) })
-        console.log(repos);
         _.each(repos, function (repo) {
-          this.linkRepo(repo);
-          this.importRepoIssues(repo);
-          this.installWebhook(repo);
+          try {
+            this.linkRepo(repo);
+            this.importRepoIssues(repo);
+            this.installWebhook(repo);
+            board.projectLinker.close();
+          } catch (e) {
+            alert(e.message);
+          }
         }.bind(this))
       },
       linkRepo: function (repo) {
