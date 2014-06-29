@@ -5,42 +5,29 @@ module.exports = ['$http', function($http) {
   var board = this;
   this.projectLinker = new ProjectLinker(board, $http);
   this.creator = new BoardCreator(this, $http);
-  this.unload = function () {
+  this.unload = function (preventClearLastBoard) {
     board.loaded = false;
     board.attributes = null;
     this.projectLinker.close();
-    localStorage.removeItem('lastBoardId')
+    if (! preventClearLastBoard) {
+      localStorage.removeItem('lastBoardId')
+    }
   };
   this.load = app.loadBoard = function (attributes) {
+    board.creator.isOpen = false;
     board.attributes = attributes;
     board.loaded = true;
     localStorage.lastBoardId = attributes._id;
   };
   this.loadBoardById = app.loadBoardById = function (_id) {
+    if (board.loaded && board.attributes._id === _id)
+      return
     board.loaded = false;
     $http.get('/boards/'+_id).success(function (data) {
       board.load(data.board)
     }).error(function () {
       localStorage.removeItem('lastBoardId')
     });
-  };
-  this.setupBoardImportFileField = function () {
-    document.getElementsByName('importFileField')[0].onchange = function (e) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        var data = {};
-        try {
-          data = JSON.parse(reader.result);
-          $http.post('/boards/'+board.attributes._id+'/import', data)
-          .success(board.restore)
-          .error(function (err) { throw err });
-        } catch (e) {
-          console.error(e);
-          alert(e);
-        }
-      };
-      reader.readAsText(e.target.files[0]);
-    };
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
