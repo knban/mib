@@ -52,6 +52,8 @@ window.app = angular.module('app', [])
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
 
+/*
+ * Add a bootstrap3 tooltip to the element */
 app.directive('ngTooltip', function () {
   return {
     link: function(scope, iElement, iAttrs) {
@@ -63,9 +65,42 @@ app.directive('ngTooltip', function () {
   }
 });
 
+/*
+ * Reads a file input field and parses it into an ngModel */
+app.directive('ngJsonreader', ['$sce', function ($sce) {
+  return {
+    restrict: 'A',
+    require: '^ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      // Listen for change events to enable binding
+      element.on('change', function(e) {
+        ngModel.$setViewValue("Reading "+e.target.files[0].name);
+        scope.$apply(function () {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var data = {};
+            try {
+              data = JSON.parse(reader.result);
+              ngModel.$setViewValue(data);
+            } catch (err) {
+              ngModel.$setViewValue("Failed to parse JSON");
+            }
+            scope.$apply();
+          };
+          reader.readAsText(e.target.files[0]);
+        });
+      });
+    }
+  }
+}]);
+
 },{"./controllers/board_controller":4,"./controllers/session_controller":5}],3:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
+  this.init = function () {
+    board.unload(true);
+    this.errors = this.success = null;
+  };
   this.template = function () {
     return 'views/new_board.html';
   };
@@ -74,21 +109,25 @@ module.exports = function BoardCreator(board, $http) {
     this.isOpen = (this.isOpen ? false : true)
     this.boardName = null;
   }
+  this.close = function () {
+    this.toggle();
+    app.loadLastBoard();
+  };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
-  };
-  this.init = function () {
-    this.errors = this.success = null;
   };
   this.submit = function () {
     this.init();
     if (this.valid()) {
-      $http.post('/boards', { name: this.boardName }).success(function (data) {
+      var payload = { name: this.boardName };
+      if (this.jsonImport && this.jsonImport.columns) {
+        payload.columns = this.jsonImport.columns;
+      }
+      $http.post('/boards', payload).success(function (data) {
         form.errors = null;
         form.success = "Board created!"
         app.updateBoardList();
-        app.loadBoard(data.board);
-        form.toggle();
+        app.loadBoardById(data.board._id);
       }).error(function (err, status) {
         form.success = null;
         form.errors = status+" -- "+err;
@@ -107,42 +146,29 @@ module.exports = ['$http', function($http) {
   var board = this;
   this.projectLinker = new ProjectLinker(board, $http);
   this.creator = new BoardCreator(this, $http);
-  this.unload = function () {
+  this.unload = function (preventClearLastBoard) {
     board.loaded = false;
     board.attributes = null;
     this.projectLinker.close();
-    localStorage.removeItem('lastBoardId')
+    if (! preventClearLastBoard) {
+      localStorage.removeItem('lastBoardId')
+    }
   };
   this.load = app.loadBoard = function (attributes) {
+    board.creator.isOpen = false;
     board.attributes = attributes;
     board.loaded = true;
     localStorage.lastBoardId = attributes._id;
   };
   this.loadBoardById = app.loadBoardById = function (_id) {
+    if (board.loaded && board.attributes._id === _id)
+      return
     board.loaded = false;
     $http.get('/boards/'+_id).success(function (data) {
       board.load(data.board)
     }).error(function () {
       localStorage.removeItem('lastBoardId')
     });
-  };
-  this.setupBoardImportFileField = function () {
-    document.getElementsByName('importFileField')[0].onchange = function (e) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        var data = {};
-        try {
-          data = JSON.parse(reader.result);
-          $http.post('/boards/'+board.attributes._id+'/import', data)
-          .success(board.restore)
-          .error(function (err) { throw err });
-        } catch (e) {
-          console.error(e);
-          alert(e);
-        }
-      };
-      reader.readAsText(e.target.files[0]);
-    };
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
@@ -220,8 +246,12 @@ module.exports = ['$http', function($http) {
     })
   };
 
-  if (localStorage.lastBoardId) {
+  app.loadLastBoard = function () {
     app.loadBoardById(localStorage.lastBoardId);
+  };
+
+  if (localStorage.lastBoardId) {
+    app.loadLastBoard();
   }
 }];
 

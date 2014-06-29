@@ -14,22 +14,16 @@
     <ul class="nav navbar-nav" ng-if="session.loggedIn">
 
       <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{board.loaded ? board.attributes.name : "My Boards"}}<span class="caret"></span></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{board.loaded ? board.attributes.name : "Boards"}}<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li ng-repeat="b in session.boards"><a href="#" ng-click="board.loadBoardById(b._id)">{{b.name}}</a></li>
           <li ng-show="session.boards.length" class="divider"></li>
-          <li><a href="#" ng-click="board.creator.toggle()">Create New Board</a></li>
+          <li><a href="#" ng-click="board.creator.toggle()">Create / Import</a></li>
         </ul>
       </li>
       <li ng-show="board.loaded" ng-include="'views/nav/project_linker.html'"></li>
-      <li ng-show="board.loaded">
-        <div class="fileUpload">
-          <span>Import Board Data</span>
-          <input ng-init="board.setupBoardImportFileField()" name="importFileField" type="file" class="upload" />
-        </a>
-      </li>
-      <li ng-show="board.loaded"><a href="/boards/{{board.attributes._id}}/export.json">Export Board Data</a></li>
-      <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete Board</a></li>
+      <li ng-show="board.loaded"><a href="/boards/{{board.attributes._id}}/export.json">Export</a></li>
+      <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li ng-show="session.loggedIn"><a href="/logout">Logout {{session.uid}}</a></li>

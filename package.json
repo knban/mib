@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha -R spec --recursive test",
-    "tdd": "mocha -R spec -w --recursive test",
+    "test": "mocha --recursive test",
+    "tdd": "mocha -w --recursive test",
     "build": "browserify src/client/app.js -o public/js/bundle.js",
     "watch": "watchify src/client/app.js -o public/js/bundle.js",
     "cover": "istanbul cover _mocha -- --recursive test"
