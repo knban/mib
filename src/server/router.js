@@ -253,3 +253,26 @@ r.delete('/boards/:_id', function(req, res, next) {
     res.send(401);
   }
 });
+
+
+// Update a board's link with a provider repository
+r.put('/boards/:_id/links/:provider/:repo_id', function(req, res, next) {
+  Board.find({ _id: req.params._id }, function(err, boards) {
+    if (err) {
+      res.send(500);
+    } else if (boards.length === 0) {
+      res.send(404);
+    } else {
+      var board = boards[0];
+      var links = board.links || {};
+      var repo = {};
+      repo[req.params.repo_id] = req.body.repo;
+      links[req.params.provider] = repo;
+      board.links = links;
+      Board.update({ _id: board._id }, { links: links }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ board: { links: board.links } }) }
+      });
+    }
+  });
+});

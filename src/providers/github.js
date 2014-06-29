@@ -1,4 +1,5 @@
 var li = require('li');
+var _ = require('lodash');
 
 var providerInfo = {
   name: "github",
@@ -7,8 +8,7 @@ var providerInfo = {
 };
 
 module.exports = {
-  // Inject the lodash dependency in this way to avoid bringing it in on the browser
-  cardHandler: function(_) {
+  cardHandler: function() {
     return {
       batchImport: function(boardAttributes, issues, done) {
         var cards = boardAttributes.columns[0].cards;
@@ -41,7 +41,9 @@ module.exports = {
       },
       personal: function() {
         board.projectLinker._PersonalOrOrg = false;
-        this.getRepos(app.session.auth.github.user.repos_url);
+        var user = app.session.auth.github.user;
+        this.repoScope = this.info.displayName+'/'+user.login;
+        this.getRepos(user.repos_url);
       },
       org: function() {
         board.projectLinker._PersonalOrOrg = false;
@@ -61,20 +63,45 @@ module.exports = {
       getReposNext: function() {
         this.getRepos(board.projectLinker._ReposLinks.next);
       },
-      getRepos: function(url, pageNum) {
+      getRepos: function(url) {
         board.projectLinker._Help = "Fetching repositories...";
-        $http.get(url).success(function(data, status, headers, config) {
-          board.projectLinker._Help = "Which repository do you wish to import issues from?";
-          board.projectLinker._Repos = data;
-          board.projectLinker._ReposNext = null;
-          board.projectLinker._ReposLast = null;
-          board.projectLinker._ReposCurPage = pageNum;
-          board.projectLinker._ReposLinks = headers('Link') ? li.parse(headers('Link')) : null;
-        })
+        board.projectLinker._Repos = [];
+        board.projectLinker.fetchedAllRepos = false;
+        this.getMoreRepos(url+"?per_page=100");
       },
-      importRepo: function(repo) {
-        this.importRepoIssues(repo);
-        this.installWebhook(repo);
+      getMoreRepos: function(url) {
+        $http.get(url).success(function(data, status, headers, config) {
+          board.projectLinker._Repos = board.projectLinker._Repos.concat(data);
+          var next = headers('Link') ? li.parse(headers('Link')).next : null;
+          if (next) {
+            this.getMoreRepos(next);
+          } else {
+            board.projectLinker.fetchedAllRepos = true;
+            board.projectLinker._Help = "Choose one or more repositories to link with the board.";
+          }
+        }.bind(this))
+      },
+      importWantedRepos: function() {
+        var ids = board.projectLinker._WantedReposIds;
+        console.log(ids);
+        var allRepos = board.projectLinker._Repos;
+        var repos = _.map(ids, function (id) {
+          console.log(id);
+          return _.where(allRepos, { id: parseInt(id) })[0];
+        });
+//        var repos = _.filter(allRepos, function(r) { return _.contains(parseInt(ids), parseInt(r.id)) })
+        console.log(repos);
+        _.each(repos, function (repo) {
+          this.linkRepo(repo);
+          this.importRepoIssues(repo);
+          this.installWebhook(repo);
+        }.bind(this))
+      },
+      linkRepo: function (repo) {
+        var url = '/boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id;
+        $http.put(url, { repo: repo }).success(function(data) {
+          if (data.board) board.attributes.links = data.board.links;
+        });
       },
       installWebhook: function(repo) {
         var url = repo.hooks_url;
@@ -95,14 +122,15 @@ module.exports = {
         });
       },
       importRepoIssues: function(repo) {
+        console.log(repo);
         repo.imported = true;
-        var url = repo.issues_url.replace('{/number}','')+'?state=open';
+        var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
         this.importIssues(url);
       },
       importIssues: function(url) {
         $http.get(url).success(function(data, status, headers) {
           this.postIssues(data);
-          var next = headers('Link') ? li.parse(headers('Link')) : null;
+          var next = headers('Link') ? li.parse(headers('Link')).next : null;
           if (next) {
             this.importIssues(next);
           }
