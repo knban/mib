@@ -1,5 +1,9 @@
 module.exports = function BoardCreator(board, $http) {
   var form = this;
+  this.init = function () {
+    board.unload(true);
+    this.errors = this.success = null;
+  };
   this.template = function () {
     return 'views/new_board.html';
   };
@@ -8,11 +12,12 @@ module.exports = function BoardCreator(board, $http) {
     this.isOpen = (this.isOpen ? false : true)
     this.boardName = null;
   }
+  this.close = function () {
+    this.toggle();
+    app.loadLastBoard();
+  };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
-  };
-  this.init = function () {
-    this.errors = this.success = null;
   };
   this.submit = function () {
     this.init();
