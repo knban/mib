@@ -72,7 +72,9 @@ r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
 
 var handler = require('../providers/github').cardHandler(_);
 
-// Importing cards from Github
+// Link Github
+// TODO authorize collaborators
+// TODO webhook sync changes to collaborators
 r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
@@ -201,40 +203,14 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
   })
 });
 
-// Importing a board via JSON
-r.post('/boards/:_id/import', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      Board.update({ _id: board._id }, req.body, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send(204) }
-      });
-    }
-  });
-})
-
-
-
-// Creating a new board
+// Create/import board
 r.post('/boards', function(req, res, next) {
   var user = new User(req.session);
   if (user.loggedIn) {
-
-    /* 
-     * This is how you get the data back out 
-    Board.find({ authorizedUsers: user.identifier }, function(error, models) {
-      //put code to process the results here
-      //});
-     */
     var board = new Board({
       name: req.body.name,
       authorizedUsers: [ user.identifier ],
-      columns: [{
+      columns: (req.body.columns || [{
         name: "Icebox",
         cards: []
       },{
@@ -246,13 +222,13 @@ r.post('/boards', function(req, res, next) {
       },{
         name: "Done",
         cards: []
-      }]
+      }])
     });
     board.save(function(err, board) {
       if (err) 
         res.send(500);
       else
-        res.send({ board: board });
+        res.send({ board: { _id: board._id }});
     });
   } else {
     res.send(401);
