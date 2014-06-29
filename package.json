@@ -40,7 +40,6 @@
     "dotenv": "^0.4.0",
     "everyauth": "^0.4.6",
     "express": "^4.4.5",
-    "jquery": "^2.1.1",
     "js-beautify": "^1.5.1",
     "li": "^1.0.0",
     "lodash": "^2.4.1",

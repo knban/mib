@@ -1,4 +1,4 @@
-window.app = angular.module('app', [])
+window.app = angular.module('app', ['ui.select2', 'smart'])
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
 
