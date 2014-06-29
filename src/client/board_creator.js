@@ -22,12 +22,15 @@ module.exports = function BoardCreator(board, $http) {
   this.submit = function () {
     this.init();
     if (this.valid()) {
-      $http.post('/boards', { name: this.boardName }).success(function (data) {
+      var payload = { name: this.boardName };
+      if (this.jsonImport && this.jsonImport.columns) {
+        payload.columns = this.jsonImport.columns;
+      }
+      $http.post('/boards', payload).success(function (data) {
         form.errors = null;
         form.success = "Board created!"
         app.updateBoardList();
-        app.loadBoard(data.board);
-        form.toggle();
+        app.loadBoardById(data.board._id);
       }).error(function (err, status) {
         form.success = null;
         form.errors = status+" -- "+err;
