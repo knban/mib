@@ -15,8 +15,9 @@ module.exports = function (board, $http) {
     this._Help = "Choose the provider containing the repository from which you wish to import open issues.";
     this._Col = 0;
   }
-  app.foo = this;
   this.close = function() {
+    this._ReposToImport = null;
+    this.fetchedAllRepos = null;
     this.isOpen = false;
     this._Col = null;
   }
