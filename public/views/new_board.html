@@ -14,10 +14,23 @@
             <label for="boardName">Board Name</label>
             <input type="text" id="boardNameInput" autofocus ng-model="board.creator.boardName" class="form-control" placeholder="My Kanban Project">
           </div>
-          <button type="submit" class="btn btn-primary"
+          <div class="form-group">
+            <div class="input-group">
+              <span class="input-group-btn">
+                <span class="btn btn-primary btn-file">
+                  Import JSON&hellip; <input ng-jsonreader ng-model="board.creator.jsonImport" type="file" class="upload">
+                </span>
+              </span>
+              <input type="text" class="form-control" value="{{board.creator.jsonImport}}" readonly>
+              <span class="input-group-btn">
+                <button ng-click="board.creator.jsonImport = null" class="btn btn-default">Clear JSON</button>
+              </span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success"
             ng-click="board.creator.submit()">Submit
           </button>  
-          <button ng-click="board.creator.toggle()" class="btn btn-default pull-right">Close</button>  
+          <button ng-click="board.creator.close()" class="btn btn-default pull-right">Close</button>  
         </form>
       </div>
     </div>
