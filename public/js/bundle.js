@@ -6837,9 +6837,14 @@
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],3:[function(require,module,exports){
-window.app = angular.module('app', ['ui.select2', 'smart'])
+var Endpoint = require('./endpoint');
+window.api = new Endpoint();
+api.setRoot("https://mib.critiqueapp.com/api/v1/");
+
+window.app = angular.module('app', ['ionic', 'ui.select2', 'smart'])
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
+
 
 /*
  * Add a bootstrap3 tooltip to the element */
@@ -6883,7 +6888,7 @@ app.directive('ngJsonreader', ['$sce', function ($sce) {
   }
 }]);
 
-},{"./controllers/board_controller":5,"./controllers/session_controller":6}],4:[function(require,module,exports){
+},{"./controllers/board_controller":5,"./controllers/session_controller":6,"./endpoint":7}],4:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
   this.init = function () {
@@ -7004,11 +7009,11 @@ module.exports = ['$http', function($http) {
   };
 }]
 
-},{"../board_creator":4,"../project_linker":7}],6:[function(require,module,exports){
+},{"../board_creator":4,"../project_linker":8}],6:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get('/session.json').success(function(data) {
+  $http.get(api.route('/session.json')).success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.anonymous = false;
       session.loggedIn = true;
@@ -7041,6 +7046,22 @@ module.exports = ['$http', function($http) {
 }];
 
 },{}],7:[function(require,module,exports){
+var Endpoint = function () {
+  this.root = "/";
+};
+
+Endpoint.prototype = {
+  setRoot: function(root) {
+    this.root = root;
+  },
+  route: function (route) {
+    return this.root+route;
+  }
+}
+
+module.exports = Endpoint;
+
+},{}],8:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7066,7 +7087,7 @@ module.exports = function (board, $http) {
   }
 };
 
-},{"../providers/github":8}],8:[function(require,module,exports){
+},{"../providers/github":9}],9:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 

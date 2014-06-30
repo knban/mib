@@ -1,7 +1,7 @@
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get('/session.json').success(function(data) {
+  $http.get(api.route('/session.json')).success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.anonymous = false;
       session.loggedIn = true;

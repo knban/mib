@@ -1,6 +1,11 @@
-window.app = angular.module('app', ['ui.select2', 'smart'])
+var Endpoint = require('./endpoint');
+window.api = new Endpoint();
+api.setRoot("https://mib.critiqueapp.com/api/v1/");
+
+window.app = angular.module('app', ['ionic', 'ui.select2', 'smart'])
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
+
 
 /*
  * Add a bootstrap3 tooltip to the element */
