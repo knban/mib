@@ -19,7 +19,7 @@ module.exports = ['$http', function($http) {
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get('/boards/index').success(function(data) {
+    $http.get(api.route('boards/index')).success(function(data) {
       session.boards = data.boards;
     })
   };

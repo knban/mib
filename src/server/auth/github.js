@@ -1,4 +1,5 @@
-module.exports = function(everyauth) {
+everyauth = require('everyauth');
+module.exports = function(opts) {
   var id = process.env.GITHUB_CLIENT_ID;
   var secret = process.env.GITHUB_CLIENT_SECRET;
   if (! id) throw new Error("Missing environment variable GITHUB_CLIENT_ID");
@@ -6,8 +7,8 @@ module.exports = function(everyauth) {
   everyauth.github
   .appId(id)
   .appSecret(secret)
-  .entryPath('/auth/github')
-  .callbackPath('/auth/github/callback')
+  .entryPath(opts.entryPath)
+  .callbackPath(opts.callbackPath)
   .scope('repo') // Can be set to a combination of: 'user', 'public_repo', 'repo', 'gist'
   .findOrCreateUser( function (session, accessToken, accessTokenExtra, githubUserMetadata) {
     session.oauth = accessToken;
@@ -20,4 +21,5 @@ module.exports = function(everyauth) {
     res.writeHead(303, { 'Location': this.logoutRedirectPath() });
     res.end();
   });
+  return everyauth.middleware();
 }

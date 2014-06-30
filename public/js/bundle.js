@@ -6841,7 +6841,10 @@ var Endpoint = require('./endpoint');
 window.api = new Endpoint();
 api.setRoot("https://mib.critiqueapp.com/api/v1/");
 
-window.app = angular.module('app', ['ionic', 'ui.select2', 'smart'])
+var requires = ['ui.select2', 'smart'];
+if (window.ionic) requires.push('ionic');
+
+window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
 
@@ -6917,7 +6920,7 @@ module.exports = function BoardCreator(board, $http) {
       if (this.jsonImport && this.jsonImport.columns) {
         payload.columns = this.jsonImport.columns;
       }
-      $http.post('/boards', payload).success(function (data) {
+      $http.post(api.route('boards', payload)).success(function (data) {
         form.errors = null;
         form.success = "Board created!"
         app.updateBoardList();
@@ -6958,7 +6961,7 @@ module.exports = ['$http', function($http) {
     if (board.loaded && board.attributes._id === _id)
       return
     board.loaded = false;
-    $http.get('/boards/'+_id).success(function (data) {
+    $http.get(api.route('boards/'+_id)).success(function (data) {
       board.load(data.board)
     }).error(function () {
       localStorage.removeItem('lastBoardId')
@@ -6966,7 +6969,7 @@ module.exports = ['$http', function($http) {
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
@@ -6974,14 +6977,14 @@ module.exports = ['$http', function($http) {
   }
   this.removeCard = function(col, row) {
     if (confirm("Are you sure you wish to delete this card?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
     }
   },
   this.addCard = function(col, body) {
-    $http.post('/boards/'+board.attributes._id+'/columns/'+col+'/cards', body).success(function(data) {
+    $http.post(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards', body)).success(function(data) {
       if (data.board)
         board.attributes.columns[col] = data.board.columns[col];
     });
@@ -6993,7 +6996,7 @@ module.exports = ['$http', function($http) {
   }
 
   this.moveCard = function(direction, col, row) {
-    $http.put('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction)).success(function(data) {
       if (data.board)
         board.attributes.columns = data.board.columns;
     });
@@ -7001,7 +7004,7 @@ module.exports = ['$http', function($http) {
 
   this.deleteBoard = function () {
     if (confirm("Are you sure you wish to delete this board and all its cards? Make sure to backup using the export tool!")) {
-      $http.delete('/boards/'+board.attributes._id).success(function() {
+      $http.delete(api.route('boards/'+board.attributes._id)).success(function() {
         board.unload();
         app.updateBoardList();
       });
@@ -7031,7 +7034,7 @@ module.exports = ['$http', function($http) {
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get('/boards/index').success(function(data) {
+    $http.get(api.route('boards/index')).success(function(data) {
       session.boards = data.boards;
     })
   };
@@ -7189,13 +7192,12 @@ module.exports = {
         }.bind(this))
       },
       linkRepo: function (repo) {
-        var url = '/boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id;
+        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id);
         $http.put(url, { repo: repo }).success(function(data) {
           if (data.board) board.attributes.links = data.board.links;
         });
       },
       installWebhook: function(repo) {
-        var url = repo.hooks_url;
         // https://developer.github.com/v3/repos/hooks/#create-a-hook
         $http.post(repo.hooks_url, {
           // full list here: https://api.github.com/hooks
@@ -7227,7 +7229,7 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
+        var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
             board.attributes.columns = data.board.columns;

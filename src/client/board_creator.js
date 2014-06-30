@@ -26,7 +26,7 @@ module.exports = function BoardCreator(board, $http) {
       if (this.jsonImport && this.jsonImport.columns) {
         payload.columns = this.jsonImport.columns;
       }
-      $http.post('/boards', payload).success(function (data) {
+      $http.post(api.route('boards', payload)).success(function (data) {
         form.errors = null;
         form.success = "Board created!"
         app.updateBoardList();

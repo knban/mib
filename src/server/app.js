@@ -4,8 +4,7 @@ http = require('http').Server(app),
 io = require('socket.io')(http),
 logger = require('morgan'),
 bodyParser = require('body-parser'),
-cookieSession = require('cookie-session'),
-everyauth = require('everyauth');
+cookieSession = require('cookie-session');
 
 app.use(express.static(__dirname + '/../../public'));
 
@@ -29,16 +28,16 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
-
-require('./auth/github.js')(everyauth);
-
 app.use(logger());
 app.use(cookieSession({
   keys: ['secret1', 'secret2'],
   secureProxy: true
 }));
 app.use(bodyParser.json());
-app.use(everyauth.middleware());
+app.use(require('./auth/github.js')({
+  entryPath: '/auth/github',
+  callbackPath: '/api/v1/auth/github/callback'
+}));
 app.use('/api/v1/', require('./router'));
 
 var mongoose = require('mongoose');

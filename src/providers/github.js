@@ -99,13 +99,12 @@ module.exports = {
         }.bind(this))
       },
       linkRepo: function (repo) {
-        var url = '/boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id;
+        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id);
         $http.put(url, { repo: repo }).success(function(data) {
           if (data.board) board.attributes.links = data.board.links;
         });
       },
       installWebhook: function(repo) {
-        var url = repo.hooks_url;
         // https://developer.github.com/v3/repos/hooks/#create-a-hook
         $http.post(repo.hooks_url, {
           // full list here: https://api.github.com/hooks
@@ -137,7 +136,7 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
+        var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
             board.attributes.columns = data.board.columns;
