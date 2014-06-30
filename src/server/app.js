@@ -19,6 +19,17 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
+// Cross Domain
+var allowCrossDomain = function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Expose-Headers", "X-Filename");
+  res.header("Access-Control-Allow-Headers", "Referer, Range, Accept-Encoding, Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
+  res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+  next();
+};
+
+app.use(allowCrossDomain);
+
 require('./auth/github.js')(everyauth);
 
 app.use(logger());
@@ -28,7 +39,7 @@ app.use(cookieSession({
 }));
 app.use(bodyParser.json());
 app.use(everyauth.middleware());
-app.use(require('./router'));
+app.use('/api/v1/', require('./router'));
 
 var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/mib");
