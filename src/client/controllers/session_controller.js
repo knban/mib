@@ -31,4 +31,14 @@ module.exports = ['$http', function($http) {
   if (localStorage.lastBoardId) {
     app.loadLastBoard();
   }
+
+  if (window.ionic) {
+    this.ionic = {
+      login: function() {
+        //$http.get('https://api.github.comauth/github').success(function (data, header) {
+        //  console.log(arguments);
+        //})
+      }
+    }
+  }
 }];

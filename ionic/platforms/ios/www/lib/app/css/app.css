@@ -1,0 +1,32 @@
+body {
+  padding-top: 70px;
+}
+
+table tr td {
+  border-right:1px solid #282828
+}
+
+table tr td:last-child {
+  border-right: none;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 999px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+

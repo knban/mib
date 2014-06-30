@@ -6847,6 +6847,32 @@ if (window.ionic) requires.push('ionic');
 window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
+.controller('IonicLoginModalController', function($scope, $ionicModal) {
+  $ionicModal.fromTemplateUrl('views/login_modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.modal = modal;
+  });
+  $scope.openModal = function() {
+    $scope.modal.show();
+  };
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+  };
+  //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });
+  // Execute action on hide modal
+  $scope.$on('modal.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove modal
+  $scope.$on('modal.removed', function() {
+    // Execute action
+  });
+});
 
 
 /*
@@ -7045,6 +7071,16 @@ module.exports = ['$http', function($http) {
 
   if (localStorage.lastBoardId) {
     app.loadLastBoard();
+  }
+
+  if (window.ionic) {
+    this.ionic = {
+      login: function() {
+        //$http.get('https://api.github.comauth/github').success(function (data, header) {
+        //  console.log(arguments);
+        //})
+      }
+    }
   }
 }];
 
