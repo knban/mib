@@ -6853,32 +6853,7 @@ if (window.ionic) requires.push('ionic');
 window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
-.controller('IonicLoginModalController', function($scope, $ionicModal) {
-  $ionicModal.fromTemplateUrl('views/login_modal.html', {
-    scope: $scope,
-    animation: 'slide-in-up'
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-  $scope.openModal = function() {
-    $scope.modal.show();
-  };
-  $scope.closeModal = function() {
-    $scope.modal.hide();
-  };
-  //Cleanup the modal when we're done with it!
-  $scope.$on('$destroy', function() {
-    $scope.modal.remove();
-  });
-  // Execute action on hide modal
-  $scope.$on('modal.hidden', function() {
-    // Execute action
-  });
-  // Execute action on remove modal
-  $scope.$on('modal.removed', function() {
-    // Execute action
-  });
-});
+.controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'));
 
 
 /*
@@ -6923,7 +6898,7 @@ app.directive('ngJsonreader', ['$sce', function ($sce) {
   }
 }]);
 
-},{"../../etc/config.js":1,"./controllers/board_controller":6,"./controllers/session_controller":7,"./endpoint":8}],5:[function(require,module,exports){
+},{"../../etc/config.js":1,"./controllers/board_controller":6,"./controllers/ionic_login_modal_controller":7,"./controllers/session_controller":8,"./endpoint":9}],5:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
   this.template = function () {
@@ -7040,7 +7015,35 @@ module.exports = ['$http', function($http) {
   };
 }]
 
-},{"../board_creator":5,"../project_linker":9}],7:[function(require,module,exports){
+},{"../board_creator":5,"../project_linker":10}],7:[function(require,module,exports){
+module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
+  $ionicModal.fromTemplateUrl('views/login_modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.modal = modal;
+  });
+  $scope.openModal = function() {
+    $scope.modal.show();
+  };
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+  };
+  //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });
+  // Execute action on hide modal
+  $scope.$on('modal.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove modal
+  $scope.$on('modal.removed', function() {
+    // Execute action
+  });
+}];
+
+},{}],8:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   session = this;
 
@@ -7086,7 +7089,7 @@ module.exports = ['$http', function($http) {
   }
 }];
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Endpoint = function () {
   this.root = "/";
 };
@@ -7102,7 +7105,7 @@ Endpoint.prototype = {
 
 module.exports = Endpoint;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7133,7 +7136,7 @@ module.exports = function (board, $http) {
   };
 };
 
-},{"../providers/github":10}],10:[function(require,module,exports){
+},{"../providers/github":11}],11:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 
@@ -7153,13 +7156,13 @@ module.exports = {
         var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
         _.each(issues, function(issue) {
           // Determine if we already represent this issue with a card
-          var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.id === issue.id
+          var existingCard = _.find(sortedCards, function(card) {
+            return card.remoteObject.id === issue.id
           });
-          if (existingIssueCard) {
-            _.merge(existingIssueCard, issue);
+          if (existingCard) {
+            _.merge(existingCard.remoteObject, issue);
           } else {
-            cards.push(issue);
+            cards.push({ remoteObject: issue });
           }
         });
         done();
