@@ -16,9 +16,11 @@ describe("Router", function() {
         cards: []
       }, {
         cards: [{
-          title: "first",
-          stuff: "stuff",
-          id: 1
+          remoteObject: {
+            title: "first",
+            stuff: "stuff",
+            id: 1
+          }
         }]
       }]
     };
@@ -42,12 +44,14 @@ describe("Router", function() {
         // TODO add provider.
         // TODO scope issue object under a key within the card
         it("adds the cards to the board and returns the new board", function(done) {
-          var card1 = { title: "foo" };
-          var card2 = { title: "bar" };
+          var issue1 = { title: "foo", id: '123' };
+          var issue2 = { title: "bar", id: '234' };
+          var card1 = { remoteObject: issue1 };
+          var card2 = { remoteObject: issue2 };
           request(app)
           .post('/boards/1/columns/0/cards/import/github')
           .send({
-            openIssues: [card1, card2]
+            openIssues: [issue1, issue2]
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -75,7 +79,7 @@ describe("Router", function() {
             if (err) throw err;
             expect(res.body.board.columns[0].cards.length).to.eq(0);
             expect(res.body.board.columns[1].cards.length).to.eq(1);
-            expect(res.body.board.columns[1].cards[0]).to.deep.eq({
+            expect(res.body.board.columns[1].cards[0].remoteObject).to.deep.eq({
               title: "new title", new_field: 'test', id: 1, stuff: "stuff"
             });
             expect(Board.update.callCount).to.eq(1);

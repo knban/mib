@@ -17,13 +17,13 @@ module.exports = {
         var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
         _.each(issues, function(issue) {
           // Determine if we already represent this issue with a card
-          var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.id === issue.id
+          var existingCard = _.find(sortedCards, function(card) {
+            return card.remoteObject.id === issue.id
           });
-          if (existingIssueCard) {
-            _.merge(existingIssueCard, issue);
+          if (existingCard) {
+            _.merge(existingCard.remoteObject, issue);
           } else {
-            cards.push(issue);
+            cards.push({ remoteObject: issue });
           }
         });
         done();
