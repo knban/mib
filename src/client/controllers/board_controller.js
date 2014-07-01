@@ -23,7 +23,7 @@ module.exports = ['$http', function($http) {
     if (board.loaded && board.attributes._id === _id)
       return
     board.loaded = false;
-    $http.get('/boards/'+_id).success(function (data) {
+    $http.get(api.route('boards/'+_id)).success(function (data) {
       board.load(data.board)
     }).error(function () {
       localStorage.removeItem('lastBoardId')
@@ -31,7 +31,7 @@ module.exports = ['$http', function($http) {
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
@@ -39,14 +39,14 @@ module.exports = ['$http', function($http) {
   }
   this.removeCard = function(col, row) {
     if (confirm("Are you sure you wish to delete this card?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
     }
   },
   this.addCard = function(col, body) {
-    $http.post('/boards/'+board.attributes._id+'/columns/'+col+'/cards', body).success(function(data) {
+    $http.post(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards', body)).success(function(data) {
       if (data.board)
         board.attributes.columns[col] = data.board.columns[col];
     });
@@ -58,7 +58,7 @@ module.exports = ['$http', function($http) {
   }
 
   this.moveCard = function(direction, col, row) {
-    $http.put('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction)).success(function(data) {
       if (data.board)
         board.attributes.columns = data.board.columns;
     });
@@ -66,14 +66,10 @@ module.exports = ['$http', function($http) {
 
   this.deleteBoard = function () {
     if (confirm("Are you sure you wish to delete this board and all its cards? Make sure to backup using the export tool!")) {
-      $http.delete('/boards/'+board.attributes._id).success(function() {
+      $http.delete(api.route('boards/'+board.attributes._id)).success(function() {
         board.unload();
         app.updateBoardList();
       });
     }
-  };
-
-  this.doTooltip = function () {
-    console.log("af");
   };
 }]

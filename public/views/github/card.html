@@ -1,0 +1,51 @@
+<span class="badge alert-{{card.state === 'open' ? 'success' : 'danger'}}" >
+  {{card.remoteObject.state}}
+</span>
+
+<span class="badge pull-left alert-info" >
+  #{{card.remoteObject.number}}
+</span>
+
+<a class="pull-left" href="{{card.remoteObject.html_url}}" 
+  ng-tooltip="{{card.remoteObject.body}}"
+  target="_blank">{{card.remoteObject.title}}</a>
+
+<br>
+
+<div class="btn-group">
+  <button
+    class="btn btn-default btn-xs"
+    ng-if="col > 0" 
+    ng-click="board.moveCard('left', col, row)">
+    <i class="glyphicon glyphicon-arrow-left"></i>
+  </button>
+  <button
+    class="btn btn-default btn-xs"
+    style="color:red"
+    ng-click="board.removeCard(col, row)">
+    <i class="glyphicon glyphicon-remove-sign"></i>
+  </button>
+  <button
+    class="btn btn-default btn-xs"
+    ng-click="board.logCard(card)">
+    <i class="glyphicon glyphicon-wrench"></i>
+  </button>
+  <button
+    class="btn btn-default btn-xs"
+    ng-hide="row === column.cards.length-1"
+    ng-click="board.moveCard('down', col, row)">
+    <i class="glyphicon glyphicon-arrow-down"></i>
+  </button>
+  <button
+    class="btn btn-default btn-xs"
+    ng-hide="row === 0"
+    ng-click="board.moveCard('up', col, row)">
+    <i class="glyphicon glyphicon-arrow-up"></i>
+  </button>
+  <button
+    class="btn btn-default btn-xs"
+    ng-if="col !== board.columns.length-1"
+    ng-click="board.moveCard('right', col, row)">
+    <i class="glyphicon glyphicon-arrow-right"></i>
+  </button>
+</div>

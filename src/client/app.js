@@ -1,6 +1,16 @@
-window.app = angular.module('app', ['ui.select2', 'smart'])
+var Endpoint = require('./endpoint');
+window.api = new Endpoint();
+var config = require('../../etc/config.js') || require('../../etc/config.js');
+api.setRoot(config.endpoint);
+
+var requires = ['ui.select2', 'smart'];
+if (window.ionic) requires.push('ionic');
+
+window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
+.controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'));
+
 
 /*
  * Add a bootstrap3 tooltip to the element */

@@ -1,7 +1,7 @@
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get('/session.json').success(function(data) {
+  $http.get(api.route('/session.json')).success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.anonymous = false;
       session.loggedIn = true;
@@ -19,7 +19,7 @@ module.exports = ['$http', function($http) {
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get('/boards/index').success(function(data) {
+    $http.get(api.route('boards/index')).success(function(data) {
       session.boards = data.boards;
     })
   };
@@ -30,5 +30,15 @@ module.exports = ['$http', function($http) {
 
   if (localStorage.lastBoardId) {
     app.loadLastBoard();
+  }
+
+  if (window.ionic) {
+    this.ionic = {
+      login: function() {
+        //$http.get('https://api.github.comauth/github').success(function (data, header) {
+        //  console.log(arguments);
+        //})
+      }
+    }
   }
 }];

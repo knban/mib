@@ -1,36 +1,7 @@
 var li = require('li');
-var _ = require('lodash');
 
-var providerInfo = {
-  name: "github",
-  displayName: "GitHub",
-  iconUrl: "/images/github_48px.png"
-};
-
-module.exports = {
-  cardHandler: function() {
-    return {
-      batchImport: function(boardAttributes, issues, done) {
-        var cards = boardAttributes.columns[0].cards;
-        var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
-        // Sort the cards by provider_id so testing dupes is quicker (Right?)
-        var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
-        _.each(issues, function(issue) {
-          // Determine if we already represent this issue with a card
-          var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.id === issue.id
-          });
-          if (existingIssueCard) {
-            _.merge(existingIssueCard, issue);
-          } else {
-            cards.push(issue);
-          }
-        });
-        done();
-      }
-    }
-  },
-  cardProvider: function(board, $http) {
+module.exports = function (providerInfo) {
+  return function(board, $http) {
     return  {
       info: providerInfo,
       next: function() {
@@ -99,13 +70,12 @@ module.exports = {
         }.bind(this))
       },
       linkRepo: function (repo) {
-        var url = '/boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id;
+        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id);
         $http.put(url, { repo: repo }).success(function(data) {
           if (data.board) board.attributes.links = data.board.links;
         });
       },
       installWebhook: function(repo) {
-        var url = repo.hooks_url;
         // https://developer.github.com/v3/repos/hooks/#create-a-hook
         $http.post(repo.hooks_url, {
           // full list here: https://api.github.com/hooks
@@ -123,7 +93,6 @@ module.exports = {
         });
       },
       importRepoIssues: function(repo) {
-        console.log(repo);
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
         this.importIssues(url);
@@ -138,7 +107,7 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
+        var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
             board.attributes.columns = data.board.columns;
@@ -149,4 +118,4 @@ module.exports = {
       }
     }
   }
-}
+};

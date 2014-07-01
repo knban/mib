@@ -1,38 +1,34 @@
 module.exports = function BoardCreator(board, $http) {
   var form = this;
-  this.init = function () {
-    board.unload(true);
-    this.errors = this.success = null;
-  };
   this.template = function () {
     return 'views/new_board.html';
   };
-  this.toggle = function() {
-    this.init();
-    this.isOpen = (this.isOpen ? false : true)
+  this.open = function () {
     this.boardName = null;
-  }
+    this.errors = this.success = null;
+    board.unload(true);
+    this.isOpen = true;
+  };
   this.close = function () {
-    this.toggle();
+    this.isOpen = false;
     app.loadLastBoard();
   };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
   };
   this.submit = function () {
-    this.init();
+    this.errors = this.success = null;
     if (this.valid()) {
       var payload = { name: this.boardName };
       if (this.jsonImport && this.jsonImport.columns) {
         payload.columns = this.jsonImport.columns;
       }
-      $http.post('/boards', payload).success(function (data) {
-        form.errors = null;
+      $http.post(api.route('boards'), payload).success(function (data) {
         form.success = "Board created!"
-        app.updateBoardList();
+        form.close();
         app.loadBoardById(data.board._id);
+        app.updateBoardList();
       }).error(function (err, status) {
-        form.success = null;
         form.errors = status+" -- "+err;
       });
     } else {

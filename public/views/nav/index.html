@@ -7,12 +7,11 @@
       <span class="icon-bar"></span>
     </button>
     <span class="navbar-brand">
-      <span>MIB</span>
+      <span></span>
     </span>
   </div>
   <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav" ng-if="session.loggedIn">
-
       <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{board.loaded ? board.attributes.name : "Boards"}}<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
@@ -20,7 +19,7 @@
             <a href="#" class="board-choice" ng-click="board.loadBoardById(b._id)">{{b.name}}</a>
           </li>
           <li ng-show="session.boards.length-(board.loaded ? 1 : 0)" class="divider"></li>
-          <li><a href="#" ng-click="board.creator.toggle()">Create / Import</a></li>
+          <li><a href="#" ng-click="board.creator.open()">Create / Import</a></li>
         </ul>
       </li>
       <li ng-show="board.loaded">
@@ -28,7 +27,7 @@
         <a href="#" ng-show="board.projectLinker.isOpen" ng-click="board.projectLinker.close()">Close Linker</a>
         <a href="#" ng-hide="board.projectLinker.isOpen" ng-click="board.projectLinker.open()">Linker</a>
       </li>
-      <li ng-show="board.loaded"><a href="/boards/{{board.attributes._id}}/export.json">Export</a></li>
+      <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json">Export</a></li>
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">

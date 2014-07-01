@@ -1,4 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = {
+  endpoint: "https://dev.knban.com/api/v1/"
+}
+
+},{}],2:[function(require,module,exports){
 (function (name, definition, context) {
 
   //try CommonJS, then AMD (require.js), then use global.
@@ -47,7 +52,7 @@
 
 }, this);
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -6836,10 +6841,20 @@
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-window.app = angular.module('app', ['ui.select2', 'smart'])
+},{}],4:[function(require,module,exports){
+var Endpoint = require('./endpoint');
+window.api = new Endpoint();
+var config = require('../../etc/config.js') || require('../../etc/config.js');
+api.setRoot(config.endpoint);
+
+var requires = ['ui.select2', 'smart'];
+if (window.ionic) requires.push('ionic');
+
+window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
+.controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'));
+
 
 /*
  * Add a bootstrap3 tooltip to the element */
@@ -6883,42 +6898,38 @@ app.directive('ngJsonreader', ['$sce', function ($sce) {
   }
 }]);
 
-},{"./controllers/board_controller":5,"./controllers/session_controller":6}],4:[function(require,module,exports){
+},{"../../etc/config.js":1,"./controllers/board_controller":6,"./controllers/ionic_login_modal_controller":7,"./controllers/session_controller":8,"./endpoint":9}],5:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
-  this.init = function () {
-    board.unload(true);
-    this.errors = this.success = null;
-  };
   this.template = function () {
     return 'views/new_board.html';
   };
-  this.toggle = function() {
-    this.init();
-    this.isOpen = (this.isOpen ? false : true)
+  this.open = function () {
     this.boardName = null;
-  }
+    this.errors = this.success = null;
+    board.unload(true);
+    this.isOpen = true;
+  };
   this.close = function () {
-    this.toggle();
+    this.isOpen = false;
     app.loadLastBoard();
   };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
   };
   this.submit = function () {
-    this.init();
+    this.errors = this.success = null;
     if (this.valid()) {
       var payload = { name: this.boardName };
       if (this.jsonImport && this.jsonImport.columns) {
         payload.columns = this.jsonImport.columns;
       }
-      $http.post('/boards', payload).success(function (data) {
-        form.errors = null;
+      $http.post(api.route('boards'), payload).success(function (data) {
         form.success = "Board created!"
-        app.updateBoardList();
+        form.close();
         app.loadBoardById(data.board._id);
+        app.updateBoardList();
       }).error(function (err, status) {
-        form.success = null;
         form.errors = status+" -- "+err;
       });
     } else {
@@ -6927,7 +6938,7 @@ module.exports = function BoardCreator(board, $http) {
   };
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var ProjectLinker = require('../project_linker');
 var BoardCreator = require('../board_creator');
 
@@ -6953,7 +6964,7 @@ module.exports = ['$http', function($http) {
     if (board.loaded && board.attributes._id === _id)
       return
     board.loaded = false;
-    $http.get('/boards/'+_id).success(function (data) {
+    $http.get(api.route('boards/'+_id)).success(function (data) {
       board.load(data.board)
     }).error(function () {
       localStorage.removeItem('lastBoardId')
@@ -6961,7 +6972,7 @@ module.exports = ['$http', function($http) {
   };
   this.removeColumn = function(col) {
     if (confirm("Are you sure you wish to delete this column and all its cards?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
@@ -6969,14 +6980,14 @@ module.exports = ['$http', function($http) {
   }
   this.removeCard = function(col, row) {
     if (confirm("Are you sure you wish to delete this card?")) {
-      $http.delete('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row).success(function(data) {
+      $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
       });
     }
   },
   this.addCard = function(col, body) {
-    $http.post('/boards/'+board.attributes._id+'/columns/'+col+'/cards', body).success(function(data) {
+    $http.post(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards', body)).success(function(data) {
       if (data.board)
         board.attributes.columns[col] = data.board.columns[col];
     });
@@ -6988,7 +6999,7 @@ module.exports = ['$http', function($http) {
   }
 
   this.moveCard = function(direction, col, row) {
-    $http.put('/boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction).success(function(data) {
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row+'/move/'+direction)).success(function(data) {
       if (data.board)
         board.attributes.columns = data.board.columns;
     });
@@ -6996,23 +7007,47 @@ module.exports = ['$http', function($http) {
 
   this.deleteBoard = function () {
     if (confirm("Are you sure you wish to delete this board and all its cards? Make sure to backup using the export tool!")) {
-      $http.delete('/boards/'+board.attributes._id).success(function() {
+      $http.delete(api.route('boards/'+board.attributes._id)).success(function() {
         board.unload();
         app.updateBoardList();
       });
     }
   };
-
-  this.doTooltip = function () {
-    console.log("af");
-  };
 }]
 
-},{"../board_creator":4,"../project_linker":7}],6:[function(require,module,exports){
+},{"../board_creator":5,"../project_linker":10}],7:[function(require,module,exports){
+module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
+  $ionicModal.fromTemplateUrl('views/login_modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.modal = modal;
+  });
+  $scope.openModal = function() {
+    $scope.modal.show();
+  };
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+  };
+  //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });
+  // Execute action on hide modal
+  $scope.$on('modal.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove modal
+  $scope.$on('modal.removed', function() {
+    // Execute action
+  });
+}];
+
+},{}],8:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get('/session.json').success(function(data) {
+  $http.get(api.route('/session.json')).success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.anonymous = false;
       session.loggedIn = true;
@@ -7030,7 +7065,7 @@ module.exports = ['$http', function($http) {
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get('/boards/index').success(function(data) {
+    $http.get(api.route('boards/index')).success(function(data) {
       session.boards = data.boards;
     })
   };
@@ -7042,9 +7077,35 @@ module.exports = ['$http', function($http) {
   if (localStorage.lastBoardId) {
     app.loadLastBoard();
   }
+
+  if (window.ionic) {
+    this.ionic = {
+      login: function() {
+        //$http.get('https://api.github.comauth/github').success(function (data, header) {
+        //  console.log(arguments);
+        //})
+      }
+    }
+  }
 }];
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
+var Endpoint = function () {
+  this.root = "/";
+};
+
+Endpoint.prototype = {
+  setRoot: function(root) {
+    this.root = root;
+  },
+  route: function (route) {
+    return this.root+route;
+  }
+}
+
+module.exports = Endpoint;
+
+},{}],10:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7052,25 +7113,30 @@ module.exports = function (board, $http) {
     GithubProvider(board, $http)
   ];
   this.open = function() {
+    this.reset();
     this.isOpen = true;
+  }
+  this.close = function() {
+    this.isOpen = false;
+    this.reset();
+  }
+  this.reset = function () {
     this._Provider = null;
     this._PersonalOrOrg = null;
     this._Orgs = null;
     this._Repos = null;
     this._ReposToImport = [];
     this.fetchedAllRepos = false;
+    this._WantedReposIds = null;
     this._Help = "Choose the provider containing the repository from which you wish to import open issues.";
     this._Col = 0;
-  }
-  this.close = function() {
     this._ReposToImport = null;
     this.fetchedAllRepos = null;
-    this.isOpen = false;
     this._Col = null;
-  }
+  };
 };
 
-},{"../providers/github":8}],8:[function(require,module,exports){
+},{"../providers/github":11}],11:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 
@@ -7090,13 +7156,13 @@ module.exports = {
         var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
         _.each(issues, function(issue) {
           // Determine if we already represent this issue with a card
-          var existingIssueCard = _.find(sortedCards, function(c) {
-            return c.id === issue.id
+          var existingCard = _.find(sortedCards, function(card) {
+            return card.remoteObject.id === issue.id
           });
-          if (existingIssueCard) {
-            _.merge(existingIssueCard, issue);
+          if (existingCard) {
+            _.merge(existingCard.remoteObject, issue);
           } else {
-            cards.push(issue);
+            cards.push({ remoteObject: issue });
           }
         });
         done();
@@ -7172,13 +7238,12 @@ module.exports = {
         }.bind(this))
       },
       linkRepo: function (repo) {
-        var url = '/boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id;
+        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id);
         $http.put(url, { repo: repo }).success(function(data) {
           if (data.board) board.attributes.links = data.board.links;
         });
       },
       installWebhook: function(repo) {
-        var url = repo.hooks_url;
         // https://developer.github.com/v3/repos/hooks/#create-a-hook
         $http.post(repo.hooks_url, {
           // full list here: https://api.github.com/hooks
@@ -7196,7 +7261,6 @@ module.exports = {
         });
       },
       importRepoIssues: function(repo) {
-        console.log(repo);
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
         this.importIssues(url);
@@ -7211,7 +7275,7 @@ module.exports = {
         }.bind(this));
       },
       postIssues: function(openIssues) {
-        var importUrl = '/boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github';
+        var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
         $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
           if (data.board)
             board.attributes.columns = data.board.columns;
@@ -7224,4 +7288,4 @@ module.exports = {
   }
 }
 
-},{"li":1,"lodash":2}]},{},[3])
+},{"li":2,"lodash":3}]},{},[4])
