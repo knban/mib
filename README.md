@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 # mib
 
 [![Dependency Status][dep-img]][dep-link]
