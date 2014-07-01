@@ -24,13 +24,11 @@ module.exports = function BoardCreator(board, $http) {
         payload.columns = this.jsonImport.columns;
       }
       $http.post(api.route('boards'), payload).success(function (data) {
-        form.errors = null;
         form.success = "Board created!"
         form.close();
         app.loadBoardById(data.board._id);
         app.updateBoardList();
       }).error(function (err, status) {
-        form.success = null;
         form.errors = status+" -- "+err;
       });
     } else {
