@@ -20,7 +20,7 @@
             <a href="#" class="board-choice" ng-click="board.loadBoardById(b._id)">{{b.name}}</a>
           </li>
           <li ng-show="session.boards.length-(board.loaded ? 1 : 0)" class="divider"></li>
-          <li><a href="#" ng-click="board.creator.toggle()">Create / Import</a></li>
+          <li><a href="#" ng-click="board.creator.open()">Create / Import</a></li>
         </ul>
       </li>
       <li ng-show="board.loaded">
