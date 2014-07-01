@@ -46,8 +46,8 @@ describe("Router", function() {
         it("adds the cards to the board and returns the new board", function(done) {
           var issue1 = { title: "foo", id: '123' };
           var issue2 = { title: "bar", id: '234' };
-          var card1 = { remoteObject: issue1 };
-          var card2 = { remoteObject: issue2 };
+          var card1 = { remoteObject: issue1, provider: "github" };
+          var card2 = { remoteObject: issue2, provider: "github" };
           request(app)
           .post('/boards/1/columns/0/cards/import/github')
           .send({
