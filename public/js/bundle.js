@@ -1,4 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = {
+  endpoint: "https://dev.knban.com/api/v1/"
+}
+
+},{}],2:[function(require,module,exports){
 (function (name, definition, context) {
 
   //try CommonJS, then AMD (require.js), then use global.
@@ -47,7 +52,7 @@
 
 }, this);
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -6836,10 +6841,11 @@
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Endpoint = require('./endpoint');
 window.api = new Endpoint();
-api.setRoot("https://dev.knban.com/api/v1/");
+var config = require('../../etc/config.js') || require('../../etc/config.js');
+api.setRoot(config.endpoint);
 
 var requires = ['ui.select2', 'smart'];
 if (window.ionic) requires.push('ionic');
@@ -6917,7 +6923,7 @@ app.directive('ngJsonreader', ['$sce', function ($sce) {
   }
 }]);
 
-},{"./controllers/board_controller":5,"./controllers/session_controller":6,"./endpoint":7}],4:[function(require,module,exports){
+},{"../../etc/config.js":1,"./controllers/board_controller":6,"./controllers/session_controller":7,"./endpoint":8}],5:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
   this.template = function () {
@@ -6944,13 +6950,11 @@ module.exports = function BoardCreator(board, $http) {
         payload.columns = this.jsonImport.columns;
       }
       $http.post(api.route('boards'), payload).success(function (data) {
-        form.errors = null;
         form.success = "Board created!"
         form.close();
         app.loadBoardById(data.board._id);
         app.updateBoardList();
       }).error(function (err, status) {
-        form.success = null;
         form.errors = status+" -- "+err;
       });
     } else {
@@ -6959,7 +6963,7 @@ module.exports = function BoardCreator(board, $http) {
   };
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var ProjectLinker = require('../project_linker');
 var BoardCreator = require('../board_creator');
 
@@ -7036,7 +7040,7 @@ module.exports = ['$http', function($http) {
   };
 }]
 
-},{"../board_creator":4,"../project_linker":8}],6:[function(require,module,exports){
+},{"../board_creator":5,"../project_linker":9}],7:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   session = this;
 
@@ -7082,7 +7086,7 @@ module.exports = ['$http', function($http) {
   }
 }];
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Endpoint = function () {
   this.root = "/";
 };
@@ -7098,7 +7102,7 @@ Endpoint.prototype = {
 
 module.exports = Endpoint;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7106,25 +7110,30 @@ module.exports = function (board, $http) {
     GithubProvider(board, $http)
   ];
   this.open = function() {
+    this.reset();
     this.isOpen = true;
+  }
+  this.close = function() {
+    this.isOpen = false;
+    this.reset();
+  }
+  this.reset = function () {
     this._Provider = null;
     this._PersonalOrOrg = null;
     this._Orgs = null;
     this._Repos = null;
     this._ReposToImport = [];
     this.fetchedAllRepos = false;
+    this._WantedReposIds = null;
     this._Help = "Choose the provider containing the repository from which you wish to import open issues.";
     this._Col = 0;
-  }
-  this.close = function() {
     this._ReposToImport = null;
     this.fetchedAllRepos = null;
-    this.isOpen = false;
     this._Col = null;
-  }
+  };
 };
 
-},{"../providers/github":9}],9:[function(require,module,exports){
+},{"../providers/github":10}],10:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 
@@ -7276,4 +7285,4 @@ module.exports = {
   }
 }
 
-},{"li":1,"lodash":2}]},{},[3])
+},{"li":2,"lodash":3}]},{},[4])
