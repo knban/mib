@@ -1,6 +1,7 @@
 var Endpoint = require('./endpoint');
 window.api = new Endpoint();
-api.setRoot("https://mib.critiqueapp.com/api/v1/");
+var config = require('../../etc/config.js') || require('../../etc/config.js');
+api.setRoot(config.endpoint);
 
 var requires = ['ui.select2', 'smart'];
 if (window.ionic) requires.push('ionic');
