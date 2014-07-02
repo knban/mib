@@ -7136,18 +7136,11 @@ module.exports = function (board, $http) {
   };
 };
 
-},{"../providers/github":11}],11:[function(require,module,exports){
-var li = require('li');
+},{"../providers/github":13}],11:[function(require,module,exports){
 var _ = require('lodash');
 
-var providerInfo = {
-  name: "github",
-  displayName: "GitHub",
-  iconUrl: "/images/github_48px.png"
-};
-
-module.exports = {
-  cardHandler: function() {
+module.exports = function(providerInfo) {
+  return function () {
     return {
       batchImport: function(boardAttributes, issues, done) {
         var cards = boardAttributes.columns[0].cards;
@@ -7162,14 +7155,23 @@ module.exports = {
           if (existingCard) {
             _.merge(existingCard.remoteObject, issue);
           } else {
-            cards.push({ remoteObject: issue });
+            cards.push({
+              remoteObject: issue,
+              provider: providerInfo.name
+            });
           }
         });
         done();
       }
     }
-  },
-  cardProvider: function(board, $http) {
+  }
+}
+
+},{"lodash":3}],12:[function(require,module,exports){
+var li = require('li');
+
+module.exports = function (providerInfo) {
+  return function(board, $http) {
     return  {
       info: providerInfo,
       next: function() {
@@ -7286,6 +7288,17 @@ module.exports = {
       }
     }
   }
-}
+};
 
-},{"li":2,"lodash":3}]},{},[4])
+},{"li":2}],13:[function(require,module,exports){
+var info = {
+  name: "github",
+  displayName: "GitHub",
+  iconUrl: "/images/github_48px.png"
+};
+
+module.exports.info = info;
+module.exports.cardHandler = require('./card_handler')(info);
+module.exports.cardProvider = require('./card_provider')(info);
+
+},{"./card_handler":11,"./card_provider":12}]},{},[4])
