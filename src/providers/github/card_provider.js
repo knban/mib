@@ -88,7 +88,7 @@ module.exports = function (providerInfo) {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.attributes._id+'/github/'+repo.id+'/webhook',
+            url: api.route('boards/'+board.attributes._id+'/github/'+repo.id+'/webhook'),
             content_type: "json"
           }
         });

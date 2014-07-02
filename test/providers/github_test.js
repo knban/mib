@@ -11,6 +11,7 @@ var Endpoint = require('../../src/client/endpoint');
 describe("GitHub Provider", function() {
   global.app = {};
   global.api = new Endpoint();
+  global.api.setRoot('https://example.com/');
   var board = null;
   var provider = null;
   var $http = null;
@@ -80,7 +81,7 @@ describe("GitHub Provider", function() {
         provider.importRepoIssues({ id: 111, issues_url: "test" });
       });
       it("uses the correct URL", function() {
-        expect(stub.getCall(0).args[0]).to.eq("/boards/2/columns/1/cards/import/github");
+        expect(stub.getCall(0).args[0]).to.eq("https://example.com/boards/2/columns/1/cards/import/github");
       });
       it("supplies an id field sufficient for uniqueness matching", function() {
         expect(stub.getCall(0).args[1].openIssues[0]._id).to.eq(222);
