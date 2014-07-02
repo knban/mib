@@ -1,7 +1,7 @@
 {
   "name": "mib",
-  "version": "0.0.0",
-  "description": "multi-project issue board, a kanban board for [√Github|?Bitbucket|?Gitlab] issues",
+  "version": "0.0.1",
+  "description": "modular issue board, a kanban board app. ships with github support",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

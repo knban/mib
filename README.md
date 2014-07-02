@@ -6,7 +6,7 @@
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 [![NPM][npm-badge-img]][npm-badge-link]
 
-### Multi-source Issue Board
+### Modular Issue Board
 
 **alpha software** this is a very early release! things might break or not work at all!
 
@@ -35,7 +35,7 @@ I believe your data should always be portable, as such import/export is first-cl
 
 I am playing around with the Ionic Framework, as you can see. Mobile support is a must, and I will make sure we have native if Ionic doesn't work out (but it looks great so far).
 
-## Security
+## Security & Authentication
 
 I'm looking at using [LaunchKey](https://launchkey.com/) for authentication. Currently, however, authentication is done only with Github via OAuth (in Web) and Personal Token (in Ionic/Mobile).
 
