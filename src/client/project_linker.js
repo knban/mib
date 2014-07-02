@@ -24,6 +24,5 @@ module.exports = function (board, $http) {
     this._Col = 0;
     this._ReposToImport = null;
     this.fetchedAllRepos = null;
-    this._Col = null;
   };
 };
