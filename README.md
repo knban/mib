@@ -1,26 +1,24 @@
-[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 # mib
 
+[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 [![Build Status][strider-build-status-img]][strider-build-status-link]
 [![Dependency Status][dep-img]][dep-link]
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 [![NPM][npm-badge-img]][npm-badge-link]
 
-### mighty issue board
+### Multi-source Issue Board
 
-**work in progress** there is no proper security right now, please do not use it yet
+**alpha software** this is a very early release! things might break or not work at all!
 
-**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board prototype that uses Github issues as cards.
+**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board that uses Github issues as cards.
 
-It does not try to create 1:1 relations between boards and github projects.
-
-It is designed in such a way as to allow projects from different providers to collect into a single board.
-
-This means your cards can be issues from projects in Bitbucket, Github, or Gitlab -- all on one board.
+An important distinction versus other implementations is that it refuses to create a 1:1 relation between a board and repositories. This results in a design in which projects from multiple providers can collect into a single board.
 
 Webhooks are automatically installed to keep cards and issues in sync.
 
 ## Supported Providers
+
+Currently only Github is implemented, but I plan to work towards adding more in the future.
 
 - [x] Github
 - [ ] Gitlab
@@ -28,8 +26,18 @@ Webhooks are automatically installed to keep cards and issues in sync.
 
 ## Freedom Features
 
+I believe your data should always be portable, as such import/export is first-class.
+
 * Export board data as a JSON file
 * Import board data via JSON file
+
+## Mobile
+
+I am playing around with the Ionic Framework, as you can see. Mobile support is a must, and I will make sure we have native if Ionic doesn't work out (but it looks great so far).
+
+## Security
+
+I'm looking at using [LaunchKey](https://launchkey.com/) for authentication. Currently, however, authentication is done only with Github via OAuth (in Web) and Personal Token (in Ionic/Mobile).
 
 ## Usage
 
@@ -37,18 +45,18 @@ There are (will be) two ways to use **mib**
 
 ### Hosted
 
-**mib** will be operated professionally and include a free plan.
+**mib** will be operated professionally downstream that will include a free plan.
 
-Open source projects will be 100% free of charge.
+Open source projects will be 100% free of charge at the downstream entity.
 
-More information coming soon.
+More information coming soon, once **mib** is stable.
 
 ### Self-Hosting
 
 **mib** is and will always be free and open source software. As such you may clone and run the project yourself.
 Here's how:
 
-* Clone the repo to your server (it's not on npm yet, I'll do that at 1.0.0)
+* Clone the repo to your server
 * Create a github application in your user settings page and take note of the keys
 * Create a `.env` file wherever you cloned the project and add the keys. Example provided below.
 * Tell supervisor or whatever you're using to run `server.js` with `node`
@@ -66,6 +74,8 @@ Better (read: more opinionated) instructions can be provided if requested.
 ## Development
 
 **mib** uses the MEAN stack (MongoDB, Express, Angular, NodeJS)
+
+Mobile development is being done with [Ionic](http://ionicframework.com/).
 
 It's easy to get started hacking features (maybe you want to help get Bitbucket/Gitlab supported sooner?)
 
