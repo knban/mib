@@ -1,9 +1,11 @@
-<span class="badge alert-{{card.state === 'open' ? 'success' : 'danger'}}" >
-  {{card.remoteObject.state}}
+<span class="badge alert-{{card.remoteObject.state === 'open' ? 'success' : 'danger'}}" >
+  #{{card.remoteObject.number}}
 </span>
 
-<span class="badge pull-left alert-info" >
-  #{{card.remoteObject.number}}
+<span class="badge pull-left alert-info">
+  <div ng-tooltip="{{board.repo(card).full_name}}">
+    {{board.repo(card).name}}
+  </div>
 </span>
 
 <a class="pull-left" href="{{card.remoteObject.html_url}}" 
