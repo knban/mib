@@ -12,7 +12,7 @@
 
 **mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board that uses Github issues as cards.
 
-An important distinction versus other implementations is that it refuses to create a 1:1 relation between a board and repositories. This results in a design in which projects from multiple providers can collect into a single board.
+An important distinction made by this project versus other implementations is that it refuses to create a 1:1 relation between a board and repositories. This results in a design in which projects from multiple providers can collect into a single board.
 
 Webhooks are automatically installed to keep cards and issues in sync.
 
