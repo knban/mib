@@ -60,6 +60,7 @@ Here's how:
 * Create a github application in your user settings page and take note of the keys
 * Create a `.env` file wherever you cloned the project and add the keys. Example provided below.
 * Tell supervisor or whatever you're using to run `server.js` with `node`
+* Copy the public/js/config.example.js to public/js/config.js and adjust the endpoint
 * Setup a reverse proxy, do SSL, whatever
 
 Example `.env` file:

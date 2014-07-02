@@ -1,4 +1,4 @@
 coverage/
 .env
 public/js/.bundle.js
-etc/config.js
+public/js/config.js
