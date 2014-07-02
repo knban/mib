@@ -87,7 +87,7 @@ DigitalFilm Tree & DFTi
 [dev-dep-link]: https://david-dm.org/keyvanfatehi/mib#info=devDependencies
 [dep-img]: https://david-dm.org/keyvanfatehi/mib.svg
 [dep-link]: https://david-dm.org/keyvanfatehi/mib
-[npm-badge-img]: https://nodei.co/npm/mib.svg
+[npm-badge-img]: https://nodei.co/npm/mib.png?downloads=true&stars=true
 [npm-badge-link]: https://nodei.co/npm/mib/
 [strider-build-status-img]: https://strider.critiqueapp.com/keyvanfatehi/mib/badge
 [strider-build-status-link]: https://strider.critiqueapp.com/keyvanfatehi/mib
