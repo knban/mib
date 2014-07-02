@@ -1,9 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = {
-  endpoint: "https://dev.knban.com/api/v1/"
-}
-
-},{}],2:[function(require,module,exports){
 (function (name, definition, context) {
 
   //try CommonJS, then AMD (require.js), then use global.
@@ -52,7 +47,7 @@ module.exports = {
 
 }, this);
 
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -6841,11 +6836,10 @@ module.exports = {
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var Endpoint = require('./endpoint');
 window.api = new Endpoint();
-var config = require('../../etc/config.js') || require('../../etc/config.js');
-api.setRoot(config.endpoint);
+api.setRoot(AppConfig.endpoint);
 
 var requires = ['ui.select2', 'smart'];
 if (window.ionic) requires.push('ionic');
@@ -6853,80 +6847,46 @@ if (window.ionic) requires.push('ionic');
 window.app = angular.module('app', requires)
 .controller('SessionController', require('./controllers/session_controller'))
 .controller('BoardController', require('./controllers/board_controller'))
-.controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'));
+.controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'))
+.directive('ngTooltip', require('./directives/ng_tooltip'))
+.directive('ngJsonreader', require('./directives/ng_jsonreader'))
 
-
-/*
- * Add a bootstrap3 tooltip to the element */
-app.directive('ngTooltip', function () {
-  return {
-    link: function(scope, iElement, iAttrs) {
-      iElement.data('toggle', 'tooltip');
-      iElement.data('placement', 'bottom')
-      iElement.data('title', iAttrs.ngTooltip);
-      iElement.tooltip();
-    }
-  }
-});
-
-/*
- * Reads a file input field and parses it into an ngModel */
-app.directive('ngJsonreader', ['$sce', function ($sce) {
-  return {
-    restrict: 'A',
-    require: '^ngModel',
-    link: function(scope, element, attrs, ngModel) {
-      // Listen for change events to enable binding
-      element.on('change', function(e) {
-        ngModel.$setViewValue("Reading "+e.target.files[0].name);
-        scope.$apply(function () {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-            var data = {};
-            try {
-              data = JSON.parse(reader.result);
-              ngModel.$setViewValue(data);
-            } catch (err) {
-              ngModel.$setViewValue("Failed to parse JSON");
-            }
-            scope.$apply();
-          };
-          reader.readAsText(e.target.files[0]);
-        });
-      });
-    }
-  }
-}]);
-
-},{"../../etc/config.js":1,"./controllers/board_controller":6,"./controllers/ionic_login_modal_controller":7,"./controllers/session_controller":8,"./endpoint":9}],5:[function(require,module,exports){
+},{"./controllers/board_controller":5,"./controllers/ionic_login_modal_controller":6,"./controllers/session_controller":7,"./directives/ng_jsonreader":8,"./directives/ng_tooltip":9,"./endpoint":10}],4:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
   this.template = function () {
     return 'views/new_board.html';
   };
-  this.open = function () {
+  this.reset = function () {
+    this.jsonImport = null;
     this.boardName = null;
+    this.submitted = null;
     this.errors = this.success = null;
+  };
+  this.open = function () {
+    this.reset();
     board.unload(true);
     this.isOpen = true;
   };
   this.close = function () {
     this.isOpen = false;
-    app.loadLastBoard();
+    if (! this.submitted)
+      app.loadLastBoard();
+    this.reset();
   };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
   };
   this.submit = function () {
+    this.submitted = true;
     this.errors = this.success = null;
     if (this.valid()) {
       var payload = { name: this.boardName };
-      if (this.jsonImport && this.jsonImport.columns) {
-        payload.columns = this.jsonImport.columns;
-      }
+      if (this.jsonImport) payload.jsonImport = this.jsonImport;
       $http.post(api.route('boards'), payload).success(function (data) {
         form.success = "Board created!"
         form.close();
+        console.log(data);
         app.loadBoardById(data.board._id);
         app.updateBoardList();
       }).error(function (err, status) {
@@ -6938,7 +6898,7 @@ module.exports = function BoardCreator(board, $http) {
   };
 };
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var ProjectLinker = require('../project_linker');
 var BoardCreator = require('../board_creator');
 
@@ -7019,7 +6979,7 @@ module.exports = ['$http', function($http) {
   };
 }]
 
-},{"../board_creator":5,"../project_linker":10}],7:[function(require,module,exports){
+},{"../board_creator":4,"../project_linker":11}],6:[function(require,module,exports){
 module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
   $ionicModal.fromTemplateUrl('views/login_modal.html', {
     scope: $scope,
@@ -7047,7 +7007,7 @@ module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
   });
 }];
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = ['$http', function($http) {
   session = this;
 
@@ -7093,7 +7053,51 @@ module.exports = ['$http', function($http) {
   }
 }];
 
+},{}],8:[function(require,module,exports){
+/*
+ * Reads a file input field and parses it into an ngModel */
+module.exports = ['$sce', function ($sce) {
+  return {
+    restrict: 'A',
+    require: '^ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      // Listen for change events to enable binding
+      element.on('change', function(e) {
+        ngModel.$setViewValue("Reading "+e.target.files[0].name);
+        scope.$apply(function () {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var data = {};
+            try {
+              data = JSON.parse(reader.result);
+              ngModel.$setViewValue(data);
+            } catch (err) {
+              ngModel.$setViewValue("Failed to parse JSON");
+            }
+            scope.$apply();
+          };
+          reader.readAsText(e.target.files[0]);
+        });
+      });
+    }
+  }
+}];
+
 },{}],9:[function(require,module,exports){
+/*
+ * Add a bootstrap3 tooltip to the element */
+module.exports = function () {
+  return {
+    link: function(scope, iElement, iAttrs) {
+      iElement.data('toggle', 'tooltip');
+      iElement.data('placement', 'bottom')
+      iElement.data('title', iAttrs.ngTooltip);
+      iElement.tooltip();
+    }
+  }
+};
+
+},{}],10:[function(require,module,exports){
 var Endpoint = function () {
   this.root = "/";
 };
@@ -7109,7 +7113,7 @@ Endpoint.prototype = {
 
 module.exports = Endpoint;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7136,11 +7140,10 @@ module.exports = function (board, $http) {
     this._Col = 0;
     this._ReposToImport = null;
     this.fetchedAllRepos = null;
-    this._Col = null;
   };
 };
 
-},{"../providers/github":13}],11:[function(require,module,exports){
+},{"../providers/github":14}],12:[function(require,module,exports){
 var _ = require('lodash');
 
 module.exports = function(providerInfo) {
@@ -7176,7 +7179,7 @@ module.exports = function(providerInfo) {
   }
 }
 
-},{"lodash":3}],12:[function(require,module,exports){
+},{"lodash":2}],13:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 
@@ -7267,7 +7270,7 @@ module.exports = function (providerInfo) {
             "issues"
           ],
           config: {
-            url: window.location.origin+'/boards/'+board.attributes._id+'/'+github+'/webhooks',
+            url: api.route('boards/'+board.attributes._id+'/github/'+repo.id+'/webhook'),
             content_type: "json"
           }
         });
@@ -7305,7 +7308,7 @@ module.exports = function (providerInfo) {
   }
 };
 
-},{"li":2,"lodash":3}],13:[function(require,module,exports){
+},{"li":1,"lodash":2}],14:[function(require,module,exports){
 var info = {
   name: "github",
   displayName: "GitHub",
@@ -7316,4 +7319,4 @@ module.exports.info = info;
 module.exports.cardHandler = require('./card_handler')(info);
 module.exports.cardProvider = require('./card_provider')(info);
 
-},{"./card_handler":11,"./card_provider":12}]},{},[4])
+},{"./card_handler":12,"./card_provider":13}]},{},[3])

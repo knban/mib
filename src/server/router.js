@@ -214,10 +214,13 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
 r.post('/boards', function(req, res, next) {
   var user = new User(req.session);
   if (user.loggedIn) {
-    var board = new Board({
-      name: req.body.name,
-      authorizedUsers: [ user.identifier ],
-      columns: (req.body.columns || [{
+    var board = null;
+    if (req.body.jsonImport) {
+      board = new Board(req.body.jsonImport);
+      board.authorizedUsers = _.merge(board.authorizedUsers, user.identifier);
+    } else {
+      board = new Board();
+      board.columns = [{
         name: "Icebox",
         cards: []
       },{
@@ -229,8 +232,10 @@ r.post('/boards', function(req, res, next) {
       },{
         name: "Done",
         cards: []
-      }])
-    });
+      }]
+      board.authorizedUsers = [user.identifier];
+    }
+    board.name = req.body.name;
     board.save(function(err, board) {
       if (err) 
         res.send(500);
