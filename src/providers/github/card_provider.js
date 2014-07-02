@@ -1,4 +1,5 @@
 var li = require('li');
+var _ = require('lodash');
 
 module.exports = function (providerInfo) {
   return function(board, $http) {
@@ -95,20 +96,25 @@ module.exports = function (providerInfo) {
       importRepoIssues: function(repo) {
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
-        this.importIssues(url);
+        this.importIssues(url, {
+          repo_id: repo.id
+        });
       },
-      importIssues: function(url) {
+      importIssues: function(url, metadata) {
         $http.get(url).success(function(data, status, headers) {
-          this.postIssues(data);
+          this.postIssues(data, metadata);
           var next = headers('Link') ? li.parse(headers('Link')).next : null;
           if (next) {
-            this.importIssues(next);
+            this.importIssues(next, metadata);
           }
         }.bind(this));
       },
-      postIssues: function(openIssues) {
+      postIssues: function(openIssues, metadata) {
         var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
-        $http.post(importUrl, { openIssues: openIssues }).success(function(data) {
+        $http.post(importUrl, {
+          metadata: metadata,
+          openIssues: openIssues
+        }).success(function(data) {
           if (data.board)
             board.attributes.columns = data.board.columns;
         });

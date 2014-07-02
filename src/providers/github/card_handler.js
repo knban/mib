@@ -3,7 +3,7 @@ var _ = require('lodash');
 module.exports = function(providerInfo) {
   return function () {
     return {
-      batchImport: function(boardAttributes, issues, done) {
+      batchImport: function(boardAttributes, issues, metadata, done) {
         var cards = boardAttributes.columns[0].cards;
         var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
         // Sort the cards by provider_id so testing dupes is quicker (Right?)
@@ -18,7 +18,8 @@ module.exports = function(providerInfo) {
           } else {
             cards.push({
               remoteObject: issue,
-              provider: providerInfo.name
+              provider: providerInfo.name,
+              repo_id: metadata.repo_id
             });
           }
         });

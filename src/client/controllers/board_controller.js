@@ -72,4 +72,8 @@ module.exports = ['$http', function($http) {
       });
     }
   };
+
+  this.repo = function (card) {
+    return this.attributes.links[card.provider][card.repo_id];
+  };
 }]
