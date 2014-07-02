@@ -6,7 +6,8 @@
 </thead>
 <tbody>
 <tr>
-  <td ng-init="col = $index" ng-repeat="column in board.attributes.columns">
+  <td ng-init="col = $index" ng-repeat="column in board.attributes.columns"
+    width="{{(100/board.attributes.columns.length)}}%">
     <ul class="list-group">
       <li class="list-group-item"
         ng-init="row = $index"
