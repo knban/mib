@@ -6,6 +6,7 @@ module.exports = function BoardCreator(board, $http) {
   this.reset = function () {
     this.jsonImport = null;
     this.boardName = null;
+    this.submitted = null;
     this.errors = this.success = null;
   };
   this.open = function () {
@@ -15,22 +16,23 @@ module.exports = function BoardCreator(board, $http) {
   };
   this.close = function () {
     this.isOpen = false;
-    app.loadLastBoard();
+    if (! this.submitted)
+      app.loadLastBoard();
     this.reset();
   };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
   };
   this.submit = function () {
+    this.submitted = true;
     this.errors = this.success = null;
     if (this.valid()) {
       var payload = { name: this.boardName };
-      if (this.jsonImport && this.jsonImport.columns) {
-        payload.columns = this.jsonImport.columns;
-      }
+      if (this.jsonImport) payload.jsonImport = this.jsonImport;
       $http.post(api.route('boards'), payload).success(function (data) {
         form.success = "Board created!"
         form.close();
+        console.log(data);
         app.loadBoardById(data.board._id);
         app.updateBoardList();
       }).error(function (err, status) {
