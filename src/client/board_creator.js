@@ -3,15 +3,20 @@ module.exports = function BoardCreator(board, $http) {
   this.template = function () {
     return 'views/new_board.html';
   };
-  this.open = function () {
+  this.reset = function () {
+    this.jsonImport = null;
     this.boardName = null;
     this.errors = this.success = null;
+  };
+  this.open = function () {
+    this.reset();
     board.unload(true);
     this.isOpen = true;
   };
   this.close = function () {
     this.isOpen = false;
     app.loadLastBoard();
+    this.reset();
   };
   this.valid = function () {
     return this.boardName && this.boardName.length > 0;
