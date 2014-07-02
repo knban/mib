@@ -6850,6 +6850,31 @@ window.app = angular.module('app', requires)
 .controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'))
 .directive('ngTooltip', require('./directives/ng_tooltip'))
 .directive('ngJsonreader', require('./directives/ng_jsonreader'))
+.directive('ngSortable', ['$parse', function ($parse) {
+  return {
+    compile: function ($element, attr) {
+      console.log($element, attr);
+      var fn = $parse(attr['ngSortable']);
+      console.log(fn);
+      fn();
+      return function (scope, element) {
+        element.on('ng-sortable', function(event) {
+          scope.$apply(function() {
+            fn(scope, {$event:event});
+          });
+        });
+      };
+    },
+    link: function(scope, iElement, iAttrs) {
+      scope.sortable = new Sortable(iElement.get(0), {
+        group: "column",
+        onUpdate: function (e) {
+          console.log(e.item);
+        }
+      });
+    }
+  }
+}]);
 
 },{"./controllers/board_controller":5,"./controllers/ionic_login_modal_controller":6,"./controllers/session_controller":7,"./directives/ng_jsonreader":8,"./directives/ng_tooltip":9,"./endpoint":10}],4:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
@@ -6972,6 +6997,10 @@ module.exports = ['$http', function($http) {
         app.updateBoardList();
       });
     }
+  };
+
+  this.update = function () {
+    console.log("TEST");
   };
 
   this.repo = function (card) {

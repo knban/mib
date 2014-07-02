@@ -73,6 +73,10 @@ module.exports = ['$http', function($http) {
     }
   };
 
+  this.update = function () {
+    console.log("TEST");
+  };
+
   this.repo = function (card) {
     return this.attributes.links[card.provider][card.repo_id];
   };
