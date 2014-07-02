@@ -1,6 +1,7 @@
 [![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 # mib
 
+[![Build Status][strider-build-status]][strider-build-status-link]
 [![Dependency Status][dep-img]][dep-link]
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 [![NPM][npm-badge-img]][npm-badge-link]
@@ -88,3 +89,4 @@ DigitalFilm Tree & DFTi
 [dep-link]: https://david-dm.org/keyvanfatehi/mib
 [npm-badge-img]: https://nodei.co/npm/mib.svg
 [npm-badge-link]: https://nodei.co/npm/mib/
+[strider-build-status-link]: https://strider.critiqueapp.com/keyvanfatehi/mib/badge
