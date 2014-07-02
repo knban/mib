@@ -83,7 +83,7 @@ r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next)
       res.send(404);
     } else {
       var board = boards[0];
-      handler.batchImport(board, req.body.openIssues, function() {
+      handler.batchImport(board, req.body.openIssues, req.body.metadata, function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
           if (err) { res.send(500, err.message); }
           else { res.send({ board: { columns: board.columns } }) }
