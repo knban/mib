@@ -46,12 +46,13 @@ describe("Router", function() {
         it("adds the cards to the board and returns the new board", function(done) {
           var issue1 = { title: "foo", id: '123' };
           var issue2 = { title: "bar", id: '234' };
-          var card1 = { remoteObject: issue1, provider: "github" };
-          var card2 = { remoteObject: issue2, provider: "github" };
+          var card1 = { remoteObject: issue1, provider: "github", repo_id: "1234" };
+          var card2 = { remoteObject: issue2, provider: "github", repo_id: "1234" };
           request(app)
           .post('/boards/1/columns/0/cards/import/github')
           .send({
-            openIssues: [issue1, issue2]
+            openIssues: [issue1, issue2],
+            metadata: { repo_id: "1234" }
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -92,30 +93,57 @@ describe("Router", function() {
     describe("Webhook installed", function() {
       it("sends 204 No Content", function(done) {
         request(app)
-        .post('/boards/1/webhooks/github')
+        .post('/boards/1/github/1234/webhook')
         .expect(204)
         .end(done)
       });
     });
 
     describe("Webhook: Github Issue Opened", function() {
-      beforeEach(function() {
-        this.json = require('../fixtures/webhooks/github/00_new_issue_opened');
-      });
       it("creates a new card in the icebox", function(done) {
         expect(board.columns[0].cards.length).to.eq(0);
         request(app)
-        .post('/boards/1/webhooks/github')
-        .send(this.json)
+        .post('/boards/1/github/1234/webhook')
+        .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
         .expect(204)
         .end(function(err, res){
           if (err) throw err;
           expect(board.columns[0].cards.length).to.eq(1);
           var newCard = board.columns[0].cards[0];
-          expect(newCard.title).to.eq('this is the title');
+          expect(newCard.remoteObject.title).to.eq('this is the title');
+          expect(newCard.repo_id).to.eq('1234');
+          expect(newCard.provider).to.eq('github');
           expect(Board.update.callCount).to.eq(1);
           done();
         });
+      });
+    });
+
+    describe("Webhook: Github Issue Comment", function() {
+      it("updates the existing card", function(done) {
+        expect(board.columns[0].cards.length).to.eq(0);
+        request(app).post('/boards/1/github/1234/webhook')
+        .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
+        .expect(204).end(function(err, res) {
+          if (err) throw err;
+          expect(board.columns[0].cards.length).to.eq(1);
+          var newCard = board.columns[0].cards[0];
+          expect(newCard.remoteObject.comments).to.eq(0);
+          request(app)
+          .post('/boards/1/github/1234/webhook')
+          .send(require('../fixtures/webhooks/github/01_issue_commented_upon'))
+          .expect(204)
+          .end(function(err, res){
+            if (err) throw err;
+            expect(board.columns[0].cards.length).to.eq(1);
+            var updatedCard = board.columns[0].cards[0];
+            expect(updatedCard.remoteObject.comments).to.eq(1);
+            expect(newCard.repo_id).to.eq('1234');
+            expect(newCard.provider).to.eq('github');
+            expect(Board.update.callCount).to.eq(2);
+            done();
+          });
+        }.bind(this));
       });
     });
   });
