@@ -26,11 +26,12 @@ describe("GitHub Provider", function() {
   describe("installWebhook", function() {
     var hook = null;
     var origin = "https://example.com";
+    var repo = { id: 123, hooks_url: "hooks" }
     beforeEach(function() {
       $http.stub('post', function(stub) {});
       global.window = { location: { origin: origin } };
       provider = Provider(board, $http);
-      provider.installWebhook({ hooks_url: "hooks" });
+      provider.installWebhook(repo);
       hook = $http.post.getCall(0).args[1];
     });
     it("adds a webhook correctly", function() {
@@ -40,7 +41,7 @@ describe("GitHub Provider", function() {
       expect(hook.active).to.eq(true);
       expect(hook.events).to.include("issues");
       expect(hook.events).to.include("issue_comment");
-      expect(hook.config.url).to.eq(origin+"/boards/"+board.attributes._id+"/webhooks/github");
+      expect(hook.config.url).to.eq(origin+"/boards/"+board.attributes._id+"/github/123/webhook");
       expect(hook.config.content_type).to.eq("json");
     });
   });
