@@ -70,12 +70,14 @@ r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
   });
 });
 
-var handler = require('../providers/github').cardHandler(_);
+var handlers = {
+  github: require('../providers/github').cardHandler(_)
+}
 
 // Link Github
 // TODO authorize collaborators
 // TODO webhook sync changes to collaborators
-r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next) {
+r.post('/boards/:_id/columns/:col/cards/import/:provider', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
@@ -83,6 +85,7 @@ r.post('/boards/:_id/columns/:col/cards/import/github', function(req, res, next)
       res.send(404);
     } else {
       var board = boards[0];
+      var handler = handlers[req.params.provider];
       handler.batchImport(board, req.body.openIssues, req.body.metadata, function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
           if (err) { res.send(500, err.message); }
@@ -144,7 +147,7 @@ var findCardPosition = function (board, issue, cb) {
     return _.find(column.cards, function (c, j) {
       row = j;
       card = c
-      return card.id == issue.id;
+      return card.remoteObject.id == issue.id;
     })
   })) { 
     cb(null, col, row);
@@ -154,13 +157,14 @@ var findCardPosition = function (board, issue, cb) {
 };
 
 // FIXME secure this route https://developer.github.com/webhooks/securing/
-r.post('/boards/:_id/webhooks/github', function(req, res, next) {
+r.post('/boards/:_id/:provider/:repo_id/webhook', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
     } else if (boards.length === 0) {
       res.send(404);
     } else {
+      var handler = handlers[req.params.provider];
       var action = req.body.action;
       var board = boards[0];
       var persistColumns = function() {
@@ -170,13 +174,15 @@ r.post('/boards/:_id/webhooks/github', function(req, res, next) {
         });
       }
       if (req.body.action === "opened") {
-        board.columns[0].cards.push(req.body.issue);
+        var card = handler.newCard(req.params.repo_id, req.body.issue);
+        board.columns[0].cards.push(card)
         persistColumns();
       } else if (action === "created" || action === "closed" || action === "reopened") {
         // TODO closed move to last column, reopened move to first column
         findCardPosition(board, req.body.issue, function (err, col, row) {
           if (err) { res.send(404) } else { 
-            board.columns[col].cards[row] = req.body.issue;
+            var card = board.columns[col].cards[row];
+            card.remoteObject = req.body.issue;
             persistColumns();
           }
         })
