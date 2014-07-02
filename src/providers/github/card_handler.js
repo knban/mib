@@ -3,6 +3,13 @@ var _ = require('lodash');
 module.exports = function(providerInfo) {
   return function () {
     return {
+      newCard: function (repo_id, issue) {
+        return {
+          remoteObject: issue,
+          provider: providerInfo.name,
+          repo_id: repo_id
+        }
+      },
       batchImport: function(boardAttributes, issues, metadata, done) {
         var cards = boardAttributes.columns[0].cards;
         var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
@@ -16,13 +23,10 @@ module.exports = function(providerInfo) {
           if (existingCard) {
             _.merge(existingCard.remoteObject, issue);
           } else {
-            cards.push({
-              remoteObject: issue,
-              provider: providerInfo.name,
-              repo_id: metadata.repo_id
-            });
+            var card = this.newCard(metadata.repo_id, issue);
+            cards.push(card);
           }
-        });
+        }.bind(this));
         done();
       }
     }
