@@ -96,8 +96,8 @@ r.post('/boards/:_id/columns/:col/cards/import/:provider', function(req, res, ne
   });
 })
 
-// Move a card
-r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res, next) {
+// Update a column
+r.put('/boards/:_id/columns/:col/cards', function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
@@ -105,37 +105,11 @@ r.put('/boards/:_id/columns/:col/cards/:row/move/:direction', function(req, res,
       res.send(404);
     } else {
       var board = boards[0];
-      var Mover = function(popCard, done) {
-        var row = parseInt(req.params.row);
-        var col = parseInt(req.params.col);
-        var directions = {
-          up: function() {
-            board.columns[col].cards.splice(row-1, 0, popCard());
-            done();
-          },
-          down: function() {
-            board.columns[col].cards.splice(row+1, 0, popCard());
-            done();
-          },
-          left: function() {
-            board.columns[col-1].cards.push(popCard());
-            done();
-          },
-          right: function() {
-            board.columns[col+1].cards.push(popCard());
-            done();
-          }
-        };
-        directions[req.params.direction]()
-      };
-      Mover(function() {
-        return board.columns[req.params.col].cards.splice(req.params.row, 1)[0];
-      }, function() {
-        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-          if (err) { res.send(500, err.message); }
-          else { res.send({ board: { columns: board.columns } }) }
-        });
-      })
+      board.columns[req.params.col].cards = req.body.cards;
+      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send(204) }
+      });
     }
   });
 });
