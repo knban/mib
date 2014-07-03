@@ -2,16 +2,25 @@
   <th style="text-align:center"
     ng-repeat="column in board.attributes.columns">
     <b>{{column.name}}</b>
+    <img ng-show="column.isSyncing" src="images/ajax-loader.gif"></img>
   </th>
 </thead>
 <tbody>
 <tr>
   <td ng-init="col = $index" ng-repeat="column in board.attributes.columns"
     width="{{(100/board.attributes.columns.length)}}%">
-    <ul class="list-group">
-      <li class="list-group-item"
+    <ul ng-sortable
+      id="column_{{$index}}"
+      class="list-group"
+      ng-model="board.attributes.columns[$index]" 
+      data-updated="board.moveCardWithinColumn($index, $event)"
+      data-added="board.addCardToColumn($index, $event)"
+      data-removed="board.removeCardFromColumn($index, $event)"
+      data-group="columns">
+      <li class="list-group-item card"
         ng-init="row = $index"
         ng-repeat="card in column.cards"
+        data-id="{{card.remoteObject.id}}"
         ng-include="'views/'+card.provider+'/card.html'"></li>   
     </ul>
   </td>

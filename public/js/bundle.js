@@ -6850,8 +6850,9 @@ window.app = angular.module('app', requires)
 .controller('IonicLoginModalController', require('./controllers/ionic_login_modal_controller'))
 .directive('ngTooltip', require('./directives/ng_tooltip'))
 .directive('ngJsonreader', require('./directives/ng_jsonreader'))
+.directive('ngSortable', require('./directives/ng_sortable'))
 
-},{"./controllers/board_controller":5,"./controllers/ionic_login_modal_controller":6,"./controllers/session_controller":7,"./directives/ng_jsonreader":8,"./directives/ng_tooltip":9,"./endpoint":10}],4:[function(require,module,exports){
+},{"./controllers/board_controller":5,"./controllers/ionic_login_modal_controller":6,"./controllers/session_controller":7,"./directives/ng_jsonreader":8,"./directives/ng_sortable":9,"./directives/ng_tooltip":10,"./endpoint":11}],4:[function(require,module,exports){
 module.exports = function BoardCreator(board, $http) {
   var form = this;
   this.template = function () {
@@ -6977,9 +6978,68 @@ module.exports = ['$http', function($http) {
   this.repo = function (card) {
     return this.attributes.links[card.provider][card.repo_id];
   };
+
+  /*
+   * Drag and Drop 
+   * */
+  var _ = require('lodash');
+
+  this.moveCardWithinColumn = function ($col, $event) {
+    var column = board.attributes.columns[$col];
+    column.isSyncing = true;
+    var cards = column.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(cards, function (c, i) {
+      oldIndex = i;
+      return c.remoteObject.id === id;
+    });
+    cards.splice(oldIndex, 1);
+    cards.splice(newIndex, 0, card);
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+$col+'/cards'), { cards: cards }).success(function(){
+      column.isSyncing = false;
+    });
+  };
+
+  // removeCardFromColumn is always hit first in
+  // a cross-column card drag event
+  var colJustRemovedFrom = null;
+  this.removeCardFromColumn = function ($col) {
+    colJustRemovedFrom = $col;
+    // The event we get out of this is the <ul>
+    // and so we cannot identify the card until the
+    // addCardToColumn method is hit.
+  };
+
+  this.addCardToColumn = function ($col, $event) {
+    var column1 = board.attributes.columns[colJustRemovedFrom];
+    column1.isSyncing = true;
+    var column2 = board.attributes.columns[$col];
+    column2.isSyncing = true;
+    var oldDeck = column1.cards;
+    var newDeck = column2.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(oldDeck, function (c, i) {
+      oldIndex = i;
+      return c.remoteObject.id === id;
+    });
+    oldDeck.splice(oldIndex, 1);
+    newDeck.splice(newIndex, 0, card);
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+colJustRemovedFrom+'/cards'), { cards: oldDeck }).success(function() {
+      column1.isSyncing = false;
+    });
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+$col+'/cards'), { cards: newDeck }).success(function() {
+      column2.isSyncing = false;
+    });
+  };
 }]
 
-},{"../board_creator":4,"../project_linker":11}],6:[function(require,module,exports){
+},{"../board_creator":4,"../project_linker":12,"lodash":2}],6:[function(require,module,exports){
 module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
   $ionicModal.fromTemplateUrl('views/login_modal.html', {
     scope: $scope,
@@ -7085,6 +7145,39 @@ module.exports = ['$sce', function ($sce) {
 
 },{}],9:[function(require,module,exports){
 /*
+ * Angular directive for the kickass Sortable library
+ * https://github.com/RubaXa/Sortable
+ */
+module.exports = ['$parse', function ($parse) {
+  return {
+    compile: function ($element, attr) {
+      var opts = {}
+      var group = attr['sortableGroup'];
+      var onAdd = $parse(attr['added']);
+      var onRemove = $parse(attr['removed']);
+      var onUpdate = $parse(attr['updated']);
+      var fauxAdd = !attr['noFauxAdd'];
+      return function (scope, element) {
+        var bind = function (fn) {
+          return function (event) {
+            scope.$apply(function() {
+              fn(scope, {$event:event});
+            });
+          }
+        };
+        if (group)    opts.group    = group;
+        if (onAdd)    opts.onAdd    = bind(onAdd);
+        if (onRemove) opts.onRemove = bind(onRemove);
+        if (onUpdate) opts.onUpdate = bind(onUpdate);
+        if (fauxAdd)  opts.fauxAdd  = true;
+        scope.sortable = new Sortable(element.get(0), opts);
+      };
+    }
+  }
+}];
+
+},{}],10:[function(require,module,exports){
+/*
  * Add a bootstrap3 tooltip to the element */
 module.exports = function () {
   return {
@@ -7097,7 +7190,7 @@ module.exports = function () {
   }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var Endpoint = function () {
   this.root = "/";
 };
@@ -7113,7 +7206,7 @@ Endpoint.prototype = {
 
 module.exports = Endpoint;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var GithubProvider = require('../providers/github').cardProvider;
 
 module.exports = function (board, $http) {
@@ -7143,7 +7236,7 @@ module.exports = function (board, $http) {
   };
 };
 
-},{"../providers/github":14}],12:[function(require,module,exports){
+},{"../providers/github":15}],13:[function(require,module,exports){
 var _ = require('lodash');
 
 module.exports = function(providerInfo) {
@@ -7179,7 +7272,7 @@ module.exports = function(providerInfo) {
   }
 }
 
-},{"lodash":2}],13:[function(require,module,exports){
+},{"lodash":2}],14:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 
@@ -7308,7 +7401,7 @@ module.exports = function (providerInfo) {
   }
 };
 
-},{"li":1,"lodash":2}],14:[function(require,module,exports){
+},{"li":1,"lodash":2}],15:[function(require,module,exports){
 var info = {
   name: "github",
   displayName: "GitHub",
@@ -7319,4 +7412,4 @@ module.exports.info = info;
 module.exports.cardHandler = require('./card_handler')(info);
 module.exports.cardProvider = require('./card_provider')(info);
 
-},{"./card_handler":12,"./card_provider":13}]},{},[3])
+},{"./card_handler":13,"./card_provider":14}]},{},[3])
