@@ -27,17 +27,17 @@ var allowCrossDomain = function(req, res, next) {
   next();
 };
 
+app.use(require('./auth/github.js')({
+  entryPath: '/auth/github',
+  callbackPath: '/api/v1/auth/github/callback'
+}));
 app.use(allowCrossDomain);
 app.use(logger());
 app.use(cookieSession({
   keys: ['secret1', 'secret2'],
   secureProxy: true
 }));
-app.use(bodyParser.json());
-app.use(require('./auth/github.js')({
-  entryPath: '/auth/github',
-  callbackPath: '/api/v1/auth/github/callback'
-}));
+app.use(bodyParser.json({limit: '10mb'}));
 app.use('/api/v1/', require('./router'));
 
 var mongoose = require('mongoose');
