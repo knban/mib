@@ -2,6 +2,7 @@
   <th style="text-align:center"
     ng-repeat="column in board.attributes.columns">
     <b>{{column.name}}</b>
+    <span class="badge">{{column.cards.length}}</span>
     <img ng-show="column.isSyncing" src="images/ajax-loader.gif"></img>
   </th>
 </thead>
