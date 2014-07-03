@@ -73,11 +73,66 @@ module.exports = ['$http', function($http) {
     }
   };
 
-  this.update = function () {
-    console.log("TEST");
-  };
-
   this.repo = function (card) {
     return this.attributes.links[card.provider][card.repo_id];
+  };
+
+  /*
+   * Drag and Drop 
+   * */
+  var _ = require('lodash');
+
+  this.moveCardWithinColumn = function ($col, $event) {
+    var column = board.attributes.columns[$col];
+    column.isSyncing = true;
+    var cards = column.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(cards, function (c, i) {
+      oldIndex = i;
+      return c.remoteObject.id === id;
+    });
+    cards.splice(oldIndex, 1);
+    cards.splice(newIndex, 0, card);
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+$col+'/cards'), { cards: cards }).success(function(){
+      column.isSyncing = false;
+    });
+  };
+
+  // removeCardFromColumn is always hit first in
+  // a cross-column card drag event
+  var colJustRemovedFrom = null;
+  this.removeCardFromColumn = function ($col) {
+    colJustRemovedFrom = $col;
+    // The event we get out of this is the <ul>
+    // and so we cannot identify the card until the
+    // addCardToColumn method is hit.
+  };
+
+  this.addCardToColumn = function ($col, $event) {
+    var column1 = board.attributes.columns[colJustRemovedFrom];
+    column1.isSyncing = true;
+    var column2 = board.attributes.columns[$col];
+    column2.isSyncing = true;
+    var oldDeck = column1.cards;
+    var newDeck = column2.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(oldDeck, function (c, i) {
+      oldIndex = i;
+      return c.remoteObject.id === id;
+    });
+    oldDeck.splice(oldIndex, 1);
+    newDeck.splice(newIndex, 0, card);
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+colJustRemovedFrom+'/cards'), { cards: oldDeck }).success(function() {
+      column1.isSyncing = false;
+    });
+    $http.put(api.route('boards/'+board.attributes._id+'/columns/'+$col+'/cards'), { cards: newDeck }).success(function() {
+      column2.isSyncing = false;
+    });
   };
 }]
