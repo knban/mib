@@ -10,6 +10,7 @@ module.exports = ['$parse', function ($parse) {
       var onAdd = $parse(attr['added']);
       var onRemove = $parse(attr['removed']);
       var onUpdate = $parse(attr['updated']);
+      var fauxAdd = !attr['noFauxAdd'];
       return function (scope, element) {
         var bind = function (fn) {
           return function (event) {
@@ -22,6 +23,7 @@ module.exports = ['$parse', function ($parse) {
         if (onAdd)    opts.onAdd    = bind(onAdd);
         if (onRemove) opts.onRemove = bind(onRemove);
         if (onUpdate) opts.onUpdate = bind(onUpdate);
+        if (fauxAdd)  opts.fauxAdd  = true;
         scope.sortable = new Sortable(element.get(0), opts);
       };
     }
