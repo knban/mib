@@ -22,11 +22,13 @@ describe("Router", function() {
             id: 1
           }
         }]
-      }]
+      }],
+      links: {}
     };
 
     helper.stubModel('Board').returns({
       find: sinon.stub().yields(null, [board]),
+      findById: sinon.stub().yields(null, board),
       update: sinon.stub().yields(null)
     });
 
@@ -38,6 +40,33 @@ describe("Router", function() {
   afterEach(helper.restoreModels);
 
   describe("Github", function() {
+
+    describe("Linking Repos", function() {
+      describe("POST /boards/:id/links/github", function() {
+        it("links multiple repos", function(done) {
+          var repo1 = { id: 123, stuff: "1"};
+          var repo2 = { id: 234, stuff: "2"};
+          request(app)
+          .put('/boards/1/links/github')
+          .send({
+            github: [
+              repo1,
+              repo2
+            ]
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res){
+            if (err) throw err;
+            expect(Object.keys(board.links.github).length).to.eq(2);
+            expect(board.links.github['123']).to.deep.eq(repo1);
+            expect(board.links.github['234']).to.deep.eq(repo2);
+            expect(Board.update.callCount).to.eq(1);
+            done();
+          });
+        });
+      });
+    });
 
     describe("Importing Issues", function() {
       describe("POST /boards/:id/columns/:col/cards/import/github", function() {

@@ -54,7 +54,11 @@ module.exports = {
       stub: function(method, successCase) {
         if (! this[method]) this[method] = function(){};
         var stub = sinon.stub(this, method);
-        stub.returns({ success: successCase(sinon.stub()) })
+        stub.returns({
+          success: successCase(sinon.stub().returns({
+            error: sinon.stub()
+          }))
+        })
         return stub;
       },
       restub: function(method, successCase) {

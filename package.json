@@ -45,6 +45,7 @@
     "mongoose": "^3.8.12",
     "morgan": "^1.1.1",
     "socket.io": "^1.0.6",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "async": "~0.9.0"
   }
 }

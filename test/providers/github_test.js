@@ -29,10 +29,18 @@ describe("GitHub Provider", function() {
     var origin = "https://example.com";
     var repo = { id: 123, hooks_url: "hooks" }
     beforeEach(function() {
-      $http.stub('post', function(stub) {});
+      $http.stub('post', function(stub) {}).returns({
+        success: function () {
+          return {
+            error:  function () {
+              
+            }
+          }
+        },
+      });
       global.window = { location: { origin: origin } };
       provider = Provider(board, $http);
-      provider.installWebhook(repo);
+      provider.installWebhook(repo, function () {})
       hook = $http.post.getCall(0).args[1];
     });
     it("adds a webhook correctly", function() {
@@ -66,7 +74,7 @@ describe("GitHub Provider", function() {
     var stub = null;
 
     describe("issues not paginated", function() {
-      beforeEach(function() {
+      beforeEach(function(done) {
         $http.stub('get', function(stub) {
           return stub.yields([
             { _id: 222 }
@@ -78,7 +86,7 @@ describe("GitHub Provider", function() {
         board.attributes._id = 2;
         board.projectLinker._Col = 1;
         provider = Provider(board, $http);
-        provider.importRepoIssues({ id: 111, issues_url: "test" });
+        provider.importRepoIssues({ id: 111, issues_url: "test" }, done);
       });
       it("uses the correct URL", function() {
         expect(stub.getCall(0).args[0]).to.eq("https://example.com/boards/2/columns/1/cards/import/github");
@@ -89,7 +97,7 @@ describe("GitHub Provider", function() {
     });
 
     describe("with paginated issues", function() {
-      beforeEach(function() {
+      beforeEach(function(done) {
         $http.stub('get', function(stub) {
           return stub.yields([
             { id: 222 }
@@ -108,7 +116,9 @@ describe("GitHub Provider", function() {
         board.id = 2;
         board.projectLinker._Col = 1;
         provider = Provider(board, $http);
-        provider.importRepoIssues({ id: 111, issues_url: "test" });
+        provider.importRepoIssues({ id: 111, issues_url: "test" }, function () {
+          done();
+        });
       });
 
       it("posts the issues to the backend in multiple calls", function() {

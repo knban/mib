@@ -1,5 +1,6 @@
 var li = require('li');
 var _ = require('lodash');
+var async = require('async');
 
 module.exports = function (providerInfo) {
   return function(board, $http) {
@@ -59,24 +60,50 @@ module.exports = function (providerInfo) {
         var repos = _.map(ids, function (id) {
           return _.where(allRepos, { id: parseInt(id) })[0];
         });
-        _.each(repos, function (repo) {
-          try {
-            this.linkRepo(repo);
-            this.importRepoIssues(repo);
-            this.installWebhook(repo);
+
+        this.linkRepos(repos, function (err) {
+          if (err) {
+            throw new Error(err);
+          } else {
             board.projectLinker.close();
-          } catch (e) {
-            alert(e.message);
           }
-        }.bind(this))
-      },
-      linkRepo: function (repo) {
-        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name+'/'+repo.id);
-        $http.put(url, { repo: repo }).success(function(data) {
-          if (data.board) board.attributes.links = data.board.links;
         });
       },
-      installWebhook: function(repo) {
+      linkRepos: function (repos, callback) {
+        var self = this;
+        var url = api.route('boards/'+board.attributes._id+'/links/'+this.info.name);
+        var linkObject = {};
+        linkObject[this.info.name] = repos;
+        $http.put(url, linkObject).success(function(data) {
+          console.log("add link");
+          if (data.links) {
+            board.attributes.links = data.links;
+            console.log("Linked "+repos.length+" repos");
+            async.each(repos, function (repo, callback2) {
+              console.log("Importing issues and installing webhook for "+repo.id);
+              self.importRepoIssues(repo, function (err) {
+                if (err) { callback2(err) } 
+                else {
+                  self.installWebhook(repo, function () {
+                    if (err) { callback2(err) } 
+                    else { callback2(null) }
+                  });
+                }
+              });
+            }, function (err) {
+              if (err) 
+                callback(err);
+              else
+                callback(null);
+            });
+          } else {
+            callback(new Error("Repo did not link"))
+          }
+        }).error(function (err) {
+          callback(err);
+        });
+      },
+      installWebhook: function(repo, done) {
         // https://developer.github.com/v3/repos/hooks/#create-a-hook
         $http.post(repo.hooks_url, {
           // full list here: https://api.github.com/hooks
@@ -91,23 +118,27 @@ module.exports = function (providerInfo) {
             url: api.route('boards/'+board.attributes._id+'/github/'+repo.id+'/webhook'),
             content_type: "json"
           }
+        }).success(function () {
+          done(null)
+        }).error(function (err) {
+          done(err)
         });
       },
-      importRepoIssues: function(repo) {
+      importRepoIssues: function(repo, done) {
         repo.imported = true;
         var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
-        this.importIssues(url, {
-          repo_id: repo.id
-        });
+        this.importIssues(url, { repo_id: repo.id }, done);
       },
-      importIssues: function(url, metadata) {
+      importIssues: function(url, metadata, done) {
         $http.get(url).success(function(data, status, headers) {
           this.postIssues(data, metadata);
           var next = headers('Link') ? li.parse(headers('Link')).next : null;
           if (next) {
-            this.importIssues(next, metadata);
+            this.importIssues(next, metadata, done);
+          } else {
+            done(null);
           }
-        }.bind(this));
+        }.bind(this)).error(done);
       },
       postIssues: function(openIssues, metadata) {
         var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
