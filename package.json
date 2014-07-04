@@ -33,6 +33,7 @@
     "watchify": "^0.10.2"
   },
   "dependencies": {
+    "async": "~0.9.0",
     "body-parser": "^1.4.3",
     "browserify": "^4.2.0",
     "cookie-session": "^1.0.2",
@@ -43,9 +44,9 @@
     "li": "^1.0.0",
     "lodash": "^2.4.1",
     "mongoose": "^3.8.12",
+    "mongoose-relationship": "0.0.6",
     "morgan": "^1.1.1",
     "socket.io": "^1.0.6",
-    "underscore": "^1.6.0",
-    "async": "~0.9.0"
+    "underscore": "^1.6.0"
   }
 }

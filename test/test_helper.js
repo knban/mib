@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var _ = require('lodash');
 var stubbedModels = [];
 module.exports = {
+  mongoDB: 'mongodb://localhost/mib-test',
+  mongoose: mongoose,
   sinon: sinon,
   expect: chai.expect,
   supertest: require('supertest'),

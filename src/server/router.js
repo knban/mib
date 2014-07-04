@@ -3,6 +3,8 @@ var r = module.exports = express.Router();
 var _ = require('lodash');
 var User = require('./user');
 var Board = require('./models/board');
+var Column = require('./models/column');
+var Card = require('./models/card');
 
 r.get('/session.json', function(req, res, next) {
   res.send(req.session);
@@ -23,14 +25,16 @@ r.get('/boards/index', function (req, res, next) {
 });
 
 r.get('/boards/:_id', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      res.send({ board: boards[0] });
-    }
+  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+    Card.populate(board.columns, { path: 'cards' }).exec(function(err) {
+      if (err) {
+        res.send(500);
+      } else if (boards.length === 0) {
+        res.send(404);
+      } else {
+        res.send({ board: boards[0] });
+      }
+    });
   });
 });
 
