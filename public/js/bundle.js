@@ -8110,6 +8110,7 @@ module.exports = ['$http', function($http) {
     }
   };
   this.load = app.loadBoard = function (attributes) {
+    app.board = this; // for debug
     board.creator.isOpen = false;
     board.attributes = attributes;
     board.loaded = true;
@@ -8134,7 +8135,7 @@ module.exports = ['$http', function($http) {
     }
   }
   this.removeCard = function(col, row) {
-    if (confirm("Are you sure you wish to delete this card?")) {
+    if (col > -1 && row > -1 && confirm("Are you sure you wish to delete this card?")) {
       $http.delete(api.route('boards/'+board.attributes._id+'/columns/'+col+'/cards/'+row)).success(function(data) {
         if (data.board)
           board.attributes.columns = data.board.columns;
@@ -8448,7 +8449,7 @@ module.exports = function (board, $http) {
   this.submit = function () {
     if (! this.newUser) return;
     else if (board.attributes.authorizedUsers.indexOf(this.newUser) >= 0)
-      return alert("User is already authorized");
+      return;
     else if (this.newUser.indexOf(':') === -1)
       return alert("Please use format 'provider:username'");
     else {
