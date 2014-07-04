@@ -263,3 +263,18 @@ r.put('/boards/:_id/links/:provider', function(req, res, next) {
     }
   });
 });
+
+// Update a board's authorized users list
+r.put('/boards/:_id/users', function(req, res, next) {
+  Board.findById( req.params._id, function(err, board) {
+    if (err) {
+      res.send(500);
+    } else {
+      board.authorizedUsers = _.uniq(board.authorizedUsers.concat(req.body.authorizedUsers));
+      Board.update({ _id: board._id }, { authorizedUsers: board.authorizedUsers }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ authorizedUsers: board.authorizedUsers }) }
+      });
+    }
+  });
+});

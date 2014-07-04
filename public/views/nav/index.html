@@ -27,6 +27,12 @@
         <a href="#" ng-show="board.projectLinker.isOpen" ng-click="board.projectLinker.close()">Close Linker</a>
         <a href="#" ng-hide="board.projectLinker.isOpen" ng-click="board.projectLinker.open()">Linker</a>
       </li>
+
+      <li ng-show="board.loaded">
+        <a href="#" ng-show="board.userMod.isOpen" ng-click="board.userMod.close()">Close Users</a>
+        <a href="#" ng-hide="board.userMod.isOpen" ng-click="board.userMod.open()">Users</a>
+      </li>
+
       <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json">Export</a></li>
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>

@@ -1,0 +1,23 @@
+<div class="container-fluid">
+  <div class="well">
+    <h4>Authorized Users</h4>
+
+    <ul class="list-group">
+      <li class="list-group-item"
+        ng-repeat="user in board.attributes.authorizedUsers">
+      {{user}}
+      </li>
+      <li class="list-group-item">
+        <form ng-submit="board.userMod.submit()" class="input-group">
+          <input type="text" ng-model="board.userMod.newUser" class="form-control" placeholder="github:substack">
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-success">Add User</button>  
+          </span>
+        </div>
+      </li>
+    </ul>
+
+      <button ng-click="board.userMod.close()" class="btn btn-default">Close</button>  
+    </div>
+  </div>
+</div>

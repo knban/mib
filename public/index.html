@@ -34,6 +34,10 @@
           ng-show="board.projectLinker.isOpen"
           ng-include="'views/project_linker.html'">
         </div>
+        <div
+          ng-show="board.userMod.isOpen"
+          ng-include="'views/user_mod.html'">
+        </div>
         <table class="table" width="100%" ng-include="'views/board.html'"></table>
       </div>
     </div>

@@ -8094,10 +8094,12 @@ module.exports = function BoardCreator(board, $http) {
 },{}],7:[function(require,module,exports){
 var ProjectLinker = require('../project_linker');
 var BoardCreator = require('../board_creator');
+var UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
   var board = this;
   this.projectLinker = new ProjectLinker(board, $http);
+  this.userMod = new UserMod(board, $http);
   this.creator = new BoardCreator(this, $http);
   this.unload = function (preventClearLastBoard) {
     board.loaded = false;
@@ -8231,7 +8233,7 @@ module.exports = ['$http', function($http) {
   };
 }]
 
-},{"../board_creator":6,"../project_linker":14,"lodash":4}],8:[function(require,module,exports){
+},{"../board_creator":6,"../project_linker":14,"../user_mod":15,"lodash":4}],8:[function(require,module,exports){
 module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
   $ionicModal.fromTemplateUrl('views/login_modal.html', {
     scope: $scope,
@@ -8428,7 +8430,41 @@ module.exports = function (board, $http) {
   };
 };
 
-},{"../providers/github":17}],15:[function(require,module,exports){
+},{"../providers/github":18}],15:[function(require,module,exports){
+var _ = require('lodash');
+
+module.exports = function (board, $http) {
+  this.open = function() {
+    this.users = board.attributes.authorizedUsers;
+    this.reset();
+    this.isOpen = true;
+  }
+  this.close = function() {
+    this.isOpen = false;
+    this.reset();
+  }
+  this.reset = function () {
+  };
+  this.submit = function () {
+    if (! this.newUser) return;
+    else if (board.attributes.authorizedUsers.indexOf(this.newUser) >= 0)
+      return alert("User is already authorized");
+    else if (this.newUser.indexOf(':') === -1)
+      return alert("Please use format 'provider:username'");
+    else {
+      var users = _.uniq(this.users.concat(this.newUser));
+      var payload = { authorizedUsers: users };
+      var url = api.route('boards/'+board.attributes._id+'/users');
+      $http.put(url, payload).success(function (data) {
+        board.attributes.authorizedUsers = data.authorizedUsers;
+      }).error(function (err, status) {
+        alert(err);
+      });
+    }
+  };
+};
+
+},{"lodash":4}],16:[function(require,module,exports){
 var _ = require('lodash');
 
 module.exports = function(providerInfo) {
@@ -8464,7 +8500,7 @@ module.exports = function(providerInfo) {
   }
 }
 
-},{"lodash":4}],16:[function(require,module,exports){
+},{"lodash":4}],17:[function(require,module,exports){
 var li = require('li');
 var _ = require('lodash');
 var async = require('async');
@@ -8624,7 +8660,7 @@ module.exports = function (providerInfo) {
   }
 };
 
-},{"async":1,"li":3,"lodash":4}],17:[function(require,module,exports){
+},{"async":1,"li":3,"lodash":4}],18:[function(require,module,exports){
 var info = {
   name: "github",
   displayName: "GitHub",
@@ -8635,4 +8671,4 @@ module.exports.info = info;
 module.exports.cardHandler = require('./card_handler')(info);
 module.exports.cardProvider = require('./card_provider')(info);
 
-},{"./card_handler":15,"./card_provider":16}]},{},[5])
+},{"./card_handler":16,"./card_provider":17}]},{},[5])
