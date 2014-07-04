@@ -27,7 +27,7 @@ var allowCrossDomain = function(req, res, next) {
   next();
 };
 
-app.use(require('./auth/github.js')({
+app.use(require('../providers/github').oauth({
   entryPath: '/auth/github',
   callbackPath: '/api/v1/auth/github/callback'
 }));
