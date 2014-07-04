@@ -10,10 +10,15 @@ table tr td:last-child {
   border-right: none;
 }
 
-table ul {
-  min-height: 200px !important;
+
+
+.column {
+  height: 100%;
 }
 
+table ul {
+  min-height: 10000px !important;
+}
 
 .btn-file {
     position: relative;
