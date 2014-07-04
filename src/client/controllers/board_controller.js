@@ -3,6 +3,7 @@ var BoardCreator = require('../board_creator');
 var UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
+  app.board = this; // for debug
   var board = this;
   this.projectLinker = new ProjectLinker(board, $http);
   this.userMod = new UserMod(board, $http);
