@@ -14,6 +14,7 @@ if (process.env.NODE_ENV === "development") {
 
   app.use(function (req, res, next) {
     logger.info(req.method + " " + req.path);
+    next();
   });
 
   global.debug = function (obj) {
