@@ -52,8 +52,8 @@ function getBoardById(req, res, next) {
 };
 
 /*
- * GET /session
- * POST /session
+ * GET /session -- get your 3rd party authorizations
+ * POST /session -- get your token
  * DELETE /session
  */
 
@@ -62,12 +62,11 @@ r.route('/session')
   res.send({ session: req.user.session });
 })
 .post(function(req, res, next) {
-  var user = new User();
-  user.login(req.body, providers, function (err) {
+  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
     if (err) {
       res.send(401);
     } else {
-      res.send(201, { token: user.token });
+      res.send(201, { token: user.token, _id: user._id });
     }
   });
 })
