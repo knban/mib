@@ -28,8 +28,33 @@ function loginRequired(req, res, next) {
   } else { res.send(401) }
 };
 
+
+function getBoardById(req, res, next) {
+  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+    if (err) { 
+      logger.error(err.message)
+      res.send(500)
+    } else if (board) {
+      Card.populate(board.columns, { path: 'cards' }, function(err) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          req.board = board;
+          next();
+        }
+      });
+    } else {
+      logger.error("Board "+req.params._id+" not found");
+      res.send(404);
+    }
+  });
+};
+
 /*
- * /session
+ * GET /session
+ * POST /session
+ * DELETE /session
  */
 
 r.route('/session')
@@ -54,7 +79,8 @@ r.route('/session')
 })
 
 /*
- * /boards
+ * GET /boards
+ * POST /boards
  */
 
 r.route('/boards')
@@ -84,37 +110,26 @@ r.route('/boards')
   });
 })
 
+
+/*
+ * GET /boards/:_id
+ */
+
 r.route('/boards/:_id')
 .all(loginRequired)
-.all(function findBoard(req, res, next) {
-  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    if (err) { 
-      logger.error(err.message)
-      res.send(500)
-    } else if (board) {
-      Card.populate(board.columns, { path: 'cards' }, function(err) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          req.board = board;
-          next();
-        }
-      });
-    } else {
-      logger.error("Board "+req.params._id+" not found");
-      res.send(404);
-    }
-  });
-})
+.all(getBoardById)
 .get(function(req, res, next) {
   res.send({ board: req.board });
 })
 
-// Link Github
-// TODO authorize collaborators
-// TODO webhook sync changes to collaborators
-r.post('/boards/:_id/columns/:col/cards/import/:provider', function(req, res, next) {
+
+/*
+ * POST /boards/:_idcolumns/:col/cards/import/:provider
+ * Batch import issues as cards into a column using a provider's card handler
+ */
+
+r.route('/boards/:_id/columns/:col/cards/import/:provider')
+.post(getBoardById, function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
