@@ -12,6 +12,10 @@ if (process.env.NODE_ENV === "development") {
   logger.info('development mode');
   app.use('/cov', express.static(__dirname + '/../../coverage/lcov-report'));
 
+  app.use(function (req, res, next) {
+    logger.info(req.method + " " + req.path);
+  });
+
   global.debug = function (obj) {
     var beautify = require('js-beautify').js_beautify;
     output = beautify(JSON.stringify(obj), { indent_size: 2});
@@ -23,13 +27,12 @@ if (process.env.NODE_ENV === "development") {
 var allowCrossDomain = function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Expose-Headers", "X-Filename");
-  res.header("Access-Control-Allow-Headers", "Referer, Range, Accept-Encoding, Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Auth-Token");
+  res.header("Access-Control-Allow-Headers", "Referer, Range, Accept-Encoding, Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
   next();
 };
 
 app.use(allowCrossDomain);
-app.use(require('morgan')());
 app.use(cookieSession({
   keys: ['secret1', 'secret2'],
   secureProxy: true
