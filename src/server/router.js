@@ -111,42 +111,6 @@ r.route('/boards/:_id')
   res.send({ board: req.board });
 })
 
-// Deleting columns
-r.delete('/boards/:_id/columns/:col', function (req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      board.columns.splice(req.params.col, 1);
-      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send({ board: board }); }
-      });
-    }
-  });
-});
-
-// Deleting cards
-r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      board.columns[req.params.col].cards.splice(req.params.row, 1);
-      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send({ board: board }); }
-      });
-    }
-  });
-});
-
 // Link Github
 // TODO authorize collaborators
 // TODO webhook sync changes to collaborators
