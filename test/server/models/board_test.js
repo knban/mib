@@ -21,8 +21,8 @@ describe('Board Model', function() {
 
   it('should create a new board without columns', function(done) {
     var board = new Board({ name: 'My Nice Board' });
-    console.log(board);
     expect(board._id).to.be.ok;
+    expect(board.columns.length).to.eq(0);
     done();
   });
 });

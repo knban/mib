@@ -2,7 +2,8 @@ var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
 var logger = require('winston');
-var User = require('./user');
+//var User = require('./user');
+var User = require('./models/user');
 var Board = require('./models/board');
 var Column = require('./models/column');
 var Card = require('./models/card');
@@ -11,11 +12,17 @@ var providers = {
   github: require('../providers/github')
 }
 
-r.route('/session')
-.all(function (req, res, next) {
-  req.user = new User(req.session);
-  next();
+r.use(function (req, res, next) {
+  var token = req.headers['x-auth-token'];
+  if (token) {
+    User.findOne({ token: token }).exec(function (err, user) {
+      console.log(err, user);
+      res.send(200);
+    })
+  } else { res.send(401) }
 })
+
+r.route('/session')
 .get(function (req, res, next) {
   res.send({ session: req.user.session });
 })
@@ -36,9 +43,8 @@ r.route('/session')
 })
 
 r.get('/boards/index', function (req, res, next) {
-  var user = new User(req.session);
-  if (user.loggedIn) {
-    Board.find({ authorizedUsers: user.identifier }, { name:1 }, function (err, boards) {
+  if (req.user.loggedIn) {
+    Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
       if (err) { res.send(500) }
       else {
         res.send({boards: boards})
@@ -54,10 +60,8 @@ r.get('/boards/:_id', function(req, res, next) {
     Card.populate(board.columns, { path: 'cards' }).exec(function(err) {
       if (err) {
         res.send(500);
-      } else if (boards.length === 0) {
-        res.send(404);
       } else {
-        res.send({ board: boards[0] });
+        res.send({ board: board });
       }
     });
   });
@@ -211,28 +215,14 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
 
 // Create/import board
 r.post('/boards', function(req, res, next) {
-  var user = new User(req.session);
-  if (user.loggedIn) {
+  if (req.user.loggedIn) {
     var board = null;
     if (req.body.jsonImport) {
       board = new Board(req.body.jsonImport);
-      board.authorizedUsers = _.merge(board.authorizedUsers, user.identifier);
+      board.authorizedUsers = _.merge(board.authorizedUsers, req.user.identifier);
     } else {
       board = new Board();
-      board.columns = [{
-        name: "Icebox",
-        cards: []
-      },{
-        name: "Backlog",
-        cards: []
-      },{
-        name: "Doing",
-        cards: []
-      },{
-        name: "Done",
-        cards: []
-      }]
-      board.authorizedUsers = [user.identifier];
+      board.authorizedUsers = [req.user.identifier];
     }
     board.name = req.body.name;
     board.save(function(err, board) {

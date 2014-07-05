@@ -3,8 +3,7 @@ express = require('express'),
 app = express(),
 http = require('http').Server(app),
 io = require('socket.io')(http),
-bodyParser = require('body-parser'),
-cookieSession = require('cookie-session');
+bodyParser = require('body-parser');
 
 app.use(express.static(__dirname + '/../../public'));
 
@@ -34,10 +33,6 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
-app.use(cookieSession({
-  keys: ['secret1', 'secret2'],
-  secureProxy: true
-}));
 app.use(bodyParser.json({limit: '10mb'}));
 app.use('/api/v1/', require('./router'));
 

@@ -1,4 +1,5 @@
 var helper = require('../test_helper'),
+mongoose = helper.mongoose,
 expect = helper.expect,
 request = helper.supertest,
 sinon = helper.sinon;
@@ -7,9 +8,11 @@ sinon = helper.sinon;
 describe("Router", function() {
   var app = null,
   board = null,
-  Board = null;
+  User = null,
+  Board = null; 
 
   beforeEach(function() {
+    /*
     board = {
       name: "a board",
       columns: [{
@@ -35,9 +38,46 @@ describe("Router", function() {
     app = helper.appWithRouter('server/router');
 
     Board = helper.require('server/models/board');
+    */
   })
 
-  afterEach(helper.restoreModels);
+  beforeEach(function(done) {
+    mongoose.models = {};
+    mongoose.modelSchemas = {};
+    mongoose.createConnection(helper.mongoDB);   
+    app = helper.appWithRouter('server/router');
+    Board = require('../../src/server/models/board');
+    User = require('../../src/server/models/user');
+    done();                                                  
+  });
+
+  afterEach(function(done) {
+    mongoose.disconnect(done);
+  });
+
+  describe.only("POST /boards", function () {
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .post('/boards')
+      .expect(401)
+      .end(done);
+    });
+
+    it("creates an empty board", function(done) {
+      request(app)
+      .post('/boards')
+      .send({
+        
+      })
+      .set('X-Auth-Token', 'mytoken')
+      .expect(201)
+      .end(function(err, res) {
+        if (err) throw err;
+        done();
+      });
+    })
+  });
+
 
   describe("Github", function() {
 

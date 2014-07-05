@@ -7,13 +7,12 @@ function User(session){
     this.auth = session.auth;
     this.loggedIn = true;
     if (this.auth.github) {
-      logger.info(this.auth);
       var provider = Object.keys(this.auth)[0];
       var login = this.auth[provider].login;
       this.identifier = provider+":"+login;
     }
   } else {
-    this.session.auth = {};
+    this.session = { auth:{} };
     this.loggedIn = false;
   }
 };
