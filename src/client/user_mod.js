@@ -1,4 +1,6 @@
-var _ = require('lodash');
+var _ = {
+  uniq: require('lodash.uniq')
+};
 
 module.exports = function (board, $http) {
   this.open = function() {

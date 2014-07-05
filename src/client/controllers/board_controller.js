@@ -1,6 +1,9 @@
-var ProjectLinker = require('../project_linker');
-var BoardCreator = require('../board_creator');
-var UserMod = require('../user_mod');
+var _ = {
+  find: require('lodash.find')
+},
+ProjectLinker = require('../project_linker'),
+BoardCreator = require('../board_creator'),
+UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
   var board = this;
@@ -83,7 +86,6 @@ module.exports = ['$http', function($http) {
   /*
    * Drag and Drop 
    * */
-  var _ = require('lodash');
 
   this.moveCardWithinColumn = function ($col, $event) {
     var column = board.attributes.columns[$col];

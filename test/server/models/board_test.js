@@ -3,7 +3,7 @@ mongoose = helper.mongoose,
 expect = helper.expect,
 sinon = helper.sinon;
 
-describe.only('Board Model', function() {
+describe('Board Model', function() {
   mongoose.models = {};
   mongoose.modelSchemas = {};
   var Board = require('../../../src/server/models/board');

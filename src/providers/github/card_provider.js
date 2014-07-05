@@ -1,6 +1,10 @@
 var li = require('li');
-var _ = require('lodash');
 var async = require('async');
+
+var _ = {
+  map: require('lodash.map'),
+  where: require('lodash.where')
+}
 
 module.exports = function (providerInfo) {
   return function(board, $http) {
@@ -75,12 +79,11 @@ module.exports = function (providerInfo) {
         var linkObject = {};
         linkObject[this.info.name] = repos;
         $http.put(url, linkObject).success(function(data) {
-          console.log("add link");
           if (data.links) {
             board.attributes.links = data.links;
-            console.log("Linked "+repos.length+" repos");
+            logger.info("Linked "+repos.length+" repos");
             async.each(repos, function (repo, callback2) {
-              console.log("Importing issues and installing webhook for "+repo.id);
+              logger.info("Importing issues and installing webhook for "+repo.id);
               self.importRepoIssues(repo, function (err) {
                 if (err) { callback2(err) } 
                 else {

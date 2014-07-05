@@ -160,7 +160,7 @@ r.post('/boards/:_id/:provider/:repo_id/webhook', function(req, res, next) {
     } else if (boards.length === 0) {
       res.send(404);
     } else {
-      var handler = handlers[req.params.provider];
+      var handler = providers[req.params.provider].cardHandler;
       var action = req.body.action;
       var board = boards[0];
       var persistColumns = function() {

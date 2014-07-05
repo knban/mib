@@ -43,6 +43,10 @@
     "js-beautify": "^1.5.1",
     "li": "^1.0.0",
     "lodash": "^2.4.1",
+    "lodash.find": "^2.4.1",
+    "lodash.map": "^2.4.1",
+    "lodash.uniq": "^2.4.1",
+    "lodash.where": "^2.4.1",
     "mongoose": "^3.8.12",
     "mongoose-relationship": "0.0.6",
     "morgan": "^1.1.1",
@@ -51,5 +55,8 @@
     "underscore": "^1.6.0",
     "winston": "^0.7.3",
     "winston-loggly": "^1.0.1"
+  },
+  "browser": {
+    "winston": "console"
   }
 }
