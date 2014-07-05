@@ -5,6 +5,8 @@ var logger = require('winston');
 
 var Models = require('./models'),
 Board = Models.Board,
+Column = Models.Column,
+Card = Models.Card,
 User = Models.User;
 
 var providers = {
@@ -60,9 +62,7 @@ r.route('/boards')
 .get(function (req, res, next) {
   Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
     if (err) { res.send(500) }
-    else {
-      res.send({boards: boards})
-    }
+    else { res.send({boards: boards}) }
   });
 })
 .post(function(req, res, next) {
@@ -84,17 +84,31 @@ r.route('/boards')
   });
 })
 
-
-r.get('/boards/:_id', function(req, res, next) {
+r.route('/boards/:_id')
+.all(loginRequired)
+.all(function findBoard(req, res, next) {
   Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    Card.populate(board.columns, { path: 'cards' }).exec(function(err) {
-      if (err) {
-        res.send(500);
-      } else {
-        res.send({ board: board });
-      }
-    });
+    if (err) { 
+      logger.error(err.message)
+      res.send(500)
+    } else if (board) {
+      Card.populate(board.columns, { path: 'cards' }, function(err) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          req.board = board;
+          next();
+        }
+      });
+    } else {
+      logger.error("Board "+req.params._id+" not found");
+      res.send(404);
+    }
   });
+})
+.get(function(req, res, next) {
+  res.send({ board: req.board });
 })
 
 // Deleting columns
