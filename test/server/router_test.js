@@ -1,4 +1,5 @@
 var helper = require('../test_helper'),
+nock = require('nock'),
 bcrypt = require('bcrypt'),
 mongoose = helper.mongoose,
 expect = helper.expect,
@@ -109,27 +110,84 @@ describe("Router", function() {
       });
     });
 
-    it("returns a new auth token", function(done) {
-      setupUser(function (err, user) {
-        request(app)
+    describe("local auth provider", function() {
+      it("returns a new auth token", function(done) {
+        setupUser(function (err, user) {
+          request(app)
+          .post('/session')
+          .send({
+            provider: "local",
+            uid: user.uid,
+            pw: "thepasswrd"
+          })
+          .expect(201)
+          .end(function (err, res) {
+            if (err) throw err;
+            expect(res.body.token).not.to.eq('userToken');
+            expect(res.body.token).to.be.ok;
+            done(); 
+          });
+        });
+      });
+    });
+
+    describe("github auth provider", function() {
+      function mockGithub() {
+        nock('https://api.github.com')
+        .put('/authorizations/clients/'+process.env.GITHUB_CLIENT_ID)
+        .reply(200, {
+          token: "ghtoken"
+        });
+      }
+
+      beforeEach(mockGithub);
+
+      function loginViaGithub() {
+        return request(app)
         .post('/session')
         .send({
-          provider: "local",
-          uid: user.uid,
-          pw: "thepasswrd"
+          provider: "github",
+          uid: "whatever",
+          pw: "muppets"
         })
         .expect(201)
-        .end(function (err, res) {
-          expect(res.body.token).not.to.eq('userToken');
-          console.log(res.body);
-          expect(res.body.token).to.be.ok;
-          done(err); 
+      };
+
+      describe("new user", function() {
+        it("creates a new user with a token", function(done) {
+          loginViaGithub().end(function (err, res) {
+            if (err) throw err;
+            expect(res.body.token).to.be.ok;
+            done(); 
+          });
+        });
+      });
+
+      describe("existing user", function() {
+        var token = null;
+        var id = null;
+        it("finds the existing user and resets the token", function(done) {
+          loginViaGithub().end(function (err, res) {
+            if (err) throw err;
+            expect(res.body.token).to.be.ok;
+            token = res.body.token;
+            id = res.body._id;
+            mockGithub();
+            loginViaGithub().end(function (err, res) {
+              if (err) throw err;
+              expect(res.body._id).to.be.ok;
+              expect(res.body._id).to.eq(id);
+              expect(res.body.token).to.be.ok;
+              expect(res.body.token).not.to.eq(token);
+              done(); 
+            });
+          });
         });
       });
     });
   });
 
-  describe("POST /boards", function () {
+  describe.skip("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
