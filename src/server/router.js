@@ -11,7 +11,8 @@ var providers = {
 }
 
 r.get('/session', function(req, res, next) {
-  res.send(req.session);
+  var user = new User(req.session);
+  res.send({ session: user.session });
 });
 
 r.post('/session', function(req, res, next) {
@@ -23,7 +24,7 @@ r.post('/session', function(req, res, next) {
     var authorizer = providers[req.body.provider].authorizer;
     user.login(authorizer(req.body.uid, req.body.pw), function () {
       if (user.loggedIn) {
-        res.send(user.session);
+        res.send(req.session);
       } else {
         res.send(401);
       }

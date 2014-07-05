@@ -7,7 +7,7 @@ module.exports = function (providerInfo) {
     return  {
       info: providerInfo,
       next: function() {
-        $http.defaults.headers.common.Authorization = 'token '+app.session.oauth;
+        $http.defaults.headers.common.Authorization = 'token '+app.session.auth.github.token;
         board.projectLinker._Provider = this;
         board.projectLinker._Help = "Is it a personal repository or part of an organization?"
         board.projectLinker._PersonalOrOrg = true;

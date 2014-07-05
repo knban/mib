@@ -1,31 +1,47 @@
 var rateLimit = {};
 
-module.exports = function (uid, pw) {
-  var now = Math.round((new Date()).getTime() / 1000);
+var client_id = process.env.GITHUB_CLIENT_ID;
+var secret = process.env.GITHUB_CLIENT_SECRET;
 
+var misconfigured = false;
+
+if (!client_id || !secret) {
+  misconfigured = true;
+}
+
+module.exports = function (uid, pw) {
+  if ( misconfigured ) throw new Error("github auth disabled")
+  var now = Math.round((new Date()).getTime() / 1000);
   var credentials = new Buffer(uid+':'+pw).toString('base64');
 
   var fn = function (callback) {
     require('request')({
-      method: "POST",
-      url: 'https://api.github.com/authorizations',
+      method: "PUT",
+      url: 'https://api.github.com/authorizations/clients/'+client_id,
       headers: {
         'User-Agent': 'keyvanfatehi/mib',
         'Authorization': 'Basic '+credentials
       },
-      data: {
-        "scopes": [
+      body: JSON.stringify({
+        client_secret: secret,
+        scopes: [
           "repo"
         ],
-        "note": "keyvanfatehi/mib"
-      }
+        note: "keyvanfatehi/mib"
+      })
     }, function (err, res, body) {
+      credentials = null;
       rateLimit.remaining = parseInt(res.headers['x-ratelimit-remaining']);
       rateLimit.reset = parseInt(res.headers['x-ratelimit-reset']) - now;
-      logger.warn('github rate limit', rateLimit);
-      if (res.statusCode === 201) {
+      if (res.statusCode === 201 || res.statusCode === 200) {
+        var data = JSON.parse(body);
         callback(null, {
-          auth: { github: body }
+          auth: {
+            github: {
+              login: uid,
+              token: data.token
+            }
+          }
         });
       } else {
         callback(new Error(body));
@@ -38,7 +54,6 @@ module.exports = function (uid, pw) {
       return fn;
     } else {
       var err = new Error("Rate limit reached. Please wait "+rateLimit.reset+" more seconds");
-      logger.warn(err.message);
       return function(callback) { callback(err.message) };
     }
   } else {
