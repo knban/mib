@@ -7,8 +7,6 @@
     "start": "node server.js",
     "test": "mocha --recursive test",
     "tdd": "mocha -w --recursive test",
-    "build": "browserify src/client/app.js -o public/js/bundle.js",
-    "watch": "watchify src/client/app.js -o public/js/bundle.js",
     "cover": "istanbul cover _mocha -- --recursive test"
   },
   "repository": {
@@ -29,13 +27,14 @@
     "chai": "^1.9.1",
     "mocha": "^1.20.1",
     "sinon": "^1.10.2",
-    "supertest": "~0.13.0",
-    "watchify": "^0.10.2"
+    "supertest": "~0.13.0"
   },
   "dependencies": {
     "async": "~0.9.0",
+    "bcrypt": "^0.7.8",
     "body-parser": "^1.4.3",
     "browserify": "^4.2.0",
+    "browserify-middleware": "^3.0.0",
     "cookie-session": "^1.0.2",
     "dotenv": "^0.4.0",
     "everyauth": "^0.4.6",
@@ -49,6 +48,7 @@
     "lodash.where": "^2.4.1",
     "mongoose": "^3.8.12",
     "mongoose-relationship": "0.0.6",
+    "node-uuid": "^1.4.1",
     "request": "^2.36.0",
     "socket.io": "^1.0.6",
     "underscore": "^1.6.0",

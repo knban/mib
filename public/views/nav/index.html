@@ -37,7 +37,7 @@
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-      <li ng-show="session.loggedIn"><a href="#" ng-click="session.destroy()">Logout {{session.uid}}</a></li>
+      <li ng-show="session.loggedIn"><a href="#" ng-click="session.destroy()">Logout {{session.userIdentifier()}}</a></li>
       <li ng-hide="session.loggedIn">
         <a href="#" ng-hide="session.loginForm" ng-click="session.login()">Login</a>
       </li>

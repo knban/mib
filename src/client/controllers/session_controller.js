@@ -1,33 +1,35 @@
 module.exports = ['$http', function($http) {
   session = this;
 
-  this.load = function () {
-    $http.get(api.route('/session')).success(function(data) {
-      if (data.session.auth.github) {
-        this.attributes = data.session;
+  this.userIdentifier = function () {
+    return this.provider+":"+this.uid;
+  };
 
-        if (data.session.auth) {
-          session.anonymous = false;
-          session.loggedIn = true;
-          session.uid = data.session.auth.github.login;
-          session.getBoardList();
-        } else
-          session.destroy()
-      }
+  this.load = function () {
+    $http.defaults.headers.common['X-Auth-Token'] = localStorage.token;
+    $http.get(api.route('session')).success(function(data) {
+      session.anonymous = false;
+      session.loggedIn = true;
+      session.uid = data.session.uid;
+      session.provider = data.session.provider;
+      session.getBoardList();
     }).error(session.destroy);
   };
 
-  this.load();
+  if (localStorage.token) {
+    this.load();
+  }
 
   this.destroy = function () {
     $http.delete(api.route('session'));
+    localStorage.removeItem('token');
     session.anonymous = true;
     session.loggedIn = false;
     app.session = null;
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get(api.route('boards/index')).success(function(data) {
+    $http.get(api.route('boards/')).success(function(data) {
       session.boards = data.boards;
     })
   };

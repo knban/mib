@@ -20,6 +20,7 @@ function LoginForm(opts) {
           uid: this.uid,
           pw: this.pw
         }).success(function (data, status, headers, config) {
+          localStorage.token = data.token;
           opts.reloadSession();
           close();
         }).error(function (err) {

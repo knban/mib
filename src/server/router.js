@@ -2,58 +2,88 @@ var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
 var logger = require('winston');
-//var User = require('./user');
-var User = require('./models/user');
-var Board = require('./models/board');
-var Column = require('./models/column');
-var Card = require('./models/card');
+
+var Models = require('./models'),
+Board = Models.Board,
+User = Models.User;
 
 var providers = {
-  github: require('../providers/github')
+  github: require('../providers/github'),
+  local: require('../providers/local')
 }
 
-r.use(function (req, res, next) {
+function loginRequired(req, res, next) {
   var token = req.headers['x-auth-token'];
   if (token) {
     User.findOne({ token: token }).exec(function (err, user) {
-      console.log(err, user);
-      res.send(200);
+      if (err || !user) { res.send(500) }
+      else if (user) {
+        req.user = user;
+        user.identifier = user.session.provider+":"+user.session.uid; // tmp
+        next();
+      }
     })
   } else { res.send(401) }
-})
+};
+
+/*
+ * /session
+ */
 
 r.route('/session')
-.get(function (req, res, next) {
+.get(loginRequired, function (req, res, next) {
   res.send({ session: req.user.session });
 })
 .post(function(req, res, next) {
-  var authorizer = providers[req.body.provider].authorizer;
-  req.user.login(authorizer(req.body.uid, req.body.pw), function () {
-    if (req.user.loggedIn) {
-      res.send(201);
-    } else {
+  var user = new User();
+  user.login(req.body, providers, function (err) {
+    if (err) {
       res.send(401);
+    } else {
+      res.send(201, { token: user.token });
     }
   });
 })
 .delete(function (req, res, next) {
+  // probably just delete the token on both sides
   req.user = null;
   req.session = null;
   res.send(204);
 })
 
-r.get('/boards/index', function (req, res, next) {
-  if (req.user.loggedIn) {
-    Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
-      if (err) { res.send(500) }
-      else {
-        res.send({boards: boards})
-      }
-    });
+/*
+ * /boards
+ */
+
+r.route('/boards')
+.all(loginRequired)
+.get(function (req, res, next) {
+  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
+    if (err) { res.send(500) }
+    else {
+      res.send({boards: boards})
+    }
+  });
+})
+.post(function(req, res, next) {
+  var board = null;
+  if (req.body.jsonImport) {
+    // TODO see if this still works
+    board = new Board(req.body.jsonImport);
+    board.authorizedUsers = _.merge(board.authorizedUsers, req.user.identifier);
   } else {
-    res.send(401);
+    board = new Board();
+    board.authorizedUsers = [req.user.identifier];
   }
-});
+  board.name = req.body.name;
+  board.save(function(err, board) {
+    if (err) 
+      res.send(500);
+    else
+      res.send({ board: { _id: board._id }});
+  });
+})
+
 
 r.get('/boards/:_id', function(req, res, next) {
   Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
@@ -65,7 +95,7 @@ r.get('/boards/:_id', function(req, res, next) {
       }
     });
   });
-});
+})
 
 // Deleting columns
 r.delete('/boards/:_id/columns/:col', function (req, res, next) {
@@ -212,29 +242,6 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
     }
   })
 });
-
-// Create/import board
-r.post('/boards', function(req, res, next) {
-  if (req.user.loggedIn) {
-    var board = null;
-    if (req.body.jsonImport) {
-      board = new Board(req.body.jsonImport);
-      board.authorizedUsers = _.merge(board.authorizedUsers, req.user.identifier);
-    } else {
-      board = new Board();
-      board.authorizedUsers = [req.user.identifier];
-    }
-    board.name = req.body.name;
-    board.save(function(err, board) {
-      if (err) 
-        res.send(500);
-      else
-        res.send({ board: { _id: board._id }});
-    });
-  } else {
-    res.send(401);
-  }
-})
 
 
 // Deleting a board

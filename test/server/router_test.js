@@ -1,4 +1,5 @@
 var helper = require('../test_helper'),
+bcrypt = require('bcrypt'),
 mongoose = helper.mongoose,
 expect = helper.expect,
 request = helper.supertest,
@@ -44,18 +45,91 @@ describe("Router", function() {
   beforeEach(function(done) {
     mongoose.models = {};
     mongoose.modelSchemas = {};
-    mongoose.createConnection(helper.mongoDB);   
-    app = helper.appWithRouter('server/router');
-    Board = require('../../src/server/models/board');
-    User = require('../../src/server/models/user');
-    done();                                                  
+    mongoose.connect(helper.mongoDB, function () {
+      app = helper.appWithRouter('server/router');
+      User = mongoose.model('User');
+      done();                                                  
+    })
   });
 
   afterEach(function(done) {
-    mongoose.disconnect(done);
+    mongoose.connection.db.dropDatabase(function (err) {
+      mongoose.disconnect(done);
+    });
   });
 
-  describe.only("POST /boards", function () {
+  function setupUser(done) {
+    var user = new User({
+      uid: "theusername",
+      hash: bcrypt.hashSync("thepasswrd", 10),
+      token: 'userToken',
+      session: { misc: "data" }
+    });
+    user.save(function (err) {
+      if (err) throw err;
+      done(err, user);
+    });
+  }
+
+  describe("GET /session", function () {
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .get('/session')
+      .expect(401)
+      .end(done);
+    });
+
+    it("returns the user's session", function(done) {
+      setupUser(function (err, user) {
+        request(app)
+        .get('/session')
+        .set('X-Auth-Token', user.token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function (err, res) {
+          expect(res.body.session.misc).to.eq('data');
+          done(err);
+        });
+      });
+    });
+  });
+
+  describe("POST /session", function () {
+    it("rejects invalid credentials", function(done) {
+      setupUser(function (err, user) {
+        request(app)
+        .post('/session')
+        .send({
+          provider: "local",
+          uid: user.uid,
+          pw: "ssaawraaad"
+        })
+        .expect(401)
+        .end(done);
+      });
+    });
+
+    it("returns a new auth token", function(done) {
+      setupUser(function (err, user) {
+        request(app)
+        .post('/session')
+        .send({
+          provider: "local",
+          uid: user.uid,
+          pw: "thepasswrd"
+        })
+        .expect(201)
+        .end(function (err, res) {
+          expect(res.body.token).not.to.eq('userToken');
+          console.log(res.body);
+          expect(res.body.token).to.be.ok;
+          done(err); 
+        });
+      });
+    });
+  });
+
+  describe("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
@@ -67,7 +141,7 @@ describe("Router", function() {
       request(app)
       .post('/boards')
       .send({
-        
+
       })
       .set('X-Auth-Token', 'mytoken')
       .expect(201)
@@ -75,11 +149,11 @@ describe("Router", function() {
         if (err) throw err;
         done();
       });
-    })
+    });
   });
 
 
-  describe("Github", function() {
+  describe.skip("Github", function() {
 
     describe("Linking Repos", function() {
       describe("POST /boards/:id/links/github", function() {
