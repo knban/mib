@@ -46,7 +46,10 @@
     "mongoose": "^3.8.12",
     "mongoose-relationship": "0.0.6",
     "morgan": "^1.1.1",
+    "request": "^2.36.0",
     "socket.io": "^1.0.6",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "winston": "^0.7.3",
+    "winston-loggly": "^1.0.1"
   }
 }

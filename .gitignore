@@ -2,3 +2,4 @@ coverage/
 .env
 public/js/.bundle.js
 public/js/config.js
+logs/*

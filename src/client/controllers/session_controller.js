@@ -1,7 +1,7 @@
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get(api.route('/session.json')).success(function(data) {
+  $http.get(api.route('/session')).success(function(data) {
     if (data.auth && data.auth.loggedIn) {
       session.anonymous = false;
       session.loggedIn = true;
@@ -35,10 +35,25 @@ module.exports = ['$http', function($http) {
   if (window.ionic) {
     this.ionic = {
       login: function() {
-        //$http.get('https://api.github.comauth/github').success(function (data, header) {
-        //  console.log(arguments);
-        //})
       }
     }
   }
+
+  this.showLogin = function () {
+    
+  };
+
+  var LoginForm = require('../login_form.js');
+
+  this.login = function () {
+    if (this.loginForm) {
+    } else {
+      session.loginForm = new LoginForm({
+        $http: $http,
+        close: function () {
+          session.loginForm = null;
+        }
+      });
+    }
+  };
 }];

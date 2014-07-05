@@ -6,8 +6,29 @@ var Board = require('./models/board');
 var Column = require('./models/column');
 var Card = require('./models/card');
 
-r.get('/session.json', function(req, res, next) {
+var providers = {
+  github: require('../providers/github')
+}
+
+r.get('/session', function(req, res, next) {
   res.send(req.session);
+});
+
+r.post('/session', function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    res.send("you're already logged in");
+  } else {
+    // TODO Rate limit by IP so github doesnt get pissed off
+    var authorizer = providers[req.body.provider].authorizer;
+    user.login(authorizer(req.body.uid, req.body.pw), function () {
+      if (user.loggedIn) {
+        res.send(user.session);
+      } else {
+        res.send(401);
+      }
+    });
+  }
 });
 
 r.get('/boards/index', function (req, res, next) {
@@ -74,10 +95,6 @@ r.delete('/boards/:_id/columns/:col/cards/:row', function(req, res, next) {
   });
 });
 
-var handlers = {
-  github: require('../providers/github').cardHandler(_)
-}
-
 // Link Github
 // TODO authorize collaborators
 // TODO webhook sync changes to collaborators
@@ -89,7 +106,7 @@ r.post('/boards/:_id/columns/:col/cards/import/:provider', function(req, res, ne
       res.send(404);
     } else {
       var board = boards[0];
-      var handler = handlers[req.params.provider];
+      var handler = providers[req.params.provider].cardHandler;
       handler.batchImport(board, req.body.openIssues, req.body.metadata, function() {
         Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
           if (err) { res.send(500, err.message); }
