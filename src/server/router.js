@@ -1,6 +1,7 @@
 var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
+var logger = require('winston');
 var User = require('./user');
 var Board = require('./models/board');
 var Column = require('./models/column');
@@ -10,27 +11,29 @@ var providers = {
   github: require('../providers/github')
 }
 
-r.get('/session', function(req, res, next) {
-  var user = new User(req.session);
-  res.send({ session: user.session });
-});
-
-r.post('/session', function(req, res, next) {
-  var user = new User(req.session);
-  if (user.loggedIn) {
-    res.send("you're already logged in");
-  } else {
-    // TODO Rate limit by IP so github doesnt get pissed off
-    var authorizer = providers[req.body.provider].authorizer;
-    user.login(authorizer(req.body.uid, req.body.pw), function () {
-      if (user.loggedIn) {
-        res.send(req.session);
-      } else {
-        res.send(401);
-      }
-    });
-  }
-});
+r.route('/session')
+.all(function (req, res, next) {
+  req.user = new User(req.session);
+  next();
+})
+.get(function (req, res, next) {
+  res.send({ session: req.user.session });
+})
+.post(function(req, res, next) {
+  var authorizer = providers[req.body.provider].authorizer;
+  req.user.login(authorizer(req.body.uid, req.body.pw), function () {
+    if (req.user.loggedIn) {
+      res.send(201);
+    } else {
+      res.send(401);
+    }
+  });
+})
+.delete(function (req, res, next) {
+  req.user = null;
+  req.session = null;
+  res.send(204);
+})
 
 r.get('/boards/index', function (req, res, next) {
   var user = new User(req.session);

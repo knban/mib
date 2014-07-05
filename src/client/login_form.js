@@ -1,6 +1,7 @@
 function LoginForm(opts) {
-  var $http = opts.$http;
-  var close = opts.close;
+  var $http = opts.$http,
+  close = opts.close;
+
   this.provider = "github";
 
   this.submit = function () {
@@ -19,9 +20,7 @@ function LoginForm(opts) {
           uid: this.uid,
           pw: this.pw
         }).success(function (data, status, headers, config) {
-          console.log(arguments);
-        }).success(function () {
-          // do stuff...
+          opts.reloadSession();
           close();
         }).error(function (err) {
           console.error(err);

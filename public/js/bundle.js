@@ -3916,21 +3916,26 @@ module.exports = ['$scope', '$ionicModal', function($scope, $ionicModal) {
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get(api.route('/session')).success(function(data) {
-    if (data.session.auth.github) {
-      this.attributes = data.session;
+  this.load = function () {
+    $http.get(api.route('/session')).success(function(data) {
+      if (data.session.auth.github) {
+        this.attributes = data.session;
 
-      if (data.session.auth) {
-        session.anonymous = false;
-        session.loggedIn = true;
-        session.uid = data.session.auth.github.login;
-        session.getBoardList();
-      } else
-        session.destroy()
-    }
-  }).error(session.destroy);
+        if (data.session.auth) {
+          session.anonymous = false;
+          session.loggedIn = true;
+          session.uid = data.session.auth.github.login;
+          session.getBoardList();
+        } else
+          session.destroy()
+      }
+    }).error(session.destroy);
+  };
+
+  this.load();
 
   this.destroy = function () {
+    $http.delete(api.route('session'));
     session.anonymous = true;
     session.loggedIn = false;
     app.session = null;
@@ -3957,20 +3962,18 @@ module.exports = ['$http', function($http) {
     }
   }
 
-  this.showLogin = function () {
-    
-  };
-
   var LoginForm = require('../login_form.js');
 
   this.login = function () {
     if (this.loginForm) {
     } else {
       session.loginForm = new LoginForm({
+        $parent: this,
         $http: $http,
         close: function () {
           session.loginForm = null;
-        }
+        },
+        reloadSession: session.load
       });
     }
   };
@@ -4071,8 +4074,9 @@ module.exports = Endpoint;
 
 },{}],261:[function(require,module,exports){
 function LoginForm(opts) {
-  var $http = opts.$http;
-  var close = opts.close;
+  var $http = opts.$http,
+  close = opts.close;
+
   this.provider = "github";
 
   this.submit = function () {
@@ -4091,9 +4095,7 @@ function LoginForm(opts) {
           uid: this.uid,
           pw: this.pw
         }).success(function (data, status, headers, config) {
-          console.log(arguments);
-        }).success(function () {
-          // do stuff...
+          opts.reloadSession();
           close();
         }).error(function (err) {
           console.error(err);
