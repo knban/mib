@@ -8,7 +8,7 @@ module.exports = function (uid, pw) {
       else if (user) {
         bcrypt.compare(pw, user.hash, function (err, res) {
           if (res) {
-            callback(null, true)
+            callback(null, { user: user });
           } else {
             callback(new Error("Failed to Auth"));
           }

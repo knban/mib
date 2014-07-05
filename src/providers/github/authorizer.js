@@ -36,12 +36,8 @@ module.exports = function (uid, pw) {
       if (res.statusCode === 201 || res.statusCode === 200) {
         var data = JSON.parse(body);
         callback(null, {
-          auth: {
-            github: {
-              login: uid,
-              token: data.token
-            }
-          }
+          login: uid,
+          token: data.token
         });
       } else {
         callback(new Error(body));

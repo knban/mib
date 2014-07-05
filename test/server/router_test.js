@@ -13,36 +13,6 @@ describe("Router", function() {
   User = null,
   Board = null; 
 
-  beforeEach(function() {
-    /*
-    board = {
-      name: "a board",
-      columns: [{
-        cards: []
-      }, {
-        cards: [{
-          remoteObject: {
-            title: "first",
-            stuff: "stuff",
-            id: 1
-          }
-        }]
-      }],
-      links: {}
-    };
-
-    helper.stubModel('Board').returns({
-      find: sinon.stub().yields(null, [board]),
-      findById: sinon.stub().yields(null, board),
-      update: sinon.stub().yields(null)
-    });
-
-    app = helper.appWithRouter('server/router');
-
-    Board = helper.require('server/models/board');
-    */
-  })
-
   beforeEach(function(done) {
     mongoose.models = {};
     mongoose.modelSchemas = {};

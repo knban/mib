@@ -21,7 +21,6 @@ function loginRequired(req, res, next) {
       if (err || !user) { res.send(500) }
       else if (user) {
         req.user = user;
-        user.identifier = user.session.provider+":"+user.session.uid; // tmp
         next();
       }
     })
@@ -52,14 +51,14 @@ function getBoardById(req, res, next) {
 };
 
 /*
- * GET /session -- get your 3rd party authorizations
+ * GET /session -- get your user session
  * POST /session -- get your token
  * DELETE /session
  */
 
 r.route('/session')
 .get(loginRequired, function (req, res, next) {
-  res.send({ session: req.user.session });
+  res.send(req.user);
 })
 .post(function(req, res, next) {
   User.findOrCreateByAuthorization(req.body, providers, function (err, user) {

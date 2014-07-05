@@ -1,3 +1,7 @@
+process.env.GITHUB_CLIENT_ID = "stubs";
+process.env.GITHUB_CLIENT_SECRET = "stubs";
+
+
 var chai = require('chai');
 var sinon = require('sinon');
 var mongoose = require('mongoose');

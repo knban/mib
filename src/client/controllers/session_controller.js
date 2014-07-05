@@ -2,16 +2,15 @@ module.exports = ['$http', function($http) {
   session = this;
 
   this.userIdentifier = function () {
-    return this.provider+":"+this.uid;
+    return this.user.uid || this.user.authorizations.github.login;
   };
 
   this.load = function () {
     $http.defaults.headers.common['X-Auth-Token'] = localStorage.token;
     $http.get(api.route('session')).success(function(data) {
+      session.user = data;
       session.anonymous = false;
       session.loggedIn = true;
-      session.uid = data.session.uid;
-      session.provider = data.session.provider;
       session.getBoardList();
     }).error(session.destroy);
   };
