@@ -157,6 +157,21 @@ describe("Router", function() {
     });
   });
 
+  function createBoard(payload, token, done) {
+    request(app)
+    .post('/boards')
+    .send(payload)
+    .set('X-Auth-Token', token)
+    .expect(201)
+    .end(function(err, res) {
+      if (err) throw err;
+      board_id = res.body.board._id;
+      expect(board_id).to.be.ok;
+      done(err, res.body.board);
+    });
+  };
+
+
   describe("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
@@ -167,34 +182,12 @@ describe("Router", function() {
 
     it("returns the board id", function(done) {
       setupUser(function (err, user) {
-        request(app)
-        .post('/boards')
-        .send({ name: "my board" })
-        .set('X-Auth-Token', user.token)
-        .expect(201)
-        .end(function(err, res) {
-          if (err) throw err;
-          expect(res.body.board._id).to.be.ok;
-          done();
-        });
+        createBoard({name: 'my board'}, user.token, done)
       })
     });
 
-    describe.skip("Import Data", function() {
-      it("imports the data and returns the board id", function(done) {
-        setupUser(function (err, user) {
-          request(app)
-          .post('/boards')
-          .send({ name: "my board" })
-          .set('X-Auth-Token', user.token)
-          .expect(201)
-          .end(function(err, res) {
-            if (err) throw err;
-            expect(res.body.board._id).to.be.ok;
-            done();
-          });
-        })
-      });
+    describe.skip("Import Feature", function() {
+      it("imports the data and returns the board id")
     });
   });
 
@@ -205,15 +198,8 @@ describe("Router", function() {
     beforeEach(function(done) {
       setupUser(function (err, testuser) {
         user = testuser;
-        request(app)
-        .post('/boards')
-        .send({ name: "my board" })
-        .set('X-Auth-Token', user.token)
-        .expect(201)
-        .end(function(err, res) {
-          if (err) throw err;
-          board_id = res.body.board._id;
-          expect(board_id).to.be.ok;
+        createBoard({name: 'my board'}, user.token, function (err, board) {
+          board_id = board._id;
           done();
         });
       })
@@ -272,22 +258,15 @@ describe("Router", function() {
     });
   });
 
-  describe.only("DELETE /boards/:id", function() {
+  describe("DELETE /boards/:id", function() {
     var user = null,
     board_id = null;
 
     beforeEach(function(done) {
       setupUser(function (err, testuser) {
         user = testuser;
-        request(app)
-        .post('/boards')
-        .send({ name: "my board" })
-        .set('X-Auth-Token', user.token)
-        .expect(201)
-        .end(function(err, res) {
-          if (err) throw err;
-          board_id = res.body.board._id;
-          expect(board_id).to.be.ok;
+        createBoard({name: 'my board'}, user.token, function (err, board) {
+          board_id = board._id;
           done();
         });
       })
@@ -319,6 +298,48 @@ describe("Router", function() {
           .set('X-Auth-Token', user.token)
           .expect(404)
           .end(done);
+        });
+      })
+    });
+  });
+
+
+  describe("GET /boards", function() {
+    var user = null,
+    board_id = null;
+
+    beforeEach(function(done) {
+      setupUser(function (err, testuser) {
+        user = testuser;
+        createBoard({ name: '1' }, user.token, function () {
+          createBoard({ name: '2' }, user.token, done);
+        })
+      })
+    });
+
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .get('/boards')
+      .expect(401)
+      .end(function () {
+        request(app)
+        .delete('/boards/'+board_id)
+        .set('X-Auth-Token', "---")
+        .expect(401)
+        .end(done);
+      });
+    });
+
+    it("returns authorized boards", function(done) {
+      setupUser(function (err, user) {
+        request(app)
+        .get('/boards')
+        .set('X-Auth-Token', user.token)
+        .expect(200)
+        .end(function(err, res) {
+          if (err) throw err;
+          expect(res.body.boards).to.have.length(2);
+          done();
         });
       })
     });
