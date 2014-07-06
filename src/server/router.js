@@ -31,7 +31,7 @@ r.route('/session')
 
 r.route('/boards')
 .all(loginRequired)
-.get(getBoards)
+.get(myBoards)
 .post(createBoard);
 
 
@@ -236,8 +236,8 @@ function loginRequired(req, res, next) {
   }
 };
 
-function getBoards(req, res, next) {
-  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
+function myBoards(req, res, next) {
+  Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
     if (err) { res.send(500) }
     else { res.send({boards: boards}) }
   });
