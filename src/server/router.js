@@ -14,47 +14,6 @@ var providers = {
   local: require('../providers/local')
 }
 
-function loginRequired(req, res, next) {
-  var token = req.headers['x-auth-token'];
-  if (token) {
-    User.findOne({ token: token }).exec(function (err, user) {
-      if (err) {
-        logger.error(err.message)
-        res.send(500)
-      } else if (user) {
-        req.user = user;
-        next();
-      } else {
-        logger.warn("No user found with that token");
-        res.send(401);
-      }
-    })
-  } else { res.send(401) }
-};
-
-
-function getBoardById(req, res, next) {
-  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    if (err) { 
-      logger.error(err.message)
-      res.send(500)
-    } else if (board) {
-      Card.populate(board.columns, { path: 'cards' }, function(err) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          req.board = board;
-          next();
-        }
-      });
-    } else {
-      logger.error("Board "+req.params._id+" not found");
-      res.send(404);
-    }
-  });
-};
-
 /*
  * GET /session -- get your user session
  * POST /session -- get your token
@@ -95,14 +54,16 @@ r.route('/boards')
     board.authorizedUsers = _.merge(board.authorizedUsers, req.user.identifier);
   } else {
     board = new Board();
-    board.authorizedUsers = [req.user.identifier];
+    board.authorizedUsers = [req.user._id];
   }
   board.name = req.body.name;
   board.save(function(err, board) {
-    if (err) 
+    if (err) {
+      logger.error(err.message);
       res.send(500);
-    else
-      res.send({ board: { _id: board._id }});
+    } else {
+      res.send(201, { board: { _id: board._id }});
+    }
   });
 })
 
@@ -289,3 +250,49 @@ r.put('/boards/:_id/users', function(req, res, next) {
     }
   });
 });
+
+
+/*
+ * Middleware Helpers
+ */
+
+function loginRequired(req, res, next) {
+  var token = req.headers['x-auth-token'];
+  if (token) {
+    User.findOne({ token: token }).exec(function (err, user) {
+      if (err) {
+        logger.error(err.message)
+        res.send(500)
+      } else if (user) {
+        req.user = user;
+        next();
+      } else {
+        logger.warn("No user found with that token");
+        res.send(401);
+      }
+    })
+  } else { res.send(401) }
+};
+
+
+function getBoardById(req, res, next) {
+  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+    if (err) { 
+      logger.error(err.message)
+      res.send(500)
+    } else if (board) {
+      Card.populate(board.columns, { path: 'cards' }, function(err) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          req.board = board;
+          next();
+        }
+      });
+    } else {
+      logger.error("Board "+req.params._id+" not found");
+      res.send(404);
+    }
+  });
+};
