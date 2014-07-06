@@ -10,6 +10,8 @@ sinon = helper.sinon;
 describe("Router", function() {
   var app = null,
   board = null,
+  user = null,
+  board_id = null,
   User = null,
   Board = null; 
 
@@ -41,6 +43,16 @@ describe("Router", function() {
       done(err, user);
     });
   }
+
+  function setupUserAndBoard(done) {
+    setupUser(function (err, testuser) {
+      user = testuser;
+      createBoard({ name: 'my board' }, user.token, function (err, board) {
+        board_id = board._id;
+        done();
+      });
+    })
+  };
 
   describe("GET /session", function () {
     it("rejects unauthorized users", function(done) {
@@ -191,18 +203,7 @@ describe("Router", function() {
   });
 
   describe("GET /boards/:id", function () {
-    var user = null,
-    board_id = null;
-
-    beforeEach(function(done) {
-      setupUser(function (err, testuser) {
-        user = testuser;
-        createBoard({name: 'my board'}, user.token, function (err, board) {
-          board_id = board._id;
-          done();
-        });
-      })
-    });
+    beforeEach(setupUserAndBoard);
 
     it("rejects unauthorized users", function(done) {
       request(app)
@@ -258,18 +259,7 @@ describe("Router", function() {
   });
 
   describe("DELETE /boards/:id", function() {
-    var user = null,
-    board_id = null;
-
-    beforeEach(function(done) {
-      setupUser(function (err, testuser) {
-        user = testuser;
-        createBoard({name: 'my board'}, user.token, function (err, board) {
-          board_id = board._id;
-          done();
-        });
-      })
-    });
+    beforeEach(setupUserAndBoard);
 
     it("rejects unauthorized users", function(done) {
       request(app)
@@ -304,9 +294,6 @@ describe("Router", function() {
 
 
   describe("GET /boards", function() {
-    var user = null,
-    board_id = null;
-
     beforeEach(function(done) {
       setupUser(function (err, testuser) {
         user = testuser;
@@ -345,18 +332,7 @@ describe("Router", function() {
   });
 
   describe("PUT /boards/:id/links/:provider", function() {
-    var user = null,
-    board_id = null;
-
-    beforeEach(function(done) {
-      setupUser(function (err, testuser) {
-        user = testuser;
-        createBoard({ name: 'test' }, user.token, function (err, board) {
-          board_id = board._id;
-          done();
-        });
-      })
-    });
+    beforeEach(setupUserAndBoard);
 
     it("rejects unauthorized users", function(done) {
       request(app)
@@ -399,6 +375,8 @@ describe("Router", function() {
   });
 
   describe.skip("POST /boards/:id/columns/:col/cards/import/:provider", function() {
+    beforeEach(setupUserAndBoard);
+
     it("adds the cards to the board and returns the new board", function(done) {
       var issue1 = { title: "foo", id: '123' };
       var issue2 = { title: "bar", id: '234' };
