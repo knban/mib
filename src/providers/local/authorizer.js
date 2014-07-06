@@ -1,7 +1,6 @@
-var bcrypt = require('bcrypt');
-var User = require('mongoose').model('User');
-
 module.exports = function (uid, pw) {
+  var bcrypt = require('bcrypt');
+  var User = require('mongoose').model('User');
   return function (callback) {
     User.findOne({ uid: uid }).exec(function (err, user) {
       if (err) { callback(err) }

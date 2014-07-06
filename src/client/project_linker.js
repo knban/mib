@@ -1,8 +1,8 @@
-var GithubProvider = require('../providers/github/card_provider');
+var GithubProvider = require('../providers').github.cardProvider;
 
-module.exports = function (board, $http) {
+module.exports = function (boardCtrl, $http) {
   this.providers = [
-    GithubProvider(board, $http)
+    GithubProvider(boardCtrl.attributes, this, $http)
   ];
   this.open = function() {
     this.reset();

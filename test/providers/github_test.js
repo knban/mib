@@ -18,8 +18,8 @@ describe("GitHub Provider", function() {
 
   beforeEach(function() {
     $http = helper.fake$http();
-    board = new BoardController[BoardController.length-1]($http);
-    board.attributes = {
+    linker = new BoardController[BoardController.length-1]($http).projectLinker;
+    board = {
       _id: "1"
     };
   });
@@ -39,7 +39,7 @@ describe("GitHub Provider", function() {
         },
       });
       global.window = { location: { origin: origin } };
-      provider = Provider(board, $http);
+      provider = Provider(board, linker, $http);
       provider.installWebhook(repo, function () {})
       hook = $http.post.getCall(0).args[1];
     });
@@ -50,7 +50,7 @@ describe("GitHub Provider", function() {
       expect(hook.active).to.eq(true);
       expect(hook.events).to.include("issues");
       expect(hook.events).to.include("issue_comment");
-      expect(hook.config.url).to.eq(origin+"/boards/"+board.attributes._id+"/github/123/webhook");
+      expect(hook.config.url).to.eq(origin+"/boards/"+board._id+"/github/123/webhook");
       expect(hook.config.content_type).to.eq("json");
     });
   });
@@ -62,11 +62,11 @@ describe("GitHub Provider", function() {
           { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
         ], 200, function linkHeaders() {return ''});
       });
-      provider = Provider(board, $http);
+      provider = Provider(board, linker, $http);
       provider.getRepos('url');
     });
-    it("populates board.projectLinker._Repos with 3 repos", function() {
-      expect(board.projectLinker._Repos.length).to.eq(3);
+    it("populates linker._Repos with 3 repos", function() {
+      expect(linker._Repos.length).to.eq(3);
     });
   });
 
@@ -83,9 +83,9 @@ describe("GitHub Provider", function() {
         stub = $http.stub('post', function(stub) {
           return stub.yields({}, 200);
         });
-        board.attributes._id = 2;
-        board.projectLinker._Col = 1;
-        provider = Provider(board, $http);
+        board._id = 2;
+        linker._Col = 1;
+        provider = Provider(board, linker, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" }, done);
       });
       it("uses the correct URL", function() {
@@ -114,8 +114,8 @@ describe("GitHub Provider", function() {
           return stub.yields({}, 200);
         });
         board.id = 2;
-        board.projectLinker._Col = 1;
-        provider = Provider(board, $http);
+        linker._Col = 1;
+        provider = Provider(board, linker, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" }, function () {
           done();
         });

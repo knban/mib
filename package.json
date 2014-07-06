@@ -58,6 +58,8 @@
     "winston-loggly": "^1.0.1"
   },
   "browser": {
-    "winston": "console"
+    "winston": "console",
+    "./authorizer": false,
+    "./card_handler": false
   }
 }
