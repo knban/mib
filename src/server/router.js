@@ -73,22 +73,24 @@ function myBoards(req, res, next) {
 };
 
 function createBoard(req, res, next) {
-  var board = null;
   if (req.body.jsonImport) {
     res.send(500, 'Not yet implemented');
   } else {
-    board = new Board({
+    var attributes = {
       name: req.body.name,
       authorizedUsers: [req.user._id]
-    });
+    };
     Promise.all([
+      Board.create(attributes),
       Column.create({ name: "Icebox",  role: 1 }),
       Column.create({ name: "Backlog"          }),
       Column.create({ name: "Doing"            }),
       Column.create({ name: "Done",    role: 2 })
-    ]).spread(function () {
-      var columns = Array.prototype.slice.call(arguments);
-      board.columns = board.columns.concat(columns);
+    ]).spread(function (board, icebox, backlog, doing, done) {
+      board.columns.push(icebox);
+      board.columns.push(backlog);
+      board.columns.push(doing);
+      board.columns.push(done);
       board.save(function(err, board) {
         if (err) {
           logger.error(err.message);
