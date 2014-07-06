@@ -446,60 +446,66 @@ describe("Router", function() {
   });
 
   describe.skip("POST /boards/:id/:provider/:repo_id/webhook", function() {
-    describe("installed", function() {
-      it("returns 204 No Content", function(done) {
-        request(app)
-        .post('/boards/1/github/1234/webhook')
-        .expect(204)
-        .end(done)
-      });
-    });
-
-    describe("github issue opened", function() {
-      it("creates a new card in the icebox", function(done) {
-        expect(board.columns[0].cards.length).to.eq(0);
-        request(app)
-        .post('/boards/1/github/1234/webhook')
-        .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
-        .expect(204)
-        .end(function(err, res){
-          if (err) throw err;
-          expect(board.columns[0].cards.length).to.eq(1);
-          var newCard = board.columns[0].cards[0];
-          expect(newCard.remoteObject.title).to.eq('this is the title');
-          expect(newCard.repo_id).to.eq('1234');
-          expect(newCard.provider).to.eq('github');
-          expect(Board.update.callCount).to.eq(1);
-          done();
-        });
-      });
-    });
-
-    describe("github issue comment", function() {
-      it("updates the existing card", function(done) {
-        expect(board.columns[0].cards.length).to.eq(0);
-        request(app).post('/boards/1/github/1234/webhook')
-        .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
-        .expect(204).end(function(err, res) {
-          if (err) throw err;
-          expect(board.columns[0].cards.length).to.eq(1);
-          var newCard = board.columns[0].cards[0];
-          expect(newCard.remoteObject.comments).to.eq(0);
+    describe("github", function() {
+      describe("installed", function() {
+        it("returns 204 No Content", function(done) {
           request(app)
           .post('/boards/1/github/1234/webhook')
-          .send(require('../fixtures/webhooks/github/01_issue_commented_upon'))
+          .expect(204)
+          .end(done)
+        });
+      });
+
+      describe("issue opened", function() {
+        it("creates a new card in the icebox", function(done) {
+          expect(board.columns[0].cards.length).to.eq(0);
+          request(app)
+          .post('/boards/1/github/1234/webhook')
+          .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
           .expect(204)
           .end(function(err, res){
             if (err) throw err;
             expect(board.columns[0].cards.length).to.eq(1);
-            var updatedCard = board.columns[0].cards[0];
-            expect(updatedCard.remoteObject.comments).to.eq(1);
+            var newCard = board.columns[0].cards[0];
+            expect(newCard.remoteObject.title).to.eq('this is the title');
             expect(newCard.repo_id).to.eq('1234');
             expect(newCard.provider).to.eq('github');
-            expect(Board.update.callCount).to.eq(2);
+            expect(Board.update.callCount).to.eq(1);
             done();
           });
         });
+      });
+
+      describe("issue comment", function() {
+        it("updates the existing card", function(done) {
+          expect(board.columns[0].cards.length).to.eq(0);
+          request(app).post('/boards/1/github/1234/webhook')
+          .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
+          .expect(204).end(function(err, res) {
+            if (err) throw err;
+            expect(board.columns[0].cards.length).to.eq(1);
+            var newCard = board.columns[0].cards[0];
+            expect(newCard.remoteObject.comments).to.eq(0);
+            request(app)
+            .post('/boards/1/github/1234/webhook')
+            .send(require('../fixtures/webhooks/github/01_issue_commented_upon'))
+            .expect(204)
+            .end(function(err, res){
+              if (err) throw err;
+              expect(board.columns[0].cards.length).to.eq(1);
+              var updatedCard = board.columns[0].cards[0];
+              expect(updatedCard.remoteObject.comments).to.eq(1);
+              expect(newCard.repo_id).to.eq('1234');
+              expect(newCard.provider).to.eq('github');
+              expect(Board.update.callCount).to.eq(2);
+              done();
+            });
+          });
+        });
+      });
+
+      describe("issue closed", function() {
+        it("moves the card to done");
       });
     });
   });
