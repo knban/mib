@@ -97,6 +97,9 @@ function createBoard(req, res, next) {
           res.send(201, { board: { _id: board._id }});
         }
       });
+    }).catch(function (err) {
+      logger.error(err.message);
+      res.send(500);
     });
   }
 };
