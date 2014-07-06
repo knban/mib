@@ -393,8 +393,6 @@ describe("Router", function() {
     it("adds the cards to the board and returns the new board", function(done) {
       var issue1 = { title: "foo", id: '123' };
       var issue2 = { title: "bar", id: '234' };
-      var card1 = { remoteObject: issue1, provider: "github", repo_id: "1234" };
-      var card2 = { remoteObject: issue2, provider: "github", repo_id: "1234" };
       request(app)
       .post('/boards/'+board_id+'/cards/github')
       .set('X-Auth-Token', user.token)
@@ -420,24 +418,37 @@ describe("Router", function() {
       });
     });
 
-    it.skip("merges/updates cards with the same (issue) id instead of duplicating", function(done) {
-      var issue = { title: "new title", new_field: 'test', id: 1 };
+    it("does not add cards that posess the same remote object id", function(done) {
       request(app)
-      .post('/boards/1/columns/0/cards/import/github')
+      .post('/boards/'+board_id+'/cards/github')
+      .set('X-Auth-Token', user.token)
       .send({
-        openIssues: [issue]
+        openIssues: [{ title: "foo", id: '123' }],
+        metadata: { repo_id: "1234" }
       })
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res){
         if (err) throw err;
-        expect(res.body.board.columns[0].cards.length).to.eq(0);
-        expect(res.body.board.columns[1].cards.length).to.eq(1);
-        expect(res.body.board.columns[1].cards[0].remoteObject).to.deep.eq({
-          title: "new title", new_field: 'test', id: 1, stuff: "stuff"
+        request(app)
+        .post('/boards/'+board_id+'/cards/github')
+        .send({
+          openIssues: [
+            { title: "qqq", id: '123' },
+            { title: "bar", id: '234' },
+            { title: "zzz", id: '345' }
+          ],
+          metadata: { repo_id: "1234" }
+        })
+        .set('X-Auth-Token', user.token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res){
+          if (err) throw err;
+          var cards = res.body.board.columns[0].cards;
+          expect(cards).to.have.length(3);
+          done();
         });
-        expect(Board.update.callCount).to.eq(1);
-        done();
       });
     });
   });

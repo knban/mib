@@ -21,9 +21,7 @@ module.exports = function(providerInfo) {
         var existingCard = _.find(sortedCards, function(card) {
           return card.remoteObject.id === issue.id
         });
-        if (existingCard) {
-          _.merge(existingCard.remoteObject, issue);
-        } else {
+        if (! existingCard) {
           importCard(this.newCard(metadata.repo_id, issue));
         }
       }.bind(this));

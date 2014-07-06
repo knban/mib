@@ -204,7 +204,6 @@ function createCardsViaProvider(req, res, next) {
       }, function() {
         Promise.all(promises).then(function () {
           Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-            //console.log(board.populate('columns').columns);
             if (err) { res.send(500, err.message); }
             else {
               Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
