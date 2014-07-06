@@ -46,6 +46,7 @@
     "lodash": "^2.4.1",
     "lodash.find": "^2.4.1",
     "lodash.map": "^2.4.1",
+    "lodash.merge": "^2.4.1",
     "lodash.uniq": "^2.4.1",
     "lodash.where": "^2.4.1",
     "mongoose": "^3.8.12",

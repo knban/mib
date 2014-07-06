@@ -3,9 +3,19 @@ var logger = require('winston');
 module.exports = ['$http', function($http) {
   session = this;
 
+  var configureEndpoint = function () {
+    api.setClient('angular', $http, {
+      headers: {
+        'X-Auth-Token': localStorage.token
+      }
+    });
+  };
+
+  configureEndpoint();
+
   this.load = function () {
-    $http.defaults.headers.common['X-Auth-Token'] = localStorage.token;
-    $http.get(api.route('session')).success(function(data) {
+    configureEndpoint();
+    api.get('session').success(function(data) {
       session.user = data;
       try {
         localStorage.github = data.authorizations.github.token;
@@ -33,7 +43,7 @@ module.exports = ['$http', function($http) {
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get(api.route('boards/')).success(function(data) {
+    api.get('boards').success(function(data) {
       session.boards = data.boards;
     })
   };

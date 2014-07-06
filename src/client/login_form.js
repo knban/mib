@@ -15,7 +15,7 @@ function LoginForm(opts) {
         /*
          * POST /sessions/:provider
          */
-        $http.post(api.route('session'), {
+        api.post('session', {
           provider: this.provider,
           uid: this.uid,
           pw: this.pw

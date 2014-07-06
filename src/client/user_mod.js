@@ -23,8 +23,7 @@ module.exports = function (board, $http) {
     else {
       var users = _.uniq(this.users.concat(this.newUser));
       var payload = { authorizedUsers: users };
-      var url = api.route('boards/'+board.attributes._id+'/users');
-      $http.put(url, payload).success(function (data) {
+      api.put('boards/'+board.attributes._id+'/users', payload).success(function (data) {
         board.attributes.authorizedUsers = data.authorizedUsers;
       }).error(function (err, status) {
         alert(err);

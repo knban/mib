@@ -7,25 +7,37 @@ var _ = {
   where: require('lodash.where')
 }
 
+var Endpoint = require('../../client/endpoint');
+
 module.exports = function(board, linker, token, $http) {
+  var api = new Endpoint();
+  api.setRoot('https://api.github.com/');
+  api.setClient('angular', $http, {
+    headers: { 'Authorization': 'token '+token }
+  });
+
+  var user = null;
+
   return {
     info: info,
     next: function() {
-      $http.defaults.headers.common.Authorization = 'token '+token;
       linker._Provider = this;
-      linker._Help = "Is it a personal repository or part of an organization?"
-      linker._PersonalOrOrg = true;
+      linker._Help = "Loading user metadata ...";
+      api.get('user').success(function(data) {
+        user = data;
+        linker._Help = "Is it a personal repository or part of an organization?"
+        linker._PersonalOrOrg = true;
+      })
     },
     personal: function() {
       linker._PersonalOrOrg = false;
-      var user = app.session.auth.github.user;
       this.repoScope = this.info.displayName+'/'+user.login;
       this.getRepos(user.repos_url);
     },
     org: function() {
       linker._PersonalOrOrg = false;
       linker._Help = "Fetching organizations...";
-      $http.get(app.session.auth.github.user.organizations_url).success(function(data) {
+      api.get(user.organizations_url).success(function(data) {
         linker._Help = "Which organization owns the repository from which you wish to import open issues?";
         linker._Orgs = data;
       })
@@ -47,7 +59,7 @@ module.exports = function(board, linker, token, $http) {
       this.getMoreRepos(url+"?per_page=100");
     },
     getMoreRepos: function(url) {
-      $http.get(url).success(function(data, status, headers, config) {
+      api.get(url).success(function(data, status, headers, config) {
         linker._Repos = linker._Repos.concat(data);
         var next = headers('Link') ? li.parse(headers('Link')).next : null;
         if (next) {
@@ -78,7 +90,7 @@ module.exports = function(board, linker, token, $http) {
       var url = api.route('boards/'+board._id+'/links/'+this.info.name);
       var linkObject = {};
       linkObject[this.info.name] = repos;
-      $http.put(url, linkObject).success(function(data) {
+      api.put(url, linkObject).success(function(data) {
         if (data.links) {
           board.links = data.links;
           logger.info("Linked "+repos.length+" repos");
@@ -108,7 +120,7 @@ module.exports = function(board, linker, token, $http) {
     },
     installWebhook: function(repo, done) {
       // https://developer.github.com/v3/repos/hooks/#create-a-hook
-      $http.post(repo.hooks_url, {
+      api.post(repo.hooks_url, {
         // full list here: https://api.github.com/hooks
         name: "web",
         active: true,
@@ -133,7 +145,7 @@ module.exports = function(board, linker, token, $http) {
       this.importIssues(url, { repo_id: repo.id }, done);
     },
     importIssues: function(url, metadata, done) {
-      $http.get(url).success(function(data, status, headers) {
+      api.get(url).success(function(data, status, headers) {
         this.postIssues(data, metadata);
         var next = headers('Link') ? li.parse(headers('Link')).next : null;
         if (next) {
@@ -145,7 +157,7 @@ module.exports = function(board, linker, token, $http) {
     },
     postIssues: function(openIssues, metadata) {
       var importUrl = api.route('boards/'+board._id+'/cards/github');
-      $http.post(importUrl, {
+      api.post(importUrl, {
         metadata: metadata,
         openIssues: openIssues
       }).success(function(data) {

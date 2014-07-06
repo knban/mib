@@ -29,7 +29,7 @@ module.exports = function BoardCreator(board, $http) {
     if (this.valid()) {
       var payload = { name: this.boardName };
       if (this.jsonImport) payload.jsonImport = this.jsonImport;
-      $http.post(api.route('boards'), payload).success(function (data) {
+      api.post('boards', payload).success(function (data) {
         form.success = "Board created!"
         form.close();
         app.loadBoardById(data.board._id);
