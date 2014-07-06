@@ -345,9 +345,7 @@ describe("Router", function() {
     });
   });
 
-
   describe.skip("Github", function() {
-
     describe("Linking Repos", function() {
       describe("POST /boards/:id/links/github", function() {
         it("links multiple repos", function(done) {
@@ -377,8 +375,6 @@ describe("Router", function() {
 
     describe("Importing Issues", function() {
       describe("POST /boards/:id/columns/:col/cards/import/github", function() {
-        // TODO add provider.
-        // TODO scope issue object under a key within the card
         it("adds the cards to the board and returns the new board", function(done) {
           var issue1 = { title: "foo", id: '123' };
           var issue2 = { title: "bar", id: '234' };

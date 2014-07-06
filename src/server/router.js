@@ -226,12 +226,10 @@ function loginRequired(req, res, next) {
         req.user = user;
         next();
       } else {
-        logger.warn("no user found with that token");
         res.send(401);
       }
     })
   } else {
-    logger.warn('a valid token is required');
     res.send(401)
   }
 };
