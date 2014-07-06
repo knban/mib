@@ -45,6 +45,143 @@ r.route('/boards/:_id')
 .get(getBoard)
 .delete(deleteBoard);
 
+/*
+ * Functions
+ */
+
+function getSession(req, res, next) {
+  res.send(req.user);
+};
+
+function createSession(req, res, next) {
+  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
+    if (err) {
+      res.send(401);
+    } else {
+      res.send(201, { token: user.token, _id: user._id });
+    }
+  });
+}
+
+function loginRequired(req, res, next) {
+  var token = req.headers['x-auth-token'];
+  if (token) {
+    User.findOne({ token: token }).exec(function (err, user) {
+      if (err) {
+        logger.error(err.message)
+        res.send(500)
+      } else if (user) {
+        req.user = user;
+        next();
+      } else {
+        res.send(401);
+      }
+    })
+  } else {
+    res.send(401)
+  }
+};
+
+function myBoards(req, res, next) {
+  Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
+    if (err) { res.send(500) }
+    else { res.send({boards: boards}) }
+  });
+};
+
+function initializeBoard(req, res, next) {
+  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+    if (err) { 
+      logger.error(err.message)
+      res.send(500)
+    } else if (board) {
+      Card.populate(board.columns, { path: 'cards' }, function(err) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          req.board = board;
+          next();
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+function getBoard(req, res, next) {
+  res.send({ board: req.board });
+}
+
+function createBoard(req, res, next) {
+  var board = null;
+  if (req.body.jsonImport) {
+    res.send(500, 'Not yet implemented');
+  } else {
+    board = new Board({
+      name: req.body.name,
+      authorizedUsers: [req.user._id]
+    });
+    var insert = function (col) { board.columns.push(col) };
+    Promise.all([
+      Column.create({ name: "Icebox",  role: 1 }).then(insert),
+      Column.create({ name: "Backlog"          }).then(insert),
+      Column.create({ name: "Doing"            }).then(insert),
+      Column.create({ name: "Done",    role: 2 }).then(insert)
+    ]).then(function () {
+      board.save(function(err, board) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          res.send(201, { board: { _id: board._id }});
+        }
+      });
+    });
+  }
+};
+
+function deleteBoard(req, res, next) {
+  req.board.remove(function(err) {
+    if (err) {
+      logger.error(err.message);
+      res.send(500)
+    } else {
+      res.send(204);
+    }
+  });
+}
+
+/*
+ *
+ * ALL CODE BELOW IS UNTESTED
+ *
+ */
+
+
+// Update a board's link with a provider repository
+r.put('/boards/:_id/links/:provider', function(req, res, next) {
+  Board.findById( req.params._id, function(err, board) {
+    if (err) {
+      res.send(500);
+    } else {
+      if (! board.links ) {
+        board.links = {};
+      }
+      if (! board.links[req.params.provider]) {
+        board.links[req.params.provider] = {}
+      }
+      _.each(req.body[req.params.provider], function (repo) {
+        board.links[req.params.provider][repo.id] = repo;
+      });
+      Board.update({ _id: board._id }, { links: board.links }, function(err) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ links: board.links }) }
+      });
+    }
+  });
+});
 
 /*
  * POST /boards/:_id/columns/:col/cards/import/:provider
@@ -70,6 +207,7 @@ r.route('/boards/:_id/columns/:col/cards/import/:provider')
     }
   });
 })
+
 
 // Update a column
 r.put('/boards/:_id/columns/:col/cards', function(req, res, next) {
@@ -159,29 +297,6 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
   })
 });
 
-// Update a board's link with a provider repository
-r.put('/boards/:_id/links/:provider', function(req, res, next) {
-  Board.findById( req.params._id, function(err, board) {
-    if (err) {
-      res.send(500);
-    } else {
-      if (! board.links ) {
-        board.links = {};
-      }
-      if (! board.links[req.params.provider]) {
-        board.links[req.params.provider] = {}
-      }
-      _.each(req.body[req.params.provider], function (repo) {
-        board.links[req.params.provider][repo.id] = repo;
-      });
-      Board.update({ _id: board._id }, { links: board.links }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send({ links: board.links }) }
-      });
-    }
-  });
-});
-
 // Update a board's authorized users list
 r.put('/boards/:_id/users', function(req, res, next) {
   Board.findById( req.params._id, function(err, board) {
@@ -197,111 +312,3 @@ r.put('/boards/:_id/users', function(req, res, next) {
   });
 });
 
-/*
- * Functions
- */
-
-function getSession(req, res, next) {
-  res.send(req.user);
-};
-
-function createSession(req, res, next) {
-  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
-    if (err) {
-      res.send(401);
-    } else {
-      res.send(201, { token: user.token, _id: user._id });
-    }
-  });
-}
-
-function loginRequired(req, res, next) {
-  var token = req.headers['x-auth-token'];
-  if (token) {
-    User.findOne({ token: token }).exec(function (err, user) {
-      if (err) {
-        logger.error(err.message)
-        res.send(500)
-      } else if (user) {
-        req.user = user;
-        next();
-      } else {
-        res.send(401);
-      }
-    })
-  } else {
-    res.send(401)
-  }
-};
-
-function myBoards(req, res, next) {
-  Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
-    if (err) { res.send(500) }
-    else { res.send({boards: boards}) }
-  });
-};
-
-function initializeBoard(req, res, next) {
-  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    if (err) { 
-      logger.error(err.message)
-      res.send(500)
-    } else if (board) {
-      Card.populate(board.columns, { path: 'cards' }, function(err) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          req.board = board;
-          next();
-        }
-      });
-    } else {
-      logger.warn("board not found");
-      res.send(404);
-    }
-  });
-};
-
-function getBoard(req, res, next) {
-  res.send({ board: req.board });
-}
-
-function createBoard(req, res, next) {
-  var board = null;
-  if (req.body.jsonImport) {
-    res.send(500, 'Not yet implemented');
-  } else {
-    board = new Board({
-      name: req.body.name,
-      authorizedUsers: [req.user._id]
-    });
-    var insert = function (col) { board.columns.push(col) };
-    Promise.all([
-      Column.create({ name: "Icebox",  role: 1 }).then(insert),
-      Column.create({ name: "Backlog"          }).then(insert),
-      Column.create({ name: "Doing"            }).then(insert),
-      Column.create({ name: "Done",    role: 2 }).then(insert)
-    ]).then(function () {
-      board.save(function(err, board) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          res.send(201, { board: { _id: board._id }});
-        }
-      });
-    });
-  }
-};
-
-function deleteBoard(req, res, next) {
-  req.board.remove(function(err) {
-    if (err) {
-      logger.error(err.message);
-      res.send(500)
-    } else {
-      res.send(204);
-    }
-  });
-}
