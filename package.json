@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha --recursive test",
-    "tdd": "mocha -w --recursive test",
+    "test": "mocha --recursive test -R spec",
+    "tdd": "mocha -w --recursive test -R spec",
     "cover": "istanbul cover _mocha -- --recursive test"
   },
   "repository": {
