@@ -374,8 +374,21 @@ describe("Router", function() {
     });
   });
 
-  describe.skip("POST /boards/:id/columns/:col/cards/import/:provider", function() {
+  describe("POST /boards/:id/cards/:provider", function() {
     beforeEach(setupUserAndBoard);
+
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .post('/boards/'+board_id+'/cards/github')
+      .expect(401)
+      .end(function () {
+        request(app)
+        .post('/boards/'+board_id+'/cards/github')
+        .set('X-Auth-Token', "---")
+        .expect(401)
+        .end(done);
+      });
+    });
 
     it("adds the cards to the board and returns the new board", function(done) {
       var issue1 = { title: "foo", id: '123' };
@@ -383,7 +396,8 @@ describe("Router", function() {
       var card1 = { remoteObject: issue1, provider: "github", repo_id: "1234" };
       var card2 = { remoteObject: issue2, provider: "github", repo_id: "1234" };
       request(app)
-      .post('/boards/1/columns/0/cards/import/github')
+      .post('/boards/'+board_id+'/cards/github')
+      .set('X-Auth-Token', user.token)
       .send({
         openIssues: [issue1, issue2],
         metadata: { repo_id: "1234" }
@@ -392,16 +406,21 @@ describe("Router", function() {
       .expect(200)
       .end(function(err, res){
         if (err) throw err;
-        expect(res.body.board.columns[0].cards.length).to.eq(2);
-        expect(res.body.board.columns[1].cards.length).to.eq(1);
-        expect(res.body.board.columns[0].cards[0]).to.deep.eq(card1);
-        expect(res.body.board.columns[0].cards[1]).to.deep.eq(card2);
-        expect(Board.update.callCount).to.eq(1);
+        var cards = res.body.board.columns[0].cards;
+        expect(cards).to.have.length(2);
+        expect(cards[0].provider).to.eq('github');
+        expect(cards[0].repo_id).to.eq('1234');
+        expect(cards[0].remoteObject.title).to.be.ok;
+        expect(cards[0].remoteObject.id).to.be.ok;
+        expect(cards[1].provider).to.eq('github');
+        expect(cards[1].repo_id).to.eq('1234');
+        expect(cards[1].remoteObject.title).to.be.ok;
+        expect(cards[1].remoteObject.id).to.be.ok;
         done();
       });
     });
 
-    it("merges/updates cards with the same (issue) id instead of duplicating", function(done) {
+    it.skip("merges/updates cards with the same (issue) id instead of duplicating", function(done) {
       var issue = { title: "new title", new_field: 'test', id: 1 };
       request(app)
       .post('/boards/1/columns/0/cards/import/github')

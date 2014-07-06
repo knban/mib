@@ -181,6 +181,60 @@ function updateBoardLinks(req, res, next) {
 };
 
 /*
+ * POST /boards/:id/cards/:provider
+ * Import cards into the board using the provider
+ */
+
+r.route('/boards/:_id/cards/:provider')
+.post(loginRequired, initializeBoard, createCardsViaProvider);
+
+function createCardsViaProvider(req, res, next) {
+  var board = req.board;
+  var handler = providers[req.params.provider].cardHandler;
+
+  var promises = [];
+  Column.findOne({ board: board._id, role: 1 }).exec(function (err, column) {
+    if (err) {
+      logger.error(err.message);
+      res.send(500);
+    } else {
+      handler.batchImport(board, req.body, function (attributes) {
+        attributes.column = column._id;
+        promises.push(Card.create(attributes))
+      }, function() {
+        Promise.all(promises).then(function () {
+          Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
+            //console.log(board.populate('columns').columns);
+            if (err) { res.send(500, err.message); }
+            else {
+              Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+                if (err) { 
+                  logger.error(err.message)
+                  res.send(500)
+                } else if (board) {
+                  Card.populate(board.columns, { path: 'cards' }, function(err) {
+                    if (err) {
+                      logger.error(err.message);
+                      res.send(500);
+                    } else {
+                      req.board = board;
+                      res.send({ board: { columns: board.columns } })
+                    }
+                  });
+                } else {
+                  res.send(404);
+                }
+              });
+            }
+          });
+        });
+      })
+    }
+  })
+};
+
+
+/*
  *
  * ALL CODE BELOW IS UNTESTED
  *
@@ -190,7 +244,6 @@ function updateBoardLinks(req, res, next) {
 /*
  * POST /boards/:_id/columns/:col/cards/import/:provider
  * Batch import issues as cards into a column using a provider's card handler
- */
 
 r.route('/boards/:_id/columns/:col/cards/import/:provider')
 .post(initializeBoard, function(req, res, next) {
@@ -212,6 +265,7 @@ r.route('/boards/:_id/columns/:col/cards/import/:provider')
   });
 })
 
+ */
 
 // Update a column
 r.put('/boards/:_id/columns/:col/cards', function(req, res, next) {

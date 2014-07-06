@@ -9,9 +9,11 @@ module.exports = function(providerInfo) {
         repo_id: repo_id
       }
     },
-    batchImport: function(boardAttributes, issues, metadata, done) {
-      var cards = boardAttributes.columns[0].cards;
-      var allCards = _.flatten(_.pluck(boardAttributes.columns, 'cards'));
+    batchImport: function(board, json, importCard, done) {
+      var issues = json.openIssues;
+      var metadata = json.metadata;
+      var cards = board.columns[0].cards;
+      var allCards = _.flatten(_.pluck(board.columns, 'cards'));
       // Sort the cards by provider_id so testing dupes is quicker (Right?)
       var sortedCards = _.sortBy(allCards, function(c) { return c.provider_id });
       _.each(issues, function(issue) {
@@ -22,8 +24,7 @@ module.exports = function(providerInfo) {
         if (existingCard) {
           _.merge(existingCard.remoteObject, issue);
         } else {
-          var card = this.newCard(metadata.repo_id, issue);
-          cards.push(card);
+          importCard(this.newCard(metadata.repo_id, issue));
         }
       }.bind(this));
       done();
