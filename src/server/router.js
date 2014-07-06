@@ -81,13 +81,14 @@ function createBoard(req, res, next) {
       name: req.body.name,
       authorizedUsers: [req.user._id]
     });
-    var insert = function (col) { board.columns.push(col) };
     Promise.all([
-      Column.create({ name: "Icebox",  role: 1 }).then(insert),
-      Column.create({ name: "Backlog"          }).then(insert),
-      Column.create({ name: "Doing"            }).then(insert),
-      Column.create({ name: "Done",    role: 2 }).then(insert)
-    ]).then(function () {
+      Column.create({ name: "Icebox",  role: 1 }),
+      Column.create({ name: "Backlog"          }),
+      Column.create({ name: "Doing"            }),
+      Column.create({ name: "Done",    role: 2 })
+    ]).spread(function () {
+      var columns = Array.prototype.slice.call(arguments);
+      board.columns = board.columns.concat(columns);
       board.save(function(err, board) {
         if (err) {
           logger.error(err.message);
