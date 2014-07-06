@@ -41,26 +41,9 @@ r.route('/boards')
 
 r.route('/boards/:_id')
 .all(loginRequired)
-.all(getBoardById)
-.get(function(req, res, next) {
-  res.send({ board: req.board });
-})
-.delete(function(req, res, next) {
-  var user = new User(req.session);
-  if (user.loggedIn) {
-    Board.find({
-      _id: req.params._id,
-      authorizedUsers: user.identifier
-    }).remove(function(err) {
-      if (err) { res.send(500) }
-      else {
-        res.send(204);
-      }
-    });
-  } else {
-    res.send(401);
-  }
-});
+.all(initializeBoard)
+.get(getBoard)
+.delete(deleteBoard);
 
 
 /*
@@ -69,7 +52,7 @@ r.route('/boards/:_id')
  */
 
 r.route('/boards/:_id/columns/:col/cards/import/:provider')
-.post(getBoardById, function(req, res, next) {
+.post(initializeBoard, function(req, res, next) {
   Board.find({ _id: req.params._id }, function(err, boards) {
     if (err) {
       res.send(500);
@@ -250,8 +233,14 @@ function loginRequired(req, res, next) {
   } else { res.send(401) }
 };
 
+function getBoards(req, res, next) {
+  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
+    if (err) { res.send(500) }
+    else { res.send({boards: boards}) }
+  });
+};
 
-function getBoardById(req, res, next) {
+function initializeBoard(req, res, next) {
   Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
     if (err) { 
       logger.error(err.message)
@@ -273,12 +262,9 @@ function getBoardById(req, res, next) {
   });
 };
 
-function getBoards(req, res, next) {
-  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
-    if (err) { res.send(500) }
-    else { res.send({boards: boards}) }
-  });
-};
+function getBoard(req, res, next) {
+  res.send({ board: req.board });
+}
 
 function createBoard(req, res, next) {
   var board = null;
@@ -307,3 +293,14 @@ function createBoard(req, res, next) {
     });
   }
 };
+
+function deleteBoard(req, res, next) {
+  req.board.remove(function(err) {
+    if (err) {
+      logger.error(err.message);
+      res.send(500)
+    } else {
+      res.send(204);
+    }
+  });
+}
