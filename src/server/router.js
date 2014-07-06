@@ -2,6 +2,7 @@ var express = require('express');
 var r = module.exports = express.Router();
 var _ = require('lodash');
 var logger = require('winston');
+var Promise = require('bluebird');
 
 var Models = require('./models'),
 Board = Models.Board,
@@ -55,14 +56,13 @@ r.route('/boards')
       name: req.body.name,
       authorizedUsers: [req.user._id]
     });
-    var pushColumn = function (col) {
-      board.columns.push(col);
-    };
-    Column
-    .create({ name: "Icebox", role: 0 }).then(pushColumn).then(Column
-    .create({ name: "Backlog"         }).then(pushColumn)).then(Column
-    .create({ name: "Doing"           }).then(pushColumn)).then(Column
-    .create({ name: "Done",   role: 1 }).then(pushColumn).then(function () {
+    var insert = function (col) { board.columns.push(col) };
+    Promise.all([
+      Column.create({ name: "Icebox",  role: 1 }).then(insert),
+      Column.create({ name: "Backlog"          }).then(insert),
+      Column.create({ name: "Doing"            }).then(insert),
+      Column.create({ name: "Done",    role: 2 }).then(insert)
+    ]).then(function () {
       board.save(function(err, board) {
         if (err) {
           logger.error(err.message);
@@ -71,7 +71,7 @@ r.route('/boards')
           res.send(201, { board: { _id: board._id }});
         }
       });
-    }));
+    });
   }
 })
 

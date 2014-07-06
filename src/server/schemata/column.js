@@ -5,10 +5,11 @@ relationship = require('mongoose-relationship');
 var columnSchema = mongoose.Schema({
   name: String,
   /* Role enum:
-   * 0 - new cards belong here
-   * 1 - done cards belong here
+   * 0 - default
+   * 1 - new cards belong here
+   * 2 - done cards belong here
    */
-  role: Number,
+  role: { type: Number, default: 0 },
   board: { type: ObjectId, ref: 'Board', childPath: 'columns' },
   cards: [{ type: ObjectId, ref: 'Card', childPath: 'column' }],
 });

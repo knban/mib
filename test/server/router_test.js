@@ -200,7 +200,7 @@ describe("Router", function() {
     });
   });
 
-  describe.only("GET /boards/:id", function () {
+  describe("GET /boards/:id", function () {
     var user = null,
     board_id = null;
 
@@ -234,7 +234,7 @@ describe("Router", function() {
       });
     });
 
-    it("returns the board", function(done) {
+    it.only("returns the board", function(done) {
       request(app)
       .get('/boards/'+board_id)
       .set('X-Auth-Token', user.token)
@@ -248,25 +248,25 @@ describe("Router", function() {
 
         var col = board.columns[0];
         expect(col.name).to.eq('Icebox');
-        expect(col.role).to.eq(0);
+        expect(col.role).to.eq(1);
         expect(col.board).to.eq(board._id);
         expect(col.cards).to.have.length(0);
 
         col = board.columns[1];
         expect(col.name).to.eq('Backlog');
-        expect(col.role).to.be.undefined;
+        expect(col.role).to.eq(0);
         expect(col.board).to.eq(board._id);
         expect(col.cards).to.have.length(0);
 
         col = board.columns[2];
         expect(col.name).to.eq('Doing');
-        expect(col.role).to.be.undefined;
+        expect(col.role).to.eq(0);
         expect(col.board).to.eq(board._id);
         expect(col.cards).to.have.length(0);
 
         col = board.columns[3];
         expect(col.name).to.eq('Done');
-        expect(col.role).to.eq(1);
+        expect(col.role).to.eq(2);
         expect(col.board).to.eq(board._id);
         expect(col.cards).to.have.length(0);
         done();
