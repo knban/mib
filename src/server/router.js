@@ -21,18 +21,8 @@ var providers = {
  */
 
 r.route('/session')
-.get(loginRequired, function (req, res, next) {
-  res.send(req.user);
-})
-.post(function(req, res, next) {
-  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
-    if (err) {
-      res.send(401);
-    } else {
-      res.send(201, { token: user.token, _id: user._id });
-    }
-  });
-})
+.get(loginRequired, getSession)
+.post(createSession);
 
 /*
  * GET /boards
@@ -41,39 +31,8 @@ r.route('/session')
 
 r.route('/boards')
 .all(loginRequired)
-.get(function (req, res, next) {
-  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
-    if (err) { res.send(500) }
-    else { res.send({boards: boards}) }
-  });
-})
-.post(function(req, res, next) {
-  var board = null;
-  if (req.body.jsonImport) {
-    res.send(500, 'Not yet implemented');
-  } else {
-    board = new Board({
-      name: req.body.name,
-      authorizedUsers: [req.user._id]
-    });
-    var insert = function (col) { board.columns.push(col) };
-    Promise.all([
-      Column.create({ name: "Icebox",  role: 1 }).then(insert),
-      Column.create({ name: "Backlog"          }).then(insert),
-      Column.create({ name: "Doing"            }).then(insert),
-      Column.create({ name: "Done",    role: 2 }).then(insert)
-    ]).then(function () {
-      board.save(function(err, board) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          res.send(201, { board: { _id: board._id }});
-        }
-      });
-    });
-  }
-})
+.get(getBoards)
+.post(createBoard);
 
 
 /*
@@ -86,10 +45,26 @@ r.route('/boards/:_id')
 .get(function(req, res, next) {
   res.send({ board: req.board });
 })
+.delete(function(req, res, next) {
+  var user = new User(req.session);
+  if (user.loggedIn) {
+    Board.find({
+      _id: req.params._id,
+      authorizedUsers: user.identifier
+    }).remove(function(err) {
+      if (err) { res.send(500) }
+      else {
+        res.send(204);
+      }
+    });
+  } else {
+    res.send(401);
+  }
+});
 
 
 /*
- * POST /boards/:_idcolumns/:col/cards/import/:provider
+ * POST /boards/:_id/columns/:col/cards/import/:provider
  * Batch import issues as cards into a column using a provider's card handler
  */
 
@@ -201,26 +176,6 @@ r.get('/boards/:_id/export.json', function(req, res, next) {
   })
 });
 
-
-// Deleting a board
-r.delete('/boards/:_id', function(req, res, next) {
-  var user = new User(req.session);
-  if (user.loggedIn) {
-    Board.find({
-      _id: req.params._id,
-      authorizedUsers: user.identifier
-    }).remove(function(err) {
-      if (err) { res.send(500) }
-      else {
-        res.send(204);
-      }
-    });
-  } else {
-    res.send(401);
-  }
-});
-
-
 // Update a board's link with a provider repository
 r.put('/boards/:_id/links/:provider', function(req, res, next) {
   Board.findById( req.params._id, function(err, board) {
@@ -259,10 +214,23 @@ r.put('/boards/:_id/users', function(req, res, next) {
   });
 });
 
-
 /*
- * Middleware Helpers
+ * Functions
  */
+
+function getSession(req, res, next) {
+  res.send(req.user);
+};
+
+function createSession(req, res, next) {
+  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
+    if (err) {
+      res.send(401);
+    } else {
+      res.send(201, { token: user.token, _id: user._id });
+    }
+  });
+}
 
 function loginRequired(req, res, next) {
   var token = req.headers['x-auth-token'];
@@ -303,4 +271,39 @@ function getBoardById(req, res, next) {
       res.send(404);
     }
   });
+};
+
+function getBoards(req, res, next) {
+  Board.find({ authorizedUsers: req.user.identifier }, { name:1 }, function (err, boards) {
+    if (err) { res.send(500) }
+    else { res.send({boards: boards}) }
+  });
+};
+
+function createBoard(req, res, next) {
+  var board = null;
+  if (req.body.jsonImport) {
+    res.send(500, 'Not yet implemented');
+  } else {
+    board = new Board({
+      name: req.body.name,
+      authorizedUsers: [req.user._id]
+    });
+    var insert = function (col) { board.columns.push(col) };
+    Promise.all([
+      Column.create({ name: "Icebox",  role: 1 }).then(insert),
+      Column.create({ name: "Backlog"          }).then(insert),
+      Column.create({ name: "Doing"            }).then(insert),
+      Column.create({ name: "Done",    role: 2 }).then(insert)
+    ]).then(function () {
+      board.save(function(err, board) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          res.send(201, { board: { _id: board._id }});
+        }
+      });
+    });
+  }
 };
