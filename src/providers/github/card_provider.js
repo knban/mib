@@ -144,7 +144,7 @@ module.exports = function (providerInfo) {
         }.bind(this)).error(done);
       },
       postIssues: function(openIssues, metadata) {
-        var importUrl = api.route('boards/'+board.attributes._id+'/columns/'+board.projectLinker._Col+'/cards/import/github');
+        var importUrl = api.route('boards/'+board.attributes._id+'/cards/github');
         $http.post(importUrl, {
           metadata: metadata,
           openIssues: openIssues

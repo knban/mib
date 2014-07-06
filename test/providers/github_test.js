@@ -89,7 +89,7 @@ describe("GitHub Provider", function() {
         provider.importRepoIssues({ id: 111, issues_url: "test" }, done);
       });
       it("uses the correct URL", function() {
-        expect(stub.getCall(0).args[0]).to.eq("https://example.com/boards/2/columns/1/cards/import/github");
+        expect(stub.getCall(0).args[0]).to.eq("https://example.com/boards/2/cards/github");
       });
       it("supplies an id field sufficient for uniqueness matching", function() {
         expect(stub.getCall(0).args[1].openIssues[0]._id).to.eq(222);
