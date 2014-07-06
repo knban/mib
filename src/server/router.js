@@ -10,10 +10,7 @@ Column = Models.Column,
 Card = Models.Card,
 User = Models.User;
 
-var providers = {
-  github: require('../providers/github'),
-  local: require('../providers/local')
-}
+var providers = require('../providers');
 
 /*
  * GET /session -- get your user session
@@ -23,45 +20,6 @@ var providers = {
 r.route('/session')
 .get(loginRequired, getSession)
 .post(createSession);
-
-/*
- * GET /boards
- * POST /boards
- */
-
-r.route('/boards')
-.all(loginRequired)
-.get(myBoards)
-.post(createBoard);
-
-
-/*
- * GET /boards/:_id
- */
-
-r.route('/boards/:_id')
-.all(loginRequired)
-.all(initializeBoard)
-.get(getBoard)
-.delete(deleteBoard);
-
-/*
- * Functions
- */
-
-function getSession(req, res, next) {
-  res.send(req.user);
-};
-
-function createSession(req, res, next) {
-  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
-    if (err) {
-      res.send(401);
-    } else {
-      res.send(201, { token: user.token, _id: user._id });
-    }
-  });
-}
 
 function loginRequired(req, res, next) {
   var token = req.headers['x-auth-token'];
@@ -82,37 +40,37 @@ function loginRequired(req, res, next) {
   }
 };
 
+
+function getSession(req, res, next) {
+  res.send(req.user);
+};
+
+function createSession(req, res, next) {
+  User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
+    if (err) {
+      res.send(401);
+    } else {
+      res.send(201, { token: user.token, _id: user._id });
+    }
+  });
+}
+
+/*
+ * GET /boards
+ * POST /boards
+ */
+
+r.route('/boards')
+.all(loginRequired)
+.get(myBoards)
+.post(createBoard);
+
 function myBoards(req, res, next) {
   Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
     if (err) { res.send(500) }
     else { res.send({boards: boards}) }
   });
 };
-
-function initializeBoard(req, res, next) {
-  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    if (err) { 
-      logger.error(err.message)
-      res.send(500)
-    } else if (board) {
-      Card.populate(board.columns, { path: 'cards' }, function(err) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          req.board = board;
-          next();
-        }
-      });
-    } else {
-      res.send(404);
-    }
-  });
-};
-
-function getBoard(req, res, next) {
-  res.send({ board: req.board });
-}
 
 function createBoard(req, res, next) {
   var board = null;
@@ -142,6 +100,42 @@ function createBoard(req, res, next) {
   }
 };
 
+
+/*
+ * GET /boards/:_id
+ */
+
+r.route('/boards/:_id')
+.all(loginRequired)
+.all(initializeBoard)
+.get(getBoard)
+.delete(deleteBoard);
+
+function initializeBoard(req, res, next) {
+  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
+    if (err) { 
+      logger.error(err.message)
+      res.send(500)
+    } else if (board) {
+      Card.populate(board.columns, { path: 'cards' }, function(err) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          req.board = board;
+          next();
+        }
+      });
+    } else {
+      res.send(404);
+    }
+  });
+};
+
+function getBoard(req, res, next) {
+  res.send({ board: req.board });
+}
+
 function deleteBoard(req, res, next) {
   req.board.remove(function(err) {
     if (err) {
@@ -154,34 +148,38 @@ function deleteBoard(req, res, next) {
 }
 
 /*
+ * PUT /boards/:_id/links/:provider
+ * Link a board with remote objects (e.g. repositories) from a provider
+ */
+
+r.route('/boards/:_id/links/:provider')
+.all(loginRequired)
+.all(initializeBoard)
+.put(updateBoardLinks);
+
+function updateBoardLinks(req, res, next) {
+  var board = req.board;
+  if (! board.links ) {
+    board.links = {};
+  }
+  if (! board.links[req.params.provider]) {
+    board.links[req.params.provider] = {}
+  }
+  _.each(req.body[req.params.provider], function (repo) {
+    board.links[req.params.provider][repo.id] = repo;
+  });
+  Board.update({ _id: board._id }, { links: board.links }, function(err) {
+    if (err) { res.send(500, err.message); }
+    else { res.send({ links: board.links }) }
+  });
+};
+
+/*
  *
  * ALL CODE BELOW IS UNTESTED
  *
  */
 
-
-// Update a board's link with a provider repository
-r.put('/boards/:_id/links/:provider', function(req, res, next) {
-  Board.findById( req.params._id, function(err, board) {
-    if (err) {
-      res.send(500);
-    } else {
-      if (! board.links ) {
-        board.links = {};
-      }
-      if (! board.links[req.params.provider]) {
-        board.links[req.params.provider] = {}
-      }
-      _.each(req.body[req.params.provider], function (repo) {
-        board.links[req.params.provider][repo.id] = repo;
-      });
-      Board.update({ _id: board._id }, { links: board.links }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send({ links: board.links }) }
-      });
-    }
-  });
-});
 
 /*
  * POST /boards/:_id/columns/:col/cards/import/:provider
