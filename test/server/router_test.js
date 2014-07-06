@@ -157,7 +157,7 @@ describe("Router", function() {
     });
   });
 
-  describe.only("POST /boards", function () {
+  describe("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
@@ -165,7 +165,7 @@ describe("Router", function() {
       .end(done);
     });
 
-    it("creates a board with 4 empty columns", function(done) {
+    it("returns the board id", function(done) {
       setupUser(function (err, user) {
         request(app)
         .post('/boards')
@@ -174,15 +174,63 @@ describe("Router", function() {
         .expect(201)
         .end(function(err, res) {
           if (err) throw err;
-          var board = res.body.board;
-          console.log(board);
-          expect(board.name).to.eq("my board");
-          expect(board.columns).to.have(4).items;
+          expect(res.body.board._id).to.be.ok;
           done();
         });
       })
     });
   });
+
+  describe.only("GET /boards/:id", function () {
+    var user = null,
+    board_id = null;
+
+    beforeEach(function(done) {
+      setupUser(function (err, testuser) {
+        user = testuser;
+        request(app)
+        .post('/boards')
+        .send({ name: "my board" })
+        .set('X-Auth-Token', user.token)
+        .expect(201)
+        .end(function(err, res) {
+          if (err) throw err;
+          board_id = res.body.board._id;
+          expect(board_id).to.be.ok;
+          done();
+        });
+      })
+    });
+
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .get('/boards/'+board_id)
+      .expect(401)
+      .end(function () {
+        request(app)
+        .get('/boards/'+board_id)
+        .set('X-Auth-Token', "---")
+        .expect(401)
+        .end(done);
+      });
+    });
+
+    it("returns the board", function(done) {
+      request(app)
+      .get('/boards/'+board_id)
+      .set('X-Auth-Token', user.token)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) throw err;
+        var board = res.body.board;
+        console.log(res.body);
+        expect(board.authorizedUsers).to.include(user._id.toString());
+        expect(board.name).to.eq("my board");
+        expect(board.columns).to.have.length(4);
+        done();
+      })
+    });
+  })
 
 
   describe.skip("Github", function() {
