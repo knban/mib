@@ -165,19 +165,38 @@ describe("Router", function() {
       .end(done);
     });
 
-    it("returns the board id", function(done) {
-      setupUser(function (err, user) {
-        request(app)
-        .post('/boards')
-        .send({ name: "my board" })
-        .set('X-Auth-Token', user.token)
-        .expect(201)
-        .end(function(err, res) {
-          if (err) throw err;
-          expect(res.body.board._id).to.be.ok;
-          done();
-        });
-      })
+    describe("No Import Data", function() {
+      it("returns the board id", function(done) {
+        setupUser(function (err, user) {
+          request(app)
+          .post('/boards')
+          .send({ name: "my board" })
+          .set('X-Auth-Token', user.token)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) throw err;
+            expect(res.body.board._id).to.be.ok;
+            done();
+          });
+        })
+      });
+    });
+
+    describe.skip("Import Data", function() {
+      it("returns the board id", function(done) {
+        setupUser(function (err, user) {
+          request(app)
+          .post('/boards')
+          .send({ name: "my board" })
+          .set('X-Auth-Token', user.token)
+          .expect(201)
+          .end(function(err, res) {
+            if (err) throw err;
+            expect(res.body.board._id).to.be.ok;
+            done();
+          });
+        })
+      });
     });
   });
 
@@ -223,10 +242,33 @@ describe("Router", function() {
       .end(function (err, res) {
         if (err) throw err;
         var board = res.body.board;
-        console.log(res.body);
-        expect(board.authorizedUsers).to.include(user._id.toString());
+        expect(board.authorizedUsers).to.deep.eq([user._id.toString()]);
         expect(board.name).to.eq("my board");
         expect(board.columns).to.have.length(4);
+
+        var col = board.columns[0];
+        expect(col.name).to.eq('Icebox');
+        expect(col.role).to.eq(0);
+        expect(col.board).to.eq(board._id);
+        expect(col.cards).to.have.length(0);
+
+        col = board.columns[1];
+        expect(col.name).to.eq('Backlog');
+        expect(col.role).to.be.undefined;
+        expect(col.board).to.eq(board._id);
+        expect(col.cards).to.have.length(0);
+
+        col = board.columns[2];
+        expect(col.name).to.eq('Doing');
+        expect(col.role).to.be.undefined;
+        expect(col.board).to.eq(board._id);
+        expect(col.cards).to.have.length(0);
+
+        col = board.columns[3];
+        expect(col.name).to.eq('Done');
+        expect(col.role).to.eq(1);
+        expect(col.board).to.eq(board._id);
+        expect(col.cards).to.have.length(0);
         done();
       })
     });

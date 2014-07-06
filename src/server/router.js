@@ -49,22 +49,30 @@ r.route('/boards')
 .post(function(req, res, next) {
   var board = null;
   if (req.body.jsonImport) {
-    // TODO see if this still works
-    board = new Board(req.body.jsonImport);
-    board.authorizedUsers = _.merge(board.authorizedUsers, req.user.identifier);
+    res.send(500, 'Not yet implemented');
   } else {
-    board = new Board();
-    board.authorizedUsers = [req.user._id];
+    board = new Board({
+      name: req.body.name,
+      authorizedUsers: [req.user._id]
+    });
+    var pushColumn = function (col) {
+      board.columns.push(col);
+    };
+    Column
+    .create({ name: "Icebox", role: 0 }).then(pushColumn).then(Column
+    .create({ name: "Backlog"         }).then(pushColumn)).then(Column
+    .create({ name: "Doing"           }).then(pushColumn)).then(Column
+    .create({ name: "Done",   role: 1 }).then(pushColumn).then(function () {
+      board.save(function(err, board) {
+        if (err) {
+          logger.error(err.message);
+          res.send(500);
+        } else {
+          res.send(201, { board: { _id: board._id }});
+        }
+      });
+    }));
   }
-  board.name = req.body.name;
-  board.save(function(err, board) {
-    if (err) {
-      logger.error(err.message);
-      res.send(500);
-    } else {
-      res.send(201, { board: { _id: board._id }});
-    }
-  });
 })
 
 
