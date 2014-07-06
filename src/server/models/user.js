@@ -1,4 +1,5 @@
 var uuid = require('node-uuid');
+var logger = require('winston');
 
 var userSchema = require('./../schemata/user');
 /* 
@@ -25,20 +26,25 @@ userSchema.statics.findOrCreateByAuthorization = function(data, providers, callb
           if (err) { return callback(err); }
           else if (user) {
             // Found the user
-            if (! user.authorizations) user.authorizations = {};
-            user.authorizations[data.provider] = providerData;
+            var auths = user.authorizations || {};
+            auths[data.provider] = providerData;
+            user.authorizations = null; // important
+            user.authorizations = auths;
             user.token = uuid.v4();
-            user.save(function () {
-              callback(null, user)
+            user.save(function (err, savedUser) {
+              if (err) callback(err);
+              else callback(null, savedUser)
             });
           } else {
             // Create the user
             var user = new User();
-            if (! user.authorizations) user.authorizations = {};
-            user.authorizations[data.provider] = providerData;
+            var auths = {};
+            auths[data.provider] = providerData;
+            user.authorizations = auths;
             user.token = uuid.v4();
-            user.save(function () {
-              callback(null, user)
+            user.save(function (err, res) {
+              if (err) callback(err);
+              else callback(null, user)
             });
           }
         })
