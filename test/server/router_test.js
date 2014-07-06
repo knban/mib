@@ -157,7 +157,7 @@ describe("Router", function() {
     });
   });
 
-  describe.skip("POST /boards", function () {
+  describe.only("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
@@ -165,18 +165,22 @@ describe("Router", function() {
       .end(done);
     });
 
-    it("creates an empty board", function(done) {
-      request(app)
-      .post('/boards')
-      .send({
-
+    it("creates a board with 4 empty columns", function(done) {
+      setupUser(function (err, user) {
+        request(app)
+        .post('/boards')
+        .send({ name: "my board" })
+        .set('X-Auth-Token', user.token)
+        .expect(201)
+        .end(function(err, res) {
+          if (err) throw err;
+          var board = res.body.board;
+          console.log(board);
+          expect(board.name).to.eq("my board");
+          expect(board.columns).to.have(4).items;
+          done();
+        });
       })
-      .set('X-Auth-Token', 'mytoken')
-      .expect(201)
-      .end(function(err, res) {
-        if (err) throw err;
-        done();
-      });
     });
   });
 
