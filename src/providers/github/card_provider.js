@@ -7,11 +7,11 @@ var _ = {
   where: require('lodash.where')
 }
 
-module.exports = function(board, linker, $http) {
+module.exports = function(board, linker, token, $http) {
   return {
     info: info,
     next: function() {
-      $http.defaults.headers.common.Authorization = 'token '+app.session.auth.github.token;
+      $http.defaults.headers.common.Authorization = 'token '+token;
       linker._Provider = this;
       linker._Help = "Is it a personal repository or part of an organization?"
       linker._PersonalOrOrg = true;

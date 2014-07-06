@@ -9,9 +9,13 @@ var li = require('li');
 var Endpoint = require('../../src/client/endpoint');
 
 describe("GitHub Provider", function() {
-  global.app = {};
-  global.api = new Endpoint();
-  global.api.setRoot('https://example.com/');
+  var app = {};
+  var api = new Endpoint();
+  api.setRoot('https://example.com/');
+  var tokens = {
+    github: "ghtoken"
+  };
+  var localStorage = tokens;
   var board = null;
   var provider = null;
   var $http = null;
@@ -39,7 +43,7 @@ describe("GitHub Provider", function() {
         },
       });
       global.window = { location: { origin: origin } };
-      provider = Provider(board, linker, $http);
+      provider = Provider(board, linker, tokens, $http);
       provider.installWebhook(repo, function () {})
       hook = $http.post.getCall(0).args[1];
     });
@@ -62,7 +66,7 @@ describe("GitHub Provider", function() {
           { name: "repo1" }, { name: "repo2" }, { name: "repo3" }
         ], 200, function linkHeaders() {return ''});
       });
-      provider = Provider(board, linker, $http);
+      provider = Provider(board, linker, tokens, $http);
       provider.getRepos('url');
     });
     it("populates linker._Repos with 3 repos", function() {
@@ -85,7 +89,7 @@ describe("GitHub Provider", function() {
         });
         board._id = 2;
         linker._Col = 1;
-        provider = Provider(board, linker, $http);
+        provider = Provider(board, linker, tokens, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" }, done);
       });
       it("uses the correct URL", function() {
@@ -115,7 +119,7 @@ describe("GitHub Provider", function() {
         });
         board.id = 2;
         linker._Col = 1;
-        provider = Provider(board, linker, $http);
+        provider = Provider(board, linker, tokens, $http);
         provider.importRepoIssues({ id: 111, issues_url: "test" }, function () {
           done();
         });

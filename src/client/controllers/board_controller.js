@@ -7,7 +7,7 @@ UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
   var board = this;
-  this.projectLinker = new ProjectLinker(board, $http);
+  this.projectLinker = new ProjectLinker(board, localStorage, $http);
   this.userMod = new UserMod(board, $http);
   this.creator = new BoardCreator(this, $http);
   this.unload = function (preventClearLastBoard) {

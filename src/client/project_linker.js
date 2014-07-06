@@ -1,9 +1,11 @@
 var GithubProvider = require('../providers').github.cardProvider;
 
-module.exports = function (boardCtrl, $http) {
-  this.providers = [
-    GithubProvider(boardCtrl.attributes, this, $http)
-  ];
+module.exports = function (boardCtrl, tokens, $http) {
+  this.providers = [];
+  if (tokens.github) {
+    var token = tokens.github;
+    this.providers.push( GithubProvider(boardCtrl.attributes, this, token, $http) )
+  };
   this.open = function() {
     this.reset();
     this.isOpen = true;

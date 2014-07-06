@@ -1,3 +1,5 @@
+var logger = require('winston');
+
 module.exports = ['$http', function($http) {
   session = this;
 
@@ -5,6 +7,12 @@ module.exports = ['$http', function($http) {
     $http.defaults.headers.common['X-Auth-Token'] = localStorage.token;
     $http.get(api.route('session')).success(function(data) {
       session.user = data;
+      try {
+        localStorage.github = data.authorizations.github.token;
+      } catch (e) {
+        logger.warn("no github authorization");
+        localStorage.removeItem('github');
+      }
       session.anonymous = false;
       session.loggedIn = true;
       session.getBoardList();
@@ -18,7 +26,7 @@ module.exports = ['$http', function($http) {
   }
 
   this.destroy = function () {
-    localStorage.removeItem('token');
+    localStorage.clear();
     session.loggedIn = false;
     session.anonymous = true;
     session.user = null;

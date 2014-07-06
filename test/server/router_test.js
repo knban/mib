@@ -114,15 +114,14 @@ describe("Router", function() {
     });
 
     describe("github auth provider", function() {
-      function mockGithub() {
+
+      function mockGithub(withToken) {
         nock('https://api.github.com')
         .put('/authorizations/clients/'+process.env.GITHUB_CLIENT_ID)
         .reply(200, {
-          token: "ghtoken"
-        });
+          token: withToken || 'ghtoken'
+        })
       }
-
-      beforeEach(mockGithub);
 
       function loginViaGithub() {
         return request(app)
@@ -137,6 +136,7 @@ describe("Router", function() {
 
       describe("new user", function() {
         it("creates a new user with a token", function(done) {
+          mockGithub();
           loginViaGithub().end(function (err, res) {
             if (err) throw err;
             expect(res.body.token).to.be.ok;
@@ -149,6 +149,7 @@ describe("Router", function() {
         var token = null;
         var id = null;
         it("finds the existing user and resets the token", function(done) {
+          mockGithub();
           loginViaGithub().end(function (err, res) {
             if (err) throw err;
             expect(res.body.token).to.be.ok;
@@ -157,11 +158,40 @@ describe("Router", function() {
             mockGithub();
             loginViaGithub().end(function (err, res) {
               if (err) throw err;
-              expect(res.body._id).to.be.ok;
               expect(res.body._id).to.eq(id);
-              expect(res.body.token).to.be.ok;
               expect(res.body.token).not.to.eq(token);
               done(); 
+            });
+          });
+        });
+
+        it("updates the github token", function(done) {
+          var ghtoken = "firstToken";
+          mockGithub(ghtoken);
+          loginViaGithub().end(function (err, res) {
+            if (err) throw err;
+            request(app)
+            .get('/session')
+            .set('X-Auth-Token', res.body.token)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function (err, res) {
+              expect(res.body.authorizations.github.token).to.eq(ghtoken);
+              ghtoken = "nextToken";
+              mockGithub(ghtoken);
+              loginViaGithub().end(function (err, res) {
+                if (err) throw err;
+                request(app)
+                .get('/session')
+                .set('X-Auth-Token', res.body.token)
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function (err, res) {
+                  if (err) throw err;
+                  expect(res.body.authorizations.github.token).to.eq(ghtoken);
+                  done();
+                });
+              })
             });
           });
         });
