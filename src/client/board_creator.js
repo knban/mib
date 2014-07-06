@@ -32,7 +32,6 @@ module.exports = function BoardCreator(board, $http) {
       $http.post(api.route('boards'), payload).success(function (data) {
         form.success = "Board created!"
         form.close();
-        console.log(data);
         app.loadBoardById(data.board._id);
         app.updateBoardList();
       }).error(function (err, status) {

@@ -22,8 +22,8 @@
           <li><a href="#" ng-click="board.creator.open()">Create / Import</a></li>
         </ul>
       </li>
+
       <li ng-show="board.loaded">
-        <!-- probably just use a modal instead of changing the link in the nav bar -->
         <a href="#" ng-show="board.projectLinker.isOpen" ng-click="board.projectLinker.close()">Close Linker</a>
         <a href="#" ng-hide="board.projectLinker.isOpen" ng-click="board.projectLinker.open()">Linker</a>
       </li>
