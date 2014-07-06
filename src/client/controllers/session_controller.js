@@ -1,10 +1,6 @@
 module.exports = ['$http', function($http) {
   session = this;
 
-  this.userIdentifier = function () {
-    return this.user.uid || this.user.authorizations.github.login;
-  };
-
   this.load = function () {
     $http.defaults.headers.common['X-Auth-Token'] = localStorage.token;
     $http.get(api.route('session')).success(function(data) {
@@ -12,7 +8,9 @@ module.exports = ['$http', function($http) {
       session.anonymous = false;
       session.loggedIn = true;
       session.getBoardList();
-    }).error(session.destroy);
+    }).error(function () {
+      session.destroy();
+    });
   };
 
   if (localStorage.token) {
@@ -20,11 +18,10 @@ module.exports = ['$http', function($http) {
   }
 
   this.destroy = function () {
-    $http.delete(api.route('session'));
     localStorage.removeItem('token');
-    session.anonymous = true;
     session.loggedIn = false;
-    app.session = null;
+    session.anonymous = true;
+    session.user = null;
   };
 
   this.getBoardList = app.updateBoardList = function () {

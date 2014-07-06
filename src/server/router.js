@@ -18,10 +18,15 @@ function loginRequired(req, res, next) {
   var token = req.headers['x-auth-token'];
   if (token) {
     User.findOne({ token: token }).exec(function (err, user) {
-      if (err || !user) { res.send(500) }
-      else if (user) {
+      if (err) {
+        logger.error(err.message)
+        res.send(500)
+      } else if (user) {
         req.user = user;
         next();
+      } else {
+        logger.warn("No user found with that token");
+        res.send(401);
       }
     })
   } else { res.send(401) }
@@ -53,7 +58,6 @@ function getBoardById(req, res, next) {
 /*
  * GET /session -- get your user session
  * POST /session -- get your token
- * DELETE /session
  */
 
 r.route('/session')
@@ -68,12 +72,6 @@ r.route('/session')
       res.send(201, { token: user.token, _id: user._id });
     }
   });
-})
-.delete(function (req, res, next) {
-  // probably just delete the token on both sides
-  req.user = null;
-  req.session = null;
-  res.send(204);
 })
 
 /*
