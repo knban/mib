@@ -1,6 +1,7 @@
 var li = require('li');
 var async = require('async');
 var info = require('./info');
+var logger = require('winston');
 
 var _ = {
   map: require('lodash.map'),

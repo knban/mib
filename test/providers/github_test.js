@@ -9,7 +9,7 @@ var li = require('li');
 
 var Endpoint = require('../../src/client/endpoint');
 
-describe.only("GitHub Provider", function() {
+describe("GitHub Provider", function() {
   var board = null,
   linker = null,
   provider = null,
