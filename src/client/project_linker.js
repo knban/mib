@@ -1,10 +1,17 @@
-var GithubProvider = require('../providers').github.cardProvider;
+var providers = require('../providers');
+var Endpoint = require('./endpoint');
 
 module.exports = function (boardCtrl, tokens, $http) {
   this.providers = [];
   if (tokens.github) {
-    var token = tokens.github;
-    this.providers.push( GithubProvider(boardCtrl.attributes, this, token, $http) )
+    var github = new Endpoint();
+    github.setRoot('https://api.github.com/');
+    github.setClient('angular', $http, {
+      headers: { 'Authorization': 'token '+tokens.github }
+    });
+    var api = window.api;
+    var provider = providers.github.cardProvider(boardCtrl.attributes, api, github, this);
+    this.providers.push(provider);
   };
   this.open = function() {
     this.reset();
