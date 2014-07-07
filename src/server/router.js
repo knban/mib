@@ -76,29 +76,11 @@ function createBoard(req, res, next) {
   if (req.body.jsonImport) {
     res.send(500, 'Not yet implemented');
   } else {
-    var attributes = {
+    Board.createWithDefaultColumns({
       name: req.body.name,
       authorizedUsers: [req.user._id]
-    };
-    Promise.all([
-      Board.create(attributes),
-      Column.create({ name: "Icebox",  role: 1 }),
-      Column.create({ name: "Backlog"          }),
-      Column.create({ name: "Doing"            }),
-      Column.create({ name: "Done",    role: 2 })
-    ]).spread(function (board, icebox, backlog, doing, done) {
-      board.columns.push(icebox);
-      board.columns.push(backlog);
-      board.columns.push(doing);
-      board.columns.push(done);
-      board.save(function(err, board) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          res.send(201, { board: { _id: board._id }});
-        }
-      });
+    }).then(function (board) {
+      res.send(201, { board: { _id: board._id }});
     }).catch(function (err) {
       logger.error(err.message);
       res.send(500);
