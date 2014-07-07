@@ -121,7 +121,9 @@ function initializeBoard(req, res, next) {
   Board.findOneAndPopulate({ _id: req.params._id }).then(function (board) {
     req.board = board;
     next();
-  }).catch(function (err) {
+  }).error(function () {
+    res.send(404);
+  }).catch(Error, function (err) {
     logger.error(err.message);
     res.send(500);
   })
@@ -231,32 +233,6 @@ function sendBoardColumns(req, res, next) {
  *
  */
 
-
-/*
- * POST /boards/:_id/columns/:col/cards/import/:provider
- * Batch import issues as cards into a column using a provider's card handler
-
-r.route('/boards/:_id/columns/:col/cards/import/:provider')
-.post(initializeBoard, function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      var handler = providers[req.params.provider].cardHandler;
-      handler.batchImport(board, req.body.openIssues, req.body.metadata, function() {
-        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-          if (err) { res.send(500, err.message); }
-          else { res.send({ board: { columns: board.columns } }) }
-        });
-      })
-    }
-  });
-})
-
- */
 
 // Update a column
 r.put('/boards/:_id/columns/:col/cards', function(req, res, next) {
