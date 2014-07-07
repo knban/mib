@@ -118,24 +118,13 @@ r.route('/boards/:_id')
 .delete(deleteBoard);
 
 function initializeBoard(req, res, next) {
-  Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-    if (err) { 
-      logger.error(err.message)
-      res.send(500)
-    } else if (board) {
-      Card.populate(board.columns, { path: 'cards' }, function(err) {
-        if (err) {
-          logger.error(err.message);
-          res.send(500);
-        } else {
-          req.board = board;
-          next();
-        }
-      });
-    } else {
-      res.send(404);
-    }
-  });
+  Board.findOneAndPopulate({ _id: req.params._id }).then(function (board) {
+    req.board = board;
+    next();
+  }).catch(function (err) {
+    logger.error(err.message);
+    res.send(500);
+  })
 };
 
 function getBoard(req, res, next) {
@@ -186,50 +175,53 @@ function updateBoardLinks(req, res, next) {
  */
 
 r.route('/boards/:_id/cards/:provider')
-.post(loginRequired, initializeBoard, createCardsViaProvider);
+.post(loginRequired,
+      initializeBoard,
+      initializeFirstColumn,
+      initializeCardHandler,
+      importCardsViaProvider,
+      saveCardsViaPromises,
+      initializeBoard,
+      sendBoardColumns
+     );
 
-function createCardsViaProvider(req, res, next) {
-  var board = req.board;
-  var handler = providers[req.params.provider].cardHandler;
-
-  var promises = [];
-  Column.findOne({ board: board._id, role: 1 }).exec(function (err, column) {
+function initializeFirstColumn(req, res, next) {
+  Column.findOne({ board: req.board._id, role: 1 })
+  .exec(function (err, column) {
     if (err) {
       logger.error(err.message);
       res.send(500);
     } else {
-      handler.batchImport(board, req.body, function (attributes) {
-        attributes.column = column._id;
-        promises.push(Card.create(attributes))
-      }, function() {
-        Promise.all(promises).then(function () {
-          Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-            if (err) { res.send(500, err.message); }
-            else {
-              Board.findOne({ _id: req.params._id }).populate('columns').exec(function(err, board) {
-                if (err) { 
-                  logger.error(err.message)
-                  res.send(500)
-                } else if (board) {
-                  Card.populate(board.columns, { path: 'cards' }, function(err) {
-                    if (err) {
-                      logger.error(err.message);
- /*lol javascript*/   res.send(500);
-                    } else {
-                      req.board = board;
-                      res.send({ board: { columns: board.columns } })
-                    }
-                  });
-                } else {
-                  res.send(404);
-                }
-              });
-            }
-          });
-        });
-      })
+      req.column = column;
+      next();
     }
-  })
+  });
+};
+
+function initializeCardHandler(req, res, next) {
+  req.handler = providers[req.params.provider].cardHandler;
+  next();
+};
+
+function importCardsViaProvider(req, res, next) {
+  req.promises = [];
+  req.handler.batchImport(req.board, req.body, function (attributes) {
+    attributes.column = req.column._id;
+    req.promises.push(Card.create(attributes))
+  }, next);
+};
+
+function saveCardsViaPromises(req, res, next) {
+  Promise.all(req.promises).then(function () {
+    req.board.update({ columns: req.board.columns }, function(err) {
+      if (err) res.send(500, err.message);
+      else next()
+    });
+  });
+};
+
+function sendBoardColumns(req, res, next) {
+  res.send({ board: { columns: req.board.columns } });
 };
 
 
