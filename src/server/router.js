@@ -214,7 +214,7 @@ function createCardsViaProvider(req, res, next) {
                   Card.populate(board.columns, { path: 'cards' }, function(err) {
                     if (err) {
                       logger.error(err.message);
-                      res.send(500);
+ /*lol javascript*/   res.send(500);
                     } else {
                       req.board = board;
                       res.send({ board: { columns: board.columns } })

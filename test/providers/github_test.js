@@ -11,14 +11,14 @@ var Endpoint = require('../../src/client/endpoint');
 
 describe("GitHub Provider", function() {
   var board = null,
-  linker = null,
-  provider = null,
-  $api = null,
-  $github = null,
-  root = null,
-  github = null,
-  api = null,
-  request = null;
+  linker    = null,
+  provider  = null,
+  $api      = null,
+  $github   = null,
+  root      = null,
+  github    = null,
+  api       = null,
+  request   = null;
 
   beforeEach(function() {
     root = "https://example.com/";
