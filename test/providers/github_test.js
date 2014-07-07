@@ -9,7 +9,7 @@ var li = require('li');
 
 var Endpoint = require('../../src/client/endpoint');
 
-describe("GitHub Provider", function() {
+describe.only("GitHub Provider", function() {
   var board = null,
   linker = null,
   provider = null,
@@ -51,7 +51,14 @@ describe("GitHub Provider", function() {
       headers: { 'Authorization': 'token ghtoken' }
     });
 
-    provider = Provider(board, api, github, linker);
+    provider = Provider({ attributes: board }, api, github, linker);
+    provider.next();
+  });
+
+  it("fetches user data from github", function() {
+    request = $github.getCall(0).args[0];
+    expect(request.url).to.eq('https://api.github.com/user');
+    expect(request.headers['Authorization']).to.eq('token ghtoken');
   });
 
   describe("installWebhook", function() {
@@ -60,8 +67,8 @@ describe("GitHub Provider", function() {
     var repo = { id: 123, hooks_url: "hooks" }
     beforeEach(function() {
       provider.installWebhook(repo, function () {})
-      request = $github.getCall(0).args[0];
-      hook = $github.getCall(0).args[0].data;
+      request = $github.getCall(1).args[0];
+      hook = $github.getCall(1).args[0].data;
     });
     it("sends the user token correctly", function() {
       expect(request.headers['Authorization']).to.eq('token ghtoken');

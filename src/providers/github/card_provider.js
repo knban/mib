@@ -7,12 +7,14 @@ var _ = {
   where: require('lodash.where')
 }
 
-module.exports = function(board, api, github, linker) {
+module.exports = function(boardCtrl, api, github, linker) {
+  var board = null;
   var user = null;
 
   return {
     info: info,
     next: function() {
+      board = boardCtrl.attributes;
       linker._Provider = this;
       linker._Help = "Loading user metadata ...";
       github.get('user').success(function(data) {

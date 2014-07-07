@@ -10,7 +10,7 @@ module.exports = function (boardCtrl, tokens, $http) {
       headers: { 'Authorization': 'token '+tokens.github }
     });
     var api = window.api;
-    var provider = providers.github.cardProvider(boardCtrl.attributes, api, github, this);
+    var provider = providers.github.cardProvider(boardCtrl, api, github, this);
     this.providers.push(provider);
   };
   this.open = function() {
