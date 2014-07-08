@@ -216,7 +216,7 @@ r.route('/boards/:_id/cards/:card_id/move')
 function performCardMove(req, res, next) {
   if (req.body.old_column === req.body.new_column) {
     Column.findByIdAndMutate(req.body.old_column, function (column) {
-      column.cards.splice(req.body.old_index, 1);
+      column.cards.splice(column.cards.indexOf(req.params.card_id), 1);
       column.cards.splice(req.body.new_index, 0, req.params.card_id);
     }).then(function () {
       res.send(204)
@@ -227,7 +227,7 @@ function performCardMove(req, res, next) {
   } else {
     Promise.all([
       Column.findByIdAndMutate(req.body.old_column, function (column) {
-        column.cards.splice(req.body.old_index, 1);
+        column.cards.splice(column.cards.indexOf(req.params.card_id), 1);
       }),
       Column.findByIdAndMutate(req.body.new_column, function (column) {
         column.cards.splice(req.body.new_index, 0, req.params.card_id);
