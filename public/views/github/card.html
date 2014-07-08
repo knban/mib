@@ -8,6 +8,10 @@
   </div>
 </span>
 
+<span class="badge pull-right" ng-show="card.remoteObject.assignee.avatar_url">
+  <img class="pull-right" ng-src="{{card.remoteObject.assignee.avatar_url}}" width="20px">
+</span>
+
 <a href="{{card.remoteObject.html_url}}" 
   ng-tooltip="{{card.remoteObject.body}}"
   target="_blank">{{card.remoteObject.title}}</a>
