@@ -483,6 +483,83 @@ describe("Router", function() {
     });
   });
 
+  describe.only("PUT /boards/:id/cards/:card_id/move", function() {
+    beforeEach(function (done) {
+      setupUserAndBoard(function () {
+        var issue1 = { title: "foo", id: '123' };
+        var issue2 = { title: "bar", id: '234' };
+        request(app)
+        .post('/boards/'+board_id+'/cards/github')
+        .set('X-Auth-Token', user.token)
+        .send({
+          openIssues: [{ test: "1" }, { test: "2" }, { test: "3" }, { test: "4" }],
+          metadata: { repo_id: "1234" }
+        }).end(function () {
+          request(app)
+          .get('/boards/'+board_id)
+          .set('X-Auth-Token', user.token)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) throw err;
+            board = res.body.board;
+            var column = res.body.board.columns[0];
+            var cards = column.cards;
+            expect(cards[0].remoteObject.test).to.eq('1')
+            expect(cards[1].remoteObject.test).to.eq('2')
+            expect(cards[2].remoteObject.test).to.eq('3')
+            expect(cards[3].remoteObject.test).to.eq('4')
+            done();
+          });
+        });
+      });
+    });
+
+    it.skip("rejects unauthorized users", function(done) {
+      request(app)
+      .put('/boards/'+board_id+'/cards/123/move')
+      .expect(401)
+      .end(function () {
+        request(app)
+        .put('/boards/'+board_id+'/cards/123/move')
+        .set('X-Auth-Token', "---")
+        .expect(401)
+        .end(done);
+      });
+    });
+
+    it("moves a card within a column", function(done) {
+      var column = board.columns[0];
+      var card = column.cards[2];
+      request(app)
+      .put('/boards/'+board._id+'/cards/'+card._id+'/move')
+      .set('X-Auth-Token', user.token)
+      .send({
+        old_column: column._id,
+        new_column: column._id,
+        old_index: 2,
+        new_index: 1
+      })
+      .expect(204)
+      .end(function(err, res){
+        if (err) throw err;
+        request(app)
+        .get('/boards/'+board_id)
+        .set('X-Auth-Token', user.token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) throw err;
+          var cards = res.body.board.columns[0].cards;
+          console.log(cards);
+          expect(cards[0].remoteObject.test).to.eq('1')
+          expect(cards[1].remoteObject.test).to.eq('3')
+          expect(cards[2].remoteObject.test).to.eq('2')
+          expect(cards[3].remoteObject.test).to.eq('4')
+          done();
+        });
+      });
+    });
+  });
+
   describe.skip("POST /boards/:id/:provider/:repo_id/webhook", function() {
     describe("github", function() {
       describe("installed", function() {
