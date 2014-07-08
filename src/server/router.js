@@ -22,7 +22,7 @@ r.route('/session')
 .post(createSession);
 
 function loginRequired(req, res, next) {
-  var token = req.headers['x-auth-token'];
+  var token = req.headers['x-auth-token'] || req.query.token;
   if (token) {
     User.findOne({ token: token }).exec(function (err, user) {
       if (err) {
@@ -32,10 +32,12 @@ function loginRequired(req, res, next) {
         req.user = user;
         next();
       } else {
+        logger.warn("loginRequired 401 -- no user found with token "+token);
         res.send(401);
       }
     })
   } else {
+    logger.warn("loginRequired 401 -- no token provided");
     res.send(401)
   }
 };
