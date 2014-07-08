@@ -207,13 +207,13 @@ function sendBoardColumns(req, res, next) {
   res.send({ board: { columns: req.board.columns } });
 };
 
+// TODO add regression tests for this route
 r.route('/boards/:_id/cards/:card_id/move')
 .put(loginRequired,
      initializeBoard,
      performCardMove);
 
 function performCardMove(req, res, next) {
-  var column = null;
   if (req.body.old_column === req.body.new_column) {
     Column.findByIdAndMutate(req.body.old_column, function (column) {
       column.cards.splice(req.body.old_index, 1);
@@ -244,28 +244,10 @@ function performCardMove(req, res, next) {
 
 /*
  *
- * ALL CODE BELOW IS UNTESTED
+ * ALL CODE BELOW IS PRE-REFACTOR
  *
  */
 
-
-// Update a column
-r.put('/boards/:_id/columns/:col/cards', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      board.columns[req.params.col].cards = req.body.cards;
-      Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send(204) }
-      });
-    }
-  });
-});
 
 var findCardPosition = function (board, issue, cb) {
   var col, row, card, column = null;
