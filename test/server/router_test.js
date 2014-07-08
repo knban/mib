@@ -483,7 +483,7 @@ describe("Router", function() {
     });
   });
 
-  describe.only("PUT /boards/:id/cards/:card_id/move", function() {
+  describe("PUT /boards/:id/cards/:card_id/move", function() {
     beforeEach(function (done) {
       setupUserAndBoard(function () {
         var issue1 = { title: "foo", id: '123' };
@@ -514,7 +514,7 @@ describe("Router", function() {
       });
     });
 
-    it.skip("rejects unauthorized users", function(done) {
+    it("rejects unauthorized users", function(done) {
       request(app)
       .put('/boards/'+board_id+'/cards/123/move')
       .expect(401)
@@ -536,7 +536,6 @@ describe("Router", function() {
       .send({
         old_column: column._id,
         new_column: column._id,
-        old_index: 2,
         new_index: 1
       })
       .expect(204)
@@ -549,11 +548,45 @@ describe("Router", function() {
         .end(function (err, res) {
           if (err) throw err;
           var cards = res.body.board.columns[0].cards;
-          console.log(cards);
+          expect(cards).to.have.length(4);
           expect(cards[0].remoteObject.test).to.eq('1')
           expect(cards[1].remoteObject.test).to.eq('3')
           expect(cards[2].remoteObject.test).to.eq('2')
           expect(cards[3].remoteObject.test).to.eq('4')
+          done();
+        });
+      });
+    });
+
+    it("moves a card from one column to another", function(done) {
+      var column = board.columns[0];
+      var column2 = board.columns[3];
+      var card = column.cards[2];
+      request(app)
+      .put('/boards/'+board._id+'/cards/'+card._id+'/move')
+      .set('X-Auth-Token', user.token)
+      .send({
+        old_column: column._id,
+        new_column: column2._id,
+        new_index: 1
+      })
+      .expect(204)
+      .end(function(err, res){
+        if (err) throw err;
+        request(app)
+        .get('/boards/'+board_id)
+        .set('X-Auth-Token', user.token)
+        .expect(200)
+        .end(function (err, res) {
+          if (err) throw err;
+          var cards = res.body.board.columns[0].cards;
+          expect(cards).to.have.length(3);
+          expect(cards[0].remoteObject.test).to.eq('1')
+          expect(cards[1].remoteObject.test).to.eq('2')
+          expect(cards[2].remoteObject.test).to.eq('4')
+          cards = res.body.board.columns[3].cards;
+          expect(cards).to.have.length(1);
+          expect(cards[0].remoteObject.test).to.eq('3')
           done();
         });
       });
