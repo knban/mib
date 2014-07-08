@@ -33,10 +33,15 @@
         <a href="#" ng-hide="board.userMod.isOpen" ng-click="board.userMod.open()">Users</a>
       </li>
 
-      <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json">Export</a></li>
+      <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json?token={{session.user.token}}">Export</a></li>
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
+      <li ng-show="session.loggedIn" style="padding:20px">
+      <small ng-tooltip="Share your user ID with others to be added to their boards.">
+        {{session.user._id}}
+      </small>
+      </li>
       <li ng-show="session.loggedIn"><a href="#" ng-click="session.destroy()">Logout {{session.user.uid}}</a></li>
       <li ng-hide="session.loggedIn">
         <a href="#" ng-hide="session.loginForm" ng-click="session.login()">Login</a>

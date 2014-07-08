@@ -209,7 +209,11 @@ function sendBoardColumns(req, res, next) {
   res.send({ board: { columns: req.board.columns } });
 };
 
-// TODO add regression tests for this route
+/*
+ * PUT /boards/:id/cards/:card_id/move
+ * Move cards around within columns and/or across columns
+ */
+
 r.route('/boards/:_id/cards/:card_id/move')
 .put(loginRequired,
      initializeBoard,
@@ -241,7 +245,76 @@ function performCardMove(req, res, next) {
       res.send(500)
     });
   }
-}
+};
+
+/*
+ * GET /boards/:id/export.json
+ * Export an entire board as human and machine readable JSON
+ */
+
+// TODO regression test
+r.route('/boards/:_id/export.json')
+.get(loginRequired,
+     initializeBoard,
+     exportBoardAsJSON);
+
+function exportBoardAsJSON(req, res, next) {
+  var beautify = require('js-beautify').js_beautify;
+  output = beautify(JSON.stringify(req.board), { indent_size: 2 });
+  res.set("Content-Disposition", 'attachment; filename="'+req.board.name+'.json"');
+  res.send(output);
+};
+
+/*
+ * PUT /boards/:id/users
+ * Update a board's authorized users list
+ */
+
+// TODO regression test
+r.route('/boards/:_id/authorizedUsers/:user_id')
+.all(loginRequired, initializeBoard)
+.post(addAuthorizedUser)
+.delete(removeAuthorizedUser);
+
+function addAuthorizedUser(req, res, next) {
+  var ObjectId = require('mongoose').Types.ObjectId; 
+  try {
+    var user_id = ObjectId(req.params.user_id);
+    if (req.board.authorizedUsers.indexOf(user_id) >= 0) {
+      res.send(400, 'user already authorized');
+    } else {
+      req.board.authorizedUsers.push(user_id);
+      req.board.save(function(err, board) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ authorizedUsers: board.authorizedUsers }) }
+      });
+    }
+  } catch (err) {
+    logger.error('addAuthorizedUser 400', err.message);
+    res.send(400, err.message);
+  }
+};
+
+function removeAuthorizedUser(req, res, next) {
+  var ObjectId = require('mongoose').Types.ObjectId; 
+  try {
+    var user_id = ObjectId(req.params.user_id);
+    var index = req.board.authorizedUsers.indexOf(user_id);
+    if (index >= 0) {
+      req.board.authorizedUsers.splice(index, 1);
+      req.board.save(function(err, board) {
+        if (err) { res.send(500, err.message); }
+        else { res.send({ authorizedUsers: board.authorizedUsers }) }
+      });
+    } else {
+      res.send(404, 'user not authorized');
+    }
+  } catch (err) {
+    logger.error('removeAuthorizedUser 400', err.message);
+    res.send(400, err.message);
+  }
+};
+
 
 
 /*
@@ -302,37 +375,5 @@ r.post('/boards/:_id/:provider/:repo_id/webhook', function(req, res, next) {
       }
     }
   })
-});
-
-// Export a board as JSON
-r.get('/boards/:_id/export.json', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var board = boards[0];
-      var beautify = require('js-beautify').js_beautify;
-      output = beautify(JSON.stringify(board), { indent_size: 2});
-      res.set("Content-Disposition", 'attachment; filename="'+board.name+'.json"');
-      res.send(output);
-    }
-  })
-});
-
-// Update a board's authorized users list
-r.put('/boards/:_id/users', function(req, res, next) {
-  Board.findById( req.params._id, function(err, board) {
-    if (err) {
-      res.send(500);
-    } else {
-      board.authorizedUsers = _.uniq(board.authorizedUsers.concat(req.body.authorizedUsers));
-      Board.update({ _id: board._id }, { authorizedUsers: board.authorizedUsers }, function(err) {
-        if (err) { res.send(500, err.message); }
-        else { res.send({ authorizedUsers: board.authorizedUsers }) }
-      });
-    }
-  });
 });
 
