@@ -75,19 +75,26 @@ module.exports = ['$http', function($http) {
     var oldIndex = null;
     var card = _.find(cards, function (c, i) {
       oldIndex = i;
-      return c.remoteObject.id === id;
+      return c._id === id;
     });
     cards.splice(oldIndex, 1);
     cards.splice(newIndex, 0, card);
-    api.put('boards/'+board.attributes._id+'/columns/'+$col+'/cards', { cards: cards }).success(function(){
+    api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
+      old_column: column._id,
+      new_column: column._id,
+      old_index: oldIndex,
+      new_index: newIndex
+    }).success(function(){
       column.isSyncing = false;
+    }).error(function () {
+      alert('something is wrong');
     });
   };
 
   // removeCardFromColumn is always hit first in
   // a cross-column card drag event
   var colJustRemovedFrom = null;
-  this.removeCardFromColumn = function ($col) {
+  this.removeCardFromColumn = function ($col, $event) {
     colJustRemovedFrom = $col;
     // The event we get out of this is the <ul>
     // and so we cannot identify the card until the
@@ -107,15 +114,20 @@ module.exports = ['$http', function($http) {
     var oldIndex = null;
     var card = _.find(oldDeck, function (c, i) {
       oldIndex = i;
-      return c.remoteObject.id === id;
+      return c._id === id;
     });
     oldDeck.splice(oldIndex, 1);
     newDeck.splice(newIndex, 0, card);
-    api.put('boards/'+board.attributes._id+'/columns/'+colJustRemovedFrom+'/cards', { cards: oldDeck }).success(function() {
+    api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
+      old_column: column1._id,
+      new_column: column2._id,
+      old_index: oldIndex,
+      new_index: newIndex
+    }).success(function(){
       column1.isSyncing = false;
-    });
-    api.put('boards/'+board.attributes._id+'/columns/'+$col+'/cards', { cards: newDeck }).success(function() {
       column2.isSyncing = false;
+    }).error(function () {
+      alert('something is wrong');
     });
   };
 }]
