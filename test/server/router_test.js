@@ -54,6 +54,18 @@ describe("Router", function() {
     })
   };
 
+  function reloadBoard(callback) {
+    request(app)
+    .get('/boards/'+board_id)
+    .set('X-Auth-Token', user.token)
+    .expect(200)
+    .end(function (err, res) {
+      if (err) throw err;
+      board = res.body.board;
+      callback();
+    });
+  };
+
   describe("GET /session", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
@@ -593,67 +605,143 @@ describe("Router", function() {
     });
   });
 
-  describe.skip("POST /boards/:id/:provider/:repo_id/webhook", function() {
+  describe("POST /boards/:id/:provider/:repo_id/webhook", function() {
+    beforeEach(function(done) {
+      setupUserAndBoard(function () {
+        var issue1 = { title: "foo", id: '123' };
+        var issue2 = { title: "bar", id: '234' };
+        request(app)
+        .post('/boards/'+board_id+'/cards/github')
+        .set('X-Auth-Token', user.token)
+        .send({
+          openIssues: [{ test: "1" }, { test: "2" }, { test: "3" }, { test: "4" }],
+          metadata: { repo_id: "1234" }
+        }).end(function () {
+          request(app)
+          .get('/boards/'+board_id)
+          .set('X-Auth-Token', user.token)
+          .expect(200)
+          .end(function (err, res) {
+            if (err) throw err;
+            board = res.body.board;
+            var column = res.body.board.columns[0];
+            var cards = column.cards;
+            expect(cards[0].remoteObject.test).to.eq('1')
+            expect(cards[1].remoteObject.test).to.eq('2')
+            expect(cards[2].remoteObject.test).to.eq('3')
+            expect(cards[3].remoteObject.test).to.eq('4')
+            done();
+          });
+        });
+      });
+    });
+
     describe("github", function() {
       describe("installed", function() {
         it("returns 204 No Content", function(done) {
           request(app)
-          .post('/boards/1/github/1234/webhook')
+          .post('/boards/'+board_id+'/github/1234/webhook')
           .expect(204)
           .end(done)
         });
       });
 
+      function newIssueHookShot(callback) {
+        request(app)
+        .post('/boards/'+board_id+'/github/1234/webhook')
+        .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
+        .expect(204)
+        .end(function(err, res){
+          if (err) throw err;
+          callback();
+        });
+      };
+
       describe("issue opened", function() {
-        it("creates a new card in the icebox", function(done) {
-          expect(board.columns[0].cards.length).to.eq(0);
-          request(app)
-          .post('/boards/1/github/1234/webhook')
-          .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
-          .expect(204)
-          .end(function(err, res){
-            if (err) throw err;
-            expect(board.columns[0].cards.length).to.eq(1);
-            var newCard = board.columns[0].cards[0];
-            expect(newCard.remoteObject.title).to.eq('this is the title');
-            expect(newCard.repo_id).to.eq('1234');
-            expect(newCard.provider).to.eq('github');
-            expect(Board.update.callCount).to.eq(1);
-            done();
+        beforeEach(function(done) {
+          expect(board.columns[0].cards.length).to.eq(4);
+          newIssueHookShot(function () {
+            reloadBoard(done)
           });
+        });
+
+        it("creates a new card in the icebox", function(done) {
+          expect(board.columns[0].cards.length).to.eq(5);
+          var card = board.columns[0].cards[4];
+          expect(card.remoteObject.title).to.eq('this is the title');
+          expect(card.repo_id).to.eq('1234');
+          expect(card.provider).to.eq('github');
+          done();
         });
       });
 
       describe("issue comment", function() {
-        it("updates the existing card", function(done) {
-          expect(board.columns[0].cards.length).to.eq(0);
-          request(app).post('/boards/1/github/1234/webhook')
-          .send(require('../fixtures/webhooks/github/00_new_issue_opened'))
-          .expect(204).end(function(err, res) {
+        beforeEach(function(done) {
+          expect(board.columns[0].cards.length).to.eq(4);
+          newIssueHookShot(function () {
+            reloadBoard(done)
+          });
+        });
+
+        function issueCommentHookShot(callback) {
+          request(app)
+          .post('/boards/'+board_id+'/github/1234/webhook')
+          .send(require('../fixtures/webhooks/github/01_issue_commented_upon'))
+          .expect(204)
+          .end(function(err, res){
             if (err) throw err;
-            expect(board.columns[0].cards.length).to.eq(1);
-            var newCard = board.columns[0].cards[0];
-            expect(newCard.remoteObject.comments).to.eq(0);
-            request(app)
-            .post('/boards/1/github/1234/webhook')
-            .send(require('../fixtures/webhooks/github/01_issue_commented_upon'))
-            .expect(204)
-            .end(function(err, res){
-              if (err) throw err;
-              expect(board.columns[0].cards.length).to.eq(1);
-              var updatedCard = board.columns[0].cards[0];
+            callback();
+          });
+        };
+
+        it("updates the existing card", function(done) {
+          expect(board.columns[0].cards.length).to.eq(5);
+          var newCard = board.columns[0].cards[4];
+          expect(newCard.remoteObject.comments).to.eq(0);
+          issueCommentHookShot(function() {
+            reloadBoard(function () {
+              expect(board.columns[0].cards.length).to.eq(5);
+              var updatedCard = board.columns[0].cards[4];
               expect(updatedCard.remoteObject.comments).to.eq(1);
-              expect(newCard.repo_id).to.eq('1234');
-              expect(newCard.provider).to.eq('github');
-              expect(Board.update.callCount).to.eq(2);
               done();
-            });
+            })
           });
         });
       });
 
       describe("issue closed", function() {
-        it("moves the card to done");
+        beforeEach(function(done) {
+          expect(board.columns[0].cards.length).to.eq(4);
+          newIssueHookShot(function () {
+            reloadBoard(done)
+          });
+        });
+
+        function issueCloseHookShot(callback) {
+          request(app)
+          .post('/boards/'+board_id+'/github/1234/webhook')
+          .send(require('../fixtures/webhooks/github/03_issue_comment_and_close'))
+          .expect(204)
+          .end(function(err, res){
+            if (err) throw err;
+            callback();
+          });
+        };
+
+        it("moves the card to done", function(done){
+          expect(board.columns[0].cards.length).to.eq(5);
+          var newCard = board.columns[0].cards[4];
+          expect(newCard.remoteObject.comments).to.eq(0);
+          issueCloseHookShot(function() {
+            reloadBoard(function () {
+              expect(board.columns[0].cards.length).to.eq(4);
+              expect(board.columns[3].cards.length).to.eq(1);
+              var updatedCard = board.columns[3].cards[0];
+              expect(updatedCard.remoteObject.state).to.eq("closed");
+              done();
+            })
+          });
+        })
       });
     });
   });

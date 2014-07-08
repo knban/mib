@@ -32,12 +32,10 @@ function loginRequired(req, res, next) {
         req.user = user;
         next();
       } else {
-        logger.warn("loginRequired 401 -- no user found with token "+token);
         res.send(401);
       }
     })
   } else {
-    logger.warn("loginRequired 401 -- no token provided");
     res.send(401)
   }
 };
@@ -76,7 +74,7 @@ function myBoards(req, res, next) {
 
 function createBoard(req, res, next) {
   if (req.body.jsonImport) {
-    res.send(500, 'Not yet implemented');
+    res.send(501, 'Not yet implemented');
   } else {
     Board.createWithDefaultColumns({
       name: req.body.name,
@@ -177,7 +175,7 @@ function initializeFirstColumn(req, res, next) {
       logger.error(err.message);
       res.send(500);
     } else {
-      req.column = column;
+      req.first_column = column;
       next();
     }
   });
@@ -191,13 +189,13 @@ function initializeCardHandler(req, res, next) {
 function importCardsViaProvider(req, res, next) {
   req.promises = [];
   req.handler.batchImport(req.board, req.body, function (attributes) {
-    attributes.column = req.column._id;
+    attributes.column = req.first_column._id;
     req.promises.push(Card.create(attributes))
   }, next);
 };
 
 function saveCardsViaPromises(req, res, next) {
-  Promise.all(req.promises).then(function () {
+  Promise.all(req.promises).spread(function () {
     req.board.update({ columns: req.board.columns }, function(err) {
       if (err) res.send(500, err.message);
       else next()
@@ -315,65 +313,88 @@ function removeAuthorizedUser(req, res, next) {
   }
 };
 
-
-
 /*
- *
- * ALL CODE BELOW IS PRE-REFACTOR
- *
+ * POST /boards/:id/:provider/:repo_id/webhook
+ * Webhook for 3rd party services to update the cards
+ * FIXME add security, check https://developer.github.com/webhooks/securing/
  */
 
+r.route('/boards/:_id/:provider/:repo_id/webhook')
+.post(initializeBoard,
+      initializeFirstColumn,
+      initializeLastColumn,
+      initializeCardHandler,
+      consumeWebhook);
 
-var findCardPosition = function (board, issue, cb) {
-  var col, row, card, column = null;
-  if (_.find(board.columns, function (column, i) {
-    col = i;
-    return _.find(column.cards, function (c, j) {
-      row = j;
-      card = c
-      return card.remoteObject.id == issue.id;
-    })
-  })) { 
-    cb(null, col, row);
-  } else {
-    cb(new Error("Card not found"));
-  }
+
+function initializeLastColumn(req, res, next) {
+  Column.findOne({ board: req.board._id, role: 2 })
+  .exec(function (err, column) {
+    if (err) {
+      logger.error(err.message);
+      res.send(500);
+    } else {
+      req.last_column = column;
+      next();
+    }
+  });
 };
 
-// FIXME secure this route https://developer.github.com/webhooks/securing/
-r.post('/boards/:_id/:provider/:repo_id/webhook', function(req, res, next) {
-  Board.find({ _id: req.params._id }, function(err, boards) {
-    if (err) {
-      res.send(500);
-    } else if (boards.length === 0) {
-      res.send(404);
-    } else {
-      var handler = providers[req.params.provider].cardHandler;
-      var action = req.body.action;
-      var board = boards[0];
-      var persistColumns = function() {
-        Board.update({ _id: board._id }, { columns: board.columns }, function(err) {
-          if (err) { res.send(500, err.message); }
-          else { res.send(204) }
+function consumeWebhook(req, res, next) {
+  var action = req.body.action;
+  if (action === "opened") {
+    var attrs = req.handler.newCard(req.params.repo_id, req.body.issue);
+    Card.create(attrs, function (err, card) {
+      if (err) {
+        logger.error(err.message);
+        res.send(500)
+      } else {
+        req.first_column.cards.push(card)
+        req.first_column.save(function (err) {
+          if (err) {
+            logger.error(err.message);
+            res.send(500);
+          } else {
+            res.send(204);
+          }
         });
       }
-      if (req.body.action === "opened") {
-        var card = handler.newCard(req.params.repo_id, req.body.issue);
-        board.columns[0].cards.push(card)
-        persistColumns();
-      } else if (action === "created" || action === "closed" || action === "reopened") {
-        // TODO closed move to last column, reopened move to first column
-        findCardPosition(board, req.body.issue, function (err, col, row) {
-          if (err) { res.send(404) } else { 
-            var card = board.columns[col].cards[row];
-            card.remoteObject = req.body.issue;
-            persistColumns();
+    });
+  } else if (action === "created" || action === "closed" || action === "reopened") {
+    // TODO closed move to last column, reopened move to first column
+    Card.findOne({ 'remoteObject.id': req.body.issue.id }, function (err, card) {
+      if (err) { res.send(404) } else { 
+        card.remoteObject = req.body.issue;
+        card.save(function (err) {
+          if (err) {
+            logger.error(err.message);
+            res.send(500);
+          } else {
+            if (action === "closed") {
+              Promise.all([
+                Column.findByIdAndMutate(card.column, function (column) {
+                  column.cards.splice(column.cards.indexOf(card._id), 1);
+                }),
+                Column.findByIdAndMutate(req.last_column, function (column) {
+                  column.cards.splice(0, 0, card._id);
+                })
+              ]).then(function () {
+                res.send(204)
+              }).catch(function (err) {
+                logger.error(err.message);
+                res.send(500)
+              });
+            } else {
+              res.send(204);
+            }
           }
-        })
-      } else {
-        res.send(204)
+        });
       }
-    }
-  })
-});
-
+    })
+  } else if (action) {
+    logger.warn("webhook action '"+action+"' unhandled");
+    res.send(501)
+  } else {
+    res.send(204)
+  }
+};
