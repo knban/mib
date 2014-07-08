@@ -82,7 +82,6 @@ module.exports = ['$http', function($http) {
     api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
       old_column: column._id,
       new_column: column._id,
-      old_index: oldIndex,
       new_index: newIndex
     }).success(function(){
       column.isSyncing = false;
@@ -121,7 +120,6 @@ module.exports = ['$http', function($http) {
     api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
       old_column: column1._id,
       new_column: column2._id,
-      old_index: oldIndex,
       new_index: newIndex
     }).success(function(){
       column1.isSyncing = false;
