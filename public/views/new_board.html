@@ -9,7 +9,7 @@
           ng-if="board.creator.success"
           ng-show="board.creator.success">{{board.creator.success}}
         </div>
-        <form role="form">
+        <form role="form" ng-submit="board.creator.submit()">
           <div class="form-group">
             <label for="boardName">Board Name</label>
             <input type="text" id="boardNameInput" autofocus ng-model="board.creator.boardName" class="form-control" placeholder="My Kanban Project">
@@ -27,9 +27,7 @@
               </span>
             </div>
           </div>
-          <button type="submit" class="btn btn-success pull-right"
-            ng-click="board.creator.submit()">Submit
-          </button>  
+          <button type="submit" class="btn btn-success pull-right">Submit</button>  
           <button ng-click="board.creator.close()" class="btn btn-default">Close</button>  
         </form>
       </div>

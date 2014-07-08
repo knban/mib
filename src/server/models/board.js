@@ -1,5 +1,44 @@
+var mongoose = require('mongoose');
 var boardSchema = require('./../schemata/board');
-boardSchema.methods.addCard = function(card) {
-  console.log("adding card"+card);
+
+var Promise = require('bluebird');
+
+boardSchema.statics.findOneAndPopulate = function(query) {
+  var Board = this;
+  return new Promise(function (resolve, reject) {
+    Board.findOne(query).populate('columns').exec(function(err, board) {
+      if (err) throw err
+      else if (board) {
+        mongoose.model('Card')
+        .populate(board.columns, { path: 'cards' }, function(err) {
+          if (err)  throw err;
+          else return resolve(board);
+        });
+      } else return reject(new Error("board not found"));
+    });
+  })
 };
-module.exports = require('mongoose').model('Board', boardSchema);
+
+boardSchema.statics.createWithDefaultColumns = function (attributes, Column) {
+  var Board = this;
+  return new Promise(function (resolve, reject) {
+    var Column = mongoose.model('Column');
+    Promise.all([
+      Board.create(attributes),
+      Column.create({ name: "Icebox",  role: 1 }),
+      Column.create({ name: "Backlog"          }),
+      Column.create({ name: "Doing"            }),
+      Column.create({ name: "Done",    role: 2 })
+    ]).spread(function (board, icebox, backlog, doing, done) {
+      board.columns.push(icebox);
+      board.columns.push(backlog);
+      board.columns.push(doing);
+      board.columns.push(done);
+      board.save(function(err, board) {
+        if (err) reject(err);
+        else resolve(board)
+      })
+    }).catch(reject)
+  });
+};
+module.exports = mongoose.model('Board', boardSchema);

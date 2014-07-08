@@ -1,9 +1,15 @@
+process.env.GITHUB_CLIENT_ID = "stubs";
+process.env.GITHUB_CLIENT_SECRET = "stubs";
+
+
 var chai = require('chai');
 var sinon = require('sinon');
 var mongoose = require('mongoose');
 var _ = require('lodash');
 var stubbedModels = [];
 module.exports = {
+  mongoDB: 'mongodb://localhost/mib-test',
+  mongoose: mongoose,
   sinon: sinon,
   expect: chai.expect,
   supertest: require('supertest'),

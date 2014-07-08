@@ -1,25 +1,49 @@
+var logger = require('winston');
+
 module.exports = ['$http', function($http) {
   session = this;
 
-  $http.get(api.route('/session.json')).success(function(data) {
-    if (data.auth && data.auth.loggedIn) {
+  var configureEndpoint = function () {
+    api.setClient('angular', $http, {
+      headers: {
+        'X-Auth-Token': localStorage.token
+      }
+    });
+  };
+
+  configureEndpoint();
+
+  this.load = function () {
+    configureEndpoint();
+    api.get('session').success(function(data) {
+      session.user = data;
+      try {
+        localStorage.github = data.authorizations.github.token;
+      } catch (e) {
+        logger.warn("no github authorization");
+        localStorage.removeItem('github');
+      }
       session.anonymous = false;
       session.loggedIn = true;
-      session.uid = data.uid;
-      session.data = app.session = data;
       session.getBoardList();
-    } else
-      session.destroy()
-  }).error(session.destroy);
+    }).error(function () {
+      session.destroy();
+    });
+  };
+
+  if (localStorage.token) {
+    this.load();
+  }
 
   this.destroy = function () {
-    session.anonymous = true;
+    localStorage.clear();
     session.loggedIn = false;
-    app.session = null;
+    session.anonymous = true;
+    session.user = null;
   };
 
   this.getBoardList = app.updateBoardList = function () {
-    $http.get(api.route('boards/index')).success(function(data) {
+    api.get('boards').success(function(data) {
       session.boards = data.boards;
     })
   };
@@ -35,10 +59,23 @@ module.exports = ['$http', function($http) {
   if (window.ionic) {
     this.ionic = {
       login: function() {
-        //$http.get('https://api.github.comauth/github').success(function (data, header) {
-        //  console.log(arguments);
-        //})
       }
     }
   }
+
+  var LoginForm = require('../login_form.js');
+
+  this.login = function () {
+    if (this.loginForm) {
+    } else {
+      session.loginForm = new LoginForm({
+        $parent: this,
+        $http: $http,
+        close: function () {
+          session.loginForm = null;
+        },
+        reloadSession: session.load
+      });
+    }
+  };
 }];

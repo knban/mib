@@ -22,8 +22,8 @@
           <li><a href="#" ng-click="board.creator.open()">Create / Import</a></li>
         </ul>
       </li>
+
       <li ng-show="board.loaded">
-        <!-- probably just use a modal instead of changing the link in the nav bar -->
         <a href="#" ng-show="board.projectLinker.isOpen" ng-click="board.projectLinker.close()">Close Linker</a>
         <a href="#" ng-hide="board.projectLinker.isOpen" ng-click="board.projectLinker.open()">Linker</a>
       </li>
@@ -33,12 +33,40 @@
         <a href="#" ng-hide="board.userMod.isOpen" ng-click="board.userMod.open()">Users</a>
       </li>
 
-      <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json">Export</a></li>
+      <li ng-show="board.loaded"><a href="/api/v1/boards/{{board.attributes._id}}/export.json?token={{session.user.token}}">Export</a></li>
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-      <li ng-show="session.loggedIn"><a href="/logout">Logout {{session.uid}}</a></li>
-      <li ng-hide="session.loggedIn"><a href="/auth/github">Login</a></li>
+      <li ng-show="session.loggedIn" style="padding:20px">
+      <small ng-tooltip="Share your user ID with others to be added to their boards.">
+        {{session.user._id}}
+      </small>
+      </li>
+      <li ng-show="session.loggedIn"><a href="#" ng-click="session.destroy()">Logout {{session.user.uid}}</a></li>
+      <li ng-hide="session.loggedIn">
+        <a href="#" ng-hide="session.loginForm" ng-click="session.login()">Login</a>
+      </li>
+      <form ng-submit="session.loginForm.submit()" class="navbar-form" ng-show="session.loginForm">
+        <div class="input-group">
+          <span class="input-group-btn" data-toggle="buttons">
+            <label class="btn btn-default active" ng-click="session.loginForm.provider = 'github'">
+              <input type="radio" checked> GitHub
+            </label>
+            <label class="btn btn-default" ng-click="session.loginForm.provider = 'bitbucket'">
+              <input type="radio"> BitBucket
+            </label>
+          </span>
+          <span>
+            <input type="text" ng-model="session.loginForm.uid" class="form-control" placeholder="{{session.loginForm.provider + ' username'}}">
+          </span>
+          <span>
+            <input type="password" ng-model="session.loginForm.pw" class="form-control" placeholder="password">
+          </span>
+          <span class="input-group-btn">
+            <button type="submit" ng-disabled="session.loginForm.busy" class="btn btn-success">Go</button>  
+          </span>
+        </div>
+      </form>
     </ul>
   </div>
 </div>

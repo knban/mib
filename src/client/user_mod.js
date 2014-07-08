@@ -1,6 +1,5 @@
-var _ = require('lodash');
-
 module.exports = function (board, $http) {
+  var form = this;
   this.open = function() {
     this.users = board.attributes.authorizedUsers;
     this.reset();
@@ -11,19 +10,26 @@ module.exports = function (board, $http) {
     this.reset();
   }
   this.reset = function () {
+    this.newUser = '';
+  };
+  this.remove = function (user_id) {
+    if (confirm("Are you sure?")) {
+      api.delete('boards/'+board.attributes._id+'/authorizedUsers/'+user_id)
+      .success(function (data) {
+        board.attributes.authorizedUsers = data.authorizedUsers;
+      }).error(function (err, status) {
+        alert(err);
+      });
+    }
   };
   this.submit = function () {
     if (! this.newUser) return;
-    else if (board.attributes.authorizedUsers.indexOf(this.newUser) >= 0)
-      return;
-    else if (this.newUser.indexOf(':') === -1)
-      return alert("Please use format 'provider:username'");
+    else if (this.users.indexOf(this.newUser) >= 0) return;
     else {
-      var users = _.uniq(this.users.concat(this.newUser));
-      var payload = { authorizedUsers: users };
-      var url = api.route('boards/'+board.attributes._id+'/users');
-      $http.put(url, payload).success(function (data) {
+      api.post('boards/'+board.attributes._id+'/authorizedUsers/'+this.newUser)
+      .success(function (data) {
         board.attributes.authorizedUsers = data.authorizedUsers;
+        form.reset();
       }).error(function (err, status) {
         alert(err);
       });

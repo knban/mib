@@ -38,14 +38,19 @@
           ng-show="board.userMod.isOpen"
           ng-include="'views/user_mod.html'">
         </div>
-        <table class="table" width="100%" ng-include="'views/board.html'"></table>
+        <table ng-show="board.loaded" class="table" width="100%" ng-include="'views/board.html'"></table>
+        <div class="container" ng-hide="board.loaded">
+          <div class="jumbotron">
+            <h3>Create or select a board from the dropdown above</h3>
+          </div>
+        </div>
       </div>
     </div>
     <script src="/js/config.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/Sortable.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/js/angular.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/angular.js" type="text/javascript" charset="utf-8"></script>
     <script src="/socket.io/socket.io.js" type="text/javascript" charset="utf-8"></script>
     <script src="/js/select2.js" type="text/javascript"></script>
     <script src="/js/angular-ui-select2.js" type="text/javascript"></script>

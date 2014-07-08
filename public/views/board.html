@@ -15,7 +15,6 @@
     <ul ng-sortable
       id="column_{{$index}}"
       class="list-group"
-      ng-model="board.attributes.columns[$index]" 
       data-updated="board.moveCardWithinColumn($index, $event)"
       data-added="board.addCardToColumn($index, $event)"
       data-removed="board.removeCardFromColumn($index, $event)"
@@ -23,7 +22,7 @@
       <li class="list-group-item card"
         ng-init="row = $index"
         ng-repeat="card in column.cards"
-        data-id="{{card.remoteObject.id}}"
+        data-id="{{card._id}}"
         ng-include="'views/'+card.provider+'/card.html'"></li>   
     </ul>
   </td>

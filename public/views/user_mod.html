@@ -4,16 +4,21 @@
 
     <ul class="list-group">
       <li class="list-group-item"
-        ng-repeat="user in board.attributes.authorizedUsers">
-      {{user}}
+        ng-repeat="id in board.attributes.authorizedUsers">
+        {{id}}
+        <a href="#" class="pull-right"
+          ng-hide="session.user._id === id"
+          ng-click="board.userMod.remove(id)">
+          <i style="color:red" class="glyphicon glyphicon-remove"></i>
+        </a>
       </li>
       <li class="list-group-item">
         <form ng-submit="board.userMod.submit()" class="input-group">
-          <input type="text" ng-model="board.userMod.newUser" class="form-control" placeholder="github:substack">
+          <input type="text" ng-model="board.userMod.newUser" class="form-control" placeholder="User ID">
           <span class="input-group-btn">
             <button type="submit" class="btn btn-success">Add User</button>  
           </span>
-        </div>
+        </form>
       </li>
     </ul>
 
