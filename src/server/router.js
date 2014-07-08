@@ -166,8 +166,7 @@ r.route('/boards/:_id/cards/:provider')
       importCardsViaProvider,
       saveCardsViaPromises,
       initializeBoard,
-      sendBoardColumns
-     );
+      sendBoardColumns);
 
 function initializeFirstColumn(req, res, next) {
   Column.findOne({ board: req.board._id, role: 1 })
@@ -207,6 +206,40 @@ function saveCardsViaPromises(req, res, next) {
 function sendBoardColumns(req, res, next) {
   res.send({ board: { columns: req.board.columns } });
 };
+
+r.route('/boards/:_id/cards/:card_id/move')
+.put(loginRequired,
+     initializeBoard,
+     performCardMove);
+
+function performCardMove(req, res, next) {
+  var column = null;
+  if (req.body.old_column === req.body.new_column) {
+    Column.findByIdAndMutate(req.body.old_column, function (column) {
+      column.cards.splice(req.body.old_index, 1);
+      column.cards.splice(req.body.new_index, 0, req.params.card_id);
+    }).then(function () {
+      res.send(204)
+    }).catch(function (err) {
+      logger.error(err.message);
+      res.send(500)
+    });
+  } else {
+    Promise.all([
+      Column.findByIdAndMutate(req.body.old_column, function (column) {
+        column.cards.splice(req.body.old_index, 1);
+      }),
+      Column.findByIdAndMutate(req.body.new_column, function (column) {
+        column.cards.splice(req.body.new_index, 0, req.params.card_id);
+      })
+    ]).then(function () {
+      res.send(204)
+    }).catch(function (err) {
+      logger.error(err.message);
+      res.send(500)
+    });
+  }
+}
 
 
 /*
