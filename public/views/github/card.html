@@ -1,19 +1,22 @@
-<span class="badge alert-{{card.remoteObject.state === 'open' ? 'success' : 'danger'}}" >
-  #{{card.remoteObject.number}}
-</span>
-
-<span class="badge pull-left alert-info">
+<span class="badge pull-left alert-{{card.remoteObject.state === 'open' ? 'info' : 'danger'}}" >
   <div ng-tooltip="{{board.repo(card).full_name}}">
-    {{board.repo(card).name}}
+    {{board.repo(card).name}} #{{card.remoteObject.number}}
   </div>
 </span>
 
-<span class="badge pull-right" ng-show="card.remoteObject.assignee.avatar_url">
-  <img class="pull-right" ng-src="{{card.remoteObject.assignee.avatar_url}}" width="20px">
-</span>
+<img class="pull-right" ng-src="{{card.remoteObject.assignee.avatar_url}}" width="20px">
+
+<br>
 
 <a href="{{card.remoteObject.html_url}}" 
   ng-tooltip="{{card.remoteObject.body}}"
   target="_blank">{{card.remoteObject.title}}</a>
+
+
+<div class="clearfix"></div>
+
+<span ng-repeat="label in card.remoteObject.labels" class="badge pull-left" style="background-color:#{{label.color}};">
+  {{label.name}}
+</span>
 
 <div class="clearfix"></div>
