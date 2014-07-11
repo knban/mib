@@ -8,13 +8,13 @@
 
 ### Modular Issue Board
 
-**alpha software** this is a very early release! things might break or not work at all!
-
 **mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board that uses Github issues as cards.
 
-An important distinction made by this project versus other implementations is that it refuses to create a 1:1 relation between a board and repositories. This results in a design in which projects from multiple providers can collect into a single board.
+An important distinction made by this project versus other implementations is that it refuses to create a 1:1 relation between a board and repositories.
 
-Webhooks are automatically installed to keep cards and issues in sync.
+This results in a design in which projects from multiple providers can collect into a single board.
+
+Webhooks are automatically installed to keep cards and issues in sync, however Github does not perform hookshots for every action (e.g. assignee change, label change).
 
 ## Supported Providers
 
@@ -30,14 +30,6 @@ I believe your data should always be portable, as such import/export is first-cl
 
 * Export board data as a JSON file
 * Import board data via JSON file
-
-## Mobile
-
-I am playing around with the Ionic Framework, as you can see. Mobile support is a must, and I will make sure we have native if Ionic doesn't work out (but it looks great so far).
-
-## Security & Authentication
-
-I'm looking at using [LaunchKey](https://launchkey.com/) for authentication. Currently, however, authentication is done only with Github via OAuth (in Web) and Personal Token (in Ionic/Mobile).
 
 ## Usage
 
