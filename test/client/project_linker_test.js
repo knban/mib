@@ -5,27 +5,21 @@ var ProjectLinker = require('../../src/client/project_linker');
 
 
 describe("Project Linker", function() {
+  var board = null;
   var linker = null;
-  beforeEach(function() {
-    global.window = {
-      api: {}
-    };
-  });
 
-  describe("with no tokens", function() {
+  describe("with a github provider", function () {
     beforeEach(function() {
-      linker = new ProjectLinker({}, {}, null);
-    });
-
-    it("has no providers", function() {
-      expect(linker.providers).to.have.length(0);
-    });
-  });
-
-  describe("with a github token", function() {
-    beforeEach(function() {
-      tokens = { github: "ghtoken" };
-      linker = new ProjectLinker({}, tokens, null);
+      board = {
+        providers: {
+          github: {
+            info: {
+              name: "github"
+            }
+          }
+        }
+      };
+      linker = new ProjectLinker(board, null);
     });
 
     it("has 1 provider", function() {
@@ -35,7 +29,7 @@ describe("Project Linker", function() {
     it("adds a github card provider", function() {
       expect(linker.providers[0].info.name).to.eq('github');
     });
-  });
+  })
 
   describe("open()", function() {
     it("sets isOpen to true", function() {

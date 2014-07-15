@@ -4,6 +4,7 @@ var _ = require('lodash');
 var logger = require('winston');
 var Promise = require('bluebird');
 
+var ObjectId = require('mongoose').Types.ObjectId; 
 var Models = require('./models'),
 Board = Models.Board,
 Column = Models.Column,
@@ -207,6 +208,25 @@ function sendBoardColumns(req, res, next) {
   res.send({ board: { columns: req.board.columns } });
 };
 
+
+/*
+ * PUT /boards/:id/cards
+ * Batch update cards
+ *
+ * TODO regression test
+ */
+
+r.route('/boards/:_id/cards')
+.put(loginRequired,
+     initializeBoard,
+     updateCardsRemoteObjects);
+
+function updateCardsRemoteObjects(req, res, next) {
+  Promise.all(_.map(req.body.cards, function (card) {
+    return Card.updateRemoteObject(card);
+  })).then(function () { res.send(200) });
+};
+
 /*
  * PUT /boards/:id/cards/:card_id/move
  * Move cards around within columns and/or across columns
@@ -275,7 +295,6 @@ r.route('/boards/:_id/authorizedUsers/:user_id')
 .delete(removeAuthorizedUser);
 
 function addAuthorizedUser(req, res, next) {
-  var ObjectId = require('mongoose').Types.ObjectId; 
   try {
     var user_id = ObjectId(req.params.user_id);
     if (req.board.authorizedUsers.indexOf(user_id) >= 0) {
@@ -294,7 +313,6 @@ function addAuthorizedUser(req, res, next) {
 };
 
 function removeAuthorizedUser(req, res, next) {
-  var ObjectId = require('mongoose').Types.ObjectId; 
   try {
     var user_id = ObjectId(req.params.user_id);
     var index = req.board.authorizedUsers.indexOf(user_id);

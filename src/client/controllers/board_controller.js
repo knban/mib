@@ -1,13 +1,16 @@
 var _ = {
-  find: require('lodash.find')
+  find: require('lodash.find'),
+  map: require('lodash.map')
 },
+providers = require('../../providers'),
 ProjectLinker = require('../project_linker'),
 BoardCreator = require('../board_creator'),
 UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
   var board = this;
-  this.projectLinker = new ProjectLinker(board, localStorage, $http);
+  this.providers = providers.prepare(localStorage, $http, this, window.api);
+  this.projectLinker = new ProjectLinker(this, $http);
   this.userMod = new UserMod(board, $http);
   this.creator = new BoardCreator(this, $http);
   this.unload = function (preventClearLastBoard) {
@@ -24,6 +27,7 @@ module.exports = ['$http', function($http) {
     board.attributes = attributes;
     board.loaded = true;
     localStorage.lastBoardId = attributes._id;
+    setTimeout(this.refreshBoardData, 5000); // do this later to improve UX
   };
   this.loadBoardById = app.loadBoardById = function (_id) {
     if (board.loaded && board.attributes._id === _id)
@@ -126,6 +130,14 @@ module.exports = ['$http', function($http) {
       column2.isSyncing = false;
     }).error(function () {
       alert('something is wrong');
+    });
+  };
+
+  this.refreshBoardData = function () {
+    _.map(board.attributes.links, function (link, provider_id) {
+      _.map(link, function (repo, id) {
+        board.providers[provider_id].refreshCards(repo, function () {});
+      });
     });
   };
 }]

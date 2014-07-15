@@ -5,7 +5,10 @@ var logger = require('winston');
 
 var _ = {
   map: require('lodash.map'),
-  where: require('lodash.where')
+  where: require('lodash.where'),
+  find: require('lodash.find'),
+  flatten: require('lodash.flatten'),
+  isEqual: require('lodash.isequal')
 }
 
 module.exports = function(boardCtrl, api, github, linker) {
@@ -136,14 +139,14 @@ module.exports = function(boardCtrl, api, github, linker) {
     importRepoIssues: function(repo, done) {
       repo.imported = true;
       var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
-      this.importIssues(url, { repo_id: repo.id }, done);
+      this.importIssues(url, { repo_id: repo.id }, this.postIssues, done);
     },
-    importIssues: function(url, metadata, done) {
+    importIssues: function(url, metadata, onSuccess, done) {
       github.get(url).success(function(data, status, headers) {
-        this.postIssues(data, metadata);
+        onSuccess(data, metadata);
         var next = headers('Link') ? li.parse(headers('Link')).next : null;
         if (next) {
-          this.importIssues(next, metadata, done);
+          this.importIssues(next, metadata, onSuccess, done);
         } else {
           done(null);
         }
@@ -160,6 +163,35 @@ module.exports = function(boardCtrl, api, github, linker) {
     },
     canImport: function(repo) {
       return repo.has_issues && repo.open_issues_count > 0;
+    },
+    refreshCards: function (repo, done) {
+      repo.cards = _.flatten(_.map(boardCtrl.attributes.columns, function (col) {
+        return _.where(col.cards, { provider: info.name, repo_id: repo.id.toString() });
+      }));
+      if (repo.cards.length > 1) {
+        var cardsToUpdate = [];
+        var url = repo.issues_url.replace('{/number}','')+'?per_page=100&state=open';
+        this.importIssues(url, { repo_id: repo.id.toString() }, function (issues, metadata) {
+          _.map(issues, function (issue) {
+            var card = _.find(repo.cards, { remoteObject: { id: issue.id } });
+            if (!card) return;
+            if ( ! _.isEqual(card.remoteObject.updated_at, issue.updated_at) ) {
+              card.remoteObject = issue;
+              cardsToUpdate.push(card);
+            }
+          });
+        }, function () {
+          if (cardsToUpdate.length > 1) {
+            console.info("updating "+cardsToUpdate.length+" cards in "+repo.name);
+            api.put('boards/'+boardCtrl.attributes._id+'/cards', {
+              cards: cardsToUpdate
+            })
+          } else {
+            console.info("cards in "+repo.name+" are up to date");
+          }
+          done();
+        });
+      }
     }
   }
 };
