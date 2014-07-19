@@ -2,6 +2,7 @@
 
 [![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 [![Build Status][strider-build-status-img]][strider-build-status-link]
+[![Build Status](https://drone.io/github.com/keyvanfatehi/mib/status.png)](https://drone.io/github.com/keyvanfatehi/mib/latest)
 [![Dependency Status][dep-img]][dep-link]
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 [![NPM][npm-badge-img]][npm-badge-link]
