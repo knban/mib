@@ -23,7 +23,6 @@ module.exports = ['$http', function($http) {
         logger.warn("no github authorization");
         localStorage.removeItem('github');
       }
-      session.anonymous = false;
       session.loggedIn = true;
       session.getBoardList();
     }).error(function () {
@@ -38,7 +37,6 @@ module.exports = ['$http', function($http) {
   this.destroy = function () {
     localStorage.clear();
     session.loggedIn = false;
-    session.anonymous = true;
     session.user = null;
   };
 

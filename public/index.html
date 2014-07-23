@@ -16,12 +16,10 @@
         ng-include="'views/nav/index.html'">
       </div>
 
-      <div ng-if="session.anonymous" class="container">
+      <div ng-if="! session.loggedIn">
         <div class="jumbotron">
-          <h1>Hello, world!</h1>
-          <p>Tired of kanban boards that miss the mark?</p>
-          <p>Login with your github account to get started.</p>
-          <p>Open source projects are always free.</p>
+          <h1>Hello!</h1>
+          <p>Login or register to continue.</p>
         </div>
       </div>
 
