@@ -37,7 +37,7 @@
           ng-include="'views/user_mod.html'">
         </div>
         <table ng-show="board.loaded" class="table" width="100%" ng-include="'views/board.html'"></table>
-        <div class="container" ng-hide="board.loaded">
+        <div class="container" ng-hide="board.loaded || board.creator.isOpen">
           <div class="jumbotron">
             <h3>Create or select a board from the dropdown above</h3>
           </div>
