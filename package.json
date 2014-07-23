@@ -2,7 +2,7 @@
   "name": "mib",
   "version": "0.2.0",
   "description": "modular issue board, a kanban board app. ships with github support",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "test": "mocha --recursive test -R spec",
