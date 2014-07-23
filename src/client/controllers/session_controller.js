@@ -47,12 +47,12 @@ module.exports = ['$http', function($http) {
   };
 
   app.loadLastBoard = function () {
-    app.loadBoardById(localStorage.lastBoardId);
+    if (localStorage.lastBoardId) {
+      app.loadBoardById(localStorage.lastBoardId);
+    }
   };
 
-  if (localStorage.lastBoardId) {
-    app.loadLastBoard();
-  }
+  app.loadLastBoard();
 
   var LoginForm = require('../login_form.js');
 
