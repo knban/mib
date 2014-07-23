@@ -25,6 +25,7 @@
   "devDependencies": {
     "browserify": "^4.1.10",
     "chai": "^1.9.1",
+    "dotenv": "^0.4.0",
     "mocha": "^1.20.1",
     "nock": "^0.42.1",
     "sinon": "^1.10.2",
@@ -38,7 +39,6 @@
     "browserify": "^4.2.0",
     "browserify-middleware": "^3.0.0",
     "cookie-session": "^1.0.2",
-    "dotenv": "^0.4.0",
     "everyauth": "^0.4.6",
     "express": "^4.4.5",
     "js-beautify": "^1.5.1",

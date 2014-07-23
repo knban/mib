@@ -6,6 +6,13 @@ io = require('socket.io')(http),
 browserify = require('browserify-middleware'),
 bodyParser = require('body-parser');
 
+logger.remove(logger.transports.Console);
+logger.add(logger.transports.Console, { colorize: true });
+
+try {
+  var dotenv = require('dotenv');
+  dotenv.load();
+} catch (e) {}
 
 app.use('/js/bundle.js', browserify(__dirname+'/../client/app.js'));
 app.use(express.static(__dirname + '/../../public'));
