@@ -9,6 +9,7 @@ UserMod = require('../user_mod');
 
 module.exports = ['$http', function($http) {
   var board = this;
+  board.loaded = false;
   this.providers = providers.prepare(localStorage, $http, this, window.api);
   this.projectLinker = new ProjectLinker(this, $http);
   this.userMod = new UserMod(board, $http);
