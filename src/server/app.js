@@ -47,7 +47,8 @@ app.use(bodyParser.json({limit: '10mb'}));
 app.use('/api/v1/', require('./router'));
 
 var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/mib");
+var mongodb_uri = process.env.MONGODB_URI || "mongodb://localhost/mib";
+mongoose.connect(mongodb_uri);
 var db = mongoose.connection;
-db.on('error', logger.error.bind(logger, 'Mongo connection error:'));
+db.on('error', logger.error.bind(logger, 'connection error '+mongodb_uri));
 module.exports = http;
