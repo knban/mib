@@ -54,13 +54,6 @@ module.exports = ['$http', function($http) {
     app.loadLastBoard();
   }
 
-  if (window.ionic) {
-    this.ionic = {
-      login: function() {
-      }
-    }
-  }
-
   var LoginForm = require('../login_form.js');
 
   this.login = function () {
