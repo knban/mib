@@ -225,7 +225,7 @@ describe("Router", function() {
     });
   };
 
-  describe("POST /boards", function () {
+  describe.only("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
@@ -239,8 +239,13 @@ describe("Router", function() {
       })
     });
 
-    describe.skip("Import Feature", function() {
-      it("imports the data and returns the board id")
+    it("can import JSON", function(done) {
+      setupUser(function (err, user) {
+        createBoard({
+          name: 'my board',
+          jsonImport: require('./../fixtures/import')
+        }, user.token, done)
+      });
     });
   });
 
