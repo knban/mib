@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var boardSchema = require('./../schemata/board');
 
@@ -19,7 +20,7 @@ boardSchema.statics.findOneAndPopulate = function(query) {
   })
 };
 
-boardSchema.statics.createWithDefaultColumns = function (attributes, Column) {
+boardSchema.statics.createWithDefaultColumns = function (attributes) {
   var Board = this;
   return new Promise(function (resolve, reject) {
     var Column = mongoose.model('Column');
@@ -41,4 +42,36 @@ boardSchema.statics.createWithDefaultColumns = function (attributes, Column) {
     }).catch(reject)
   });
 };
+
+boardSchema.statics.createViaImport = function (data, attributes) {
+  var Board = this;
+  return new Promise(function (resolve, reject) {
+    var Column = mongoose.model('Column');
+    var promises = [
+      Board.create(attributes),
+    ];
+
+    _.each(data.columns, function(column) {
+      var promise = Column.create({
+        name: column.name,
+        role: column.role
+      });
+      promises.push(promise);
+    });
+
+    Promise.all(promises).spread(function () {
+      var args = _.toArray(arguments);
+      var board = args[0];
+      var columns = _.rest(args);
+      _.each(columns, function (column) {
+        board.columns.push(column);
+      });
+      board.save(function(err, board) {
+        if (err) reject(err);
+        else resolve(board)
+      })
+    }).catch(reject)
+  });
+};
+
 module.exports = mongoose.model('Board', boardSchema);
