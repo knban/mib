@@ -32,13 +32,16 @@ describe("Router", function() {
   });
 
   function setupUser(done) {
-    var user = new User({
+    user = {
+      token: 'userToken',
+    }
+    var userModal = new User({
       uid: "theusername",
       hash: bcrypt.hashSync("thepasswrd", 10),
       token: 'userToken',
       session: { misc: "data" }
     });
-    user.save(function (err) {
+    userModal.save(function (err) {
       if (err) throw err;
       done(err, user);
     });
@@ -225,7 +228,7 @@ describe("Router", function() {
     });
   };
 
-  describe.only("POST /boards", function () {
+  describe("POST /boards", function () {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/boards')
@@ -239,12 +242,35 @@ describe("Router", function() {
       })
     });
 
-    it("can import JSON", function(done) {
-      setupUser(function (err, user) {
-        createBoard({
-          name: 'my board',
-          jsonImport: require('./../fixtures/import')
-        }, user.token, done)
+    describe.only("Import JSON", function() {
+      var json = null;
+
+      beforeEach(function(done) {
+        json = require('./../fixtures/import');
+        setupUser(function (err, user) {
+          createBoard({
+            name: 'renamed board',
+            jsonImport: json
+          }, user.token, function (err, _board) {
+            if (err) throw err;
+            board_id = _board._id;
+            reloadBoard(done);
+          });
+        });
+      });
+
+      it("takes the new name", function() {
+        expect(board.name).to.eq('renamed board');
+      });
+
+      it("has the right # of columns", function() {
+        expect(board.columns.length)
+        .to.eq(json.columns.length);
+      });
+
+      it.skip("", function() {
+        expect(board.columns[0].cards.length)
+        .to.eq(json.columns[0].cards.length);
       });
     });
   });
