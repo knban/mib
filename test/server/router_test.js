@@ -268,9 +268,11 @@ describe("Router", function() {
         .to.eq(json.columns.length);
       });
 
-      it.skip("", function() {
-        expect(board.columns[0].cards.length)
-        .to.eq(json.columns[0].cards.length);
+      describe("column #1", function() {
+        it("has the right # of cards", function() {
+          expect(board.columns[0].cards.length)
+          .to.eq(json.columns[0].cards.length);
+        });
       });
     });
   });
