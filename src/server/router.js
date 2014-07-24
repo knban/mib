@@ -75,7 +75,14 @@ function myBoards(req, res, next) {
 
 function createBoard(req, res, next) {
   if (req.body.jsonImport) {
-    res.send(501, 'Not yet implemented');
+    Board.createViaImport(req.body.jsonImport, {
+      name: req.body.name,
+    }).then(function (board) {
+      res.send(201, { board: { _id: board._id }});
+    }).catch(function (err) {
+      logger.error(err.message);
+      res.send(500);
+    });
   } else {
     Board.createWithDefaultColumns({
       name: req.body.name,
