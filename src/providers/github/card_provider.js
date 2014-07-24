@@ -11,13 +11,15 @@ var _ = {
   isEqual: require('lodash.isequal')
 }
 
-module.exports = function(boardCtrl, api, github, linker) {
+module.exports = function(boardCtrl, api, github) {
   var board = null;
   var user = null;
+  var linker = null; 
 
   return {
     info: info,
     next: function() {
+      linker = boardCtrl.projectLinker;
       board = boardCtrl.attributes;
       linker._Provider = this;
       linker._Help = "Loading user metadata ...";

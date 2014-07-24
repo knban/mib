@@ -11,6 +11,7 @@ module.exports = function (board, $http) {
     this.reset();
   }
   this.reset = function () {
+    this.view = 'views/project_linker.html';
     this._Provider = null;
     this._PersonalOrOrg = null;
     this._Orgs = null;
@@ -23,4 +24,5 @@ module.exports = function (board, $http) {
     this._ReposToImport = null;
     this.fetchedAllRepos = null;
   };
+  this.reset();
 };

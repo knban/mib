@@ -12,7 +12,7 @@ providers.prepare = function (tokens, $http, boardCtrl, api) {
     github.setClient('angular', $http, {
       headers: { 'Authorization': 'token '+tokens.github }
     });
-    all.github = providers.github.cardProvider(boardCtrl, api, github, this);
+    all.github = providers.github.cardProvider(boardCtrl, api, github);
   };
   return all;
 };

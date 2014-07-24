@@ -51,7 +51,11 @@ describe("GitHub Provider", function() {
       headers: { 'Authorization': 'token ghtoken' }
     });
 
-    provider = Provider({ attributes: board }, api, github, linker);
+    provider = Provider({
+      attributes: board,
+      projectLinker: linker
+    }, api, github);
+
     provider.next();
   });
 
