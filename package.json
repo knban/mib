@@ -1,6 +1,6 @@
 {
   "name": "mib",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "modular issue board, a kanban board app. ships with github support",
   "main": "index.js",
   "scripts": {
