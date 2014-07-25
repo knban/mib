@@ -47,14 +47,32 @@ boardSchema.statics.createViaImport = function (data, attributes) {
   var Board = this;
   return new Promise(function (resolve, reject) {
     var Column = mongoose.model('Column');
-    var promises = [
-      Board.create(attributes),
-    ];
+    var Card = mongoose.model('Card');
+    var promises = [ Board.create(attributes) ];
 
     _.each(data.columns, function(column) {
-      var promise = Column.create({
-        name: column.name,
-        role: column.role
+      var promise = Column.create(_.omit(column, [
+        '__v', '_id', 'cards', 'board'
+      ]));
+      promise.then(function(col) {
+        return new Promise(function(resolve, reject) {
+          var cardPromises = [];
+          _.each(column.cards, function (card) {
+            var cardPromise = Card.create(_.omit(card, [
+              '__v', '_id', 'column'
+            ]));
+            cardPromises.push(cardPromise);
+          });
+          Promise.all(cardPromises).spread(function() {
+            _.each(_.toArray(arguments), function (card) {
+              col.cards.push(card);
+            });
+            col.save(function(err, col) {
+              if (err) reject(err);
+              else resolve(col)
+            })
+          }).catch(reject);
+        })
       });
       promises.push(promise);
     });
