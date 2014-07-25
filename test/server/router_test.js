@@ -42,9 +42,10 @@ describe("Router", function() {
       token: 'userToken',
       session: { misc: "data" }
     });
-    userModal.save(function (err) {
+    userModal.save(function (err, _user) {
       if (err) throw err;
-      done(err, user);
+      user._id = _user.id;
+      done(err, _user);
     });
   }
 
@@ -243,7 +244,7 @@ describe("Router", function() {
       })
     });
 
-    describe.only("Import JSON", function() {
+    describe("Import JSON", function() {
       var json = null;
 
       beforeEach(function(done) {
@@ -279,6 +280,10 @@ describe("Router", function() {
         it("has the right # of cards", function() {
           expect(board.columns[0].cards.length)
           .to.eq(json.columns[0].cards.length);
+        });
+
+        it("resets authorized users", function() {
+          expect(board.authorizedUsers).to.deep.eq([user._id.toString()]);
         });
 
         it("matches the imported column", function() {
