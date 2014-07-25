@@ -77,6 +77,7 @@ function createBoard(req, res, next) {
   if (req.body.jsonImport) {
     Board.createViaImport(req.body.jsonImport, {
       name: req.body.name,
+      authorizedUsers: [req.user._id]
     }).then(function (board) {
       res.send(201, { board: { _id: board._id }});
     }).catch(function (err) {
