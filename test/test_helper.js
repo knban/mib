@@ -11,6 +11,7 @@ var mongoose = require('mongoose');
 var _ = require('lodash');
 var stubbedModels = [];
 module.exports = {
+  _:_,
   mongoDB: 'mongodb://localhost/mib-test',
   mongoose: mongoose,
   sinon: sinon,

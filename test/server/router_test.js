@@ -4,7 +4,8 @@ bcrypt = require('bcrypt'),
 mongoose = helper.mongoose,
 expect = helper.expect,
 request = helper.supertest,
-sinon = helper.sinon;
+sinon = helper.sinon,
+_ = helper._;
 
 
 describe("Router", function() {
@@ -269,9 +270,34 @@ describe("Router", function() {
       });
 
       describe("column #1", function() {
+        var strip = function(c) {
+          return _.omit(c, [
+            '__v', '_id', 'cards', 'board'
+          ]);
+        };
+
         it("has the right # of cards", function() {
           expect(board.columns[0].cards.length)
           .to.eq(json.columns[0].cards.length);
+        });
+
+        it("matches the imported column", function() {
+          var jsonCol = strip(json.columns[0]);
+          var col = strip(board.columns[0]);
+          expect(jsonCol).to.deep.eq(col);
+        });
+
+        describe("card #1", function() {
+          var strip = function(c) {
+            return _.omit(c, [
+              '__v', '_id', 'column'
+            ]);
+          };
+          it("matches the imported card", function() {
+            var jsonCard = strip(json.columns[0].cards[0]);
+            var card = strip(board.columns[0].cards[0]);
+            expect(jsonCard).to.deep.eq(card);
+          });
         });
       });
     });
