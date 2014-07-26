@@ -1,17 +1,16 @@
 function LoginForm(opts) {
   var $http = opts.$http,
   close = opts.close;
-
-  this.provider = "github";
+  var form = this;
 
   this.submit = function () {
-    if (! this.uid || ! this.pw) return;
-    else if (this.provider !== 'github') {
-      alert("Currently only github login is supported");
+    form.busy = true;
+    if (! this.uid || ! this.pw) {
+      form.busy = false;
     } else {
-      this.busy = true;
       try {
         var self = this;
+        console.log('go');
         /*
          * POST /sessions/:provider
          */
@@ -29,6 +28,7 @@ function LoginForm(opts) {
         });
       } finally {
         pw = null;
+        form.busy = false;
       }
     }
   };

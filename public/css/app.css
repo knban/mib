@@ -1,4 +1,4 @@
-body {
+body.loggedIn {
   padding-top: 70px;
 }
 
@@ -39,4 +39,3 @@ table ul {
     cursor: inherit;
     display: block;
 }
-

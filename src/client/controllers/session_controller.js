@@ -52,21 +52,22 @@ module.exports = ['$http', function($http) {
     }
   };
 
-  app.loadLastBoard();
+  if (session.loggedIn) {
+    app.loadLastBoard();
+  } else {
+    var LoginForm = require('../login_form.js');
+    var SignupForm = require('../signup_form.js');
 
-  var LoginForm = require('../login_form.js');
+    session.loginForm = new LoginForm({
+      $http: $http,
+      close: function () {
+        session.loginForm = null;
+      },
+      reloadSession: session.load
+    });
 
-  this.login = function () {
-    if (this.loginForm) {
-    } else {
-      session.loginForm = new LoginForm({
-        $parent: this,
-        $http: $http,
-        close: function () {
-          session.loginForm = null;
-        },
-        reloadSession: session.load
-      });
-    }
-  };
+    session.signupForm = new SignupForm({
+      $http: $http
+    });
+  }
 }];

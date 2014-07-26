@@ -42,31 +42,9 @@
         {{session.user._id}}
       </small>
       </li>
-      <li ng-show="session.loggedIn"><a href="#" ng-click="session.destroy()">Logout {{session.user.uid}}</a></li>
-      <li ng-hide="session.loggedIn">
-        <a href="#" ng-hide="session.loginForm" ng-click="session.login()">Login</a>
+      <li ng-show="session.loggedIn">
+        <a href="#" ng-click="session.destroy()">Logout {{session.user.uid}}</a>
       </li>
-      <form ng-submit="session.loginForm.submit()" class="navbar-form" ng-show="session.loginForm">
-        <div class="input-group">
-          <span class="input-group-btn" data-toggle="buttons">
-            <label class="btn btn-default active" ng-click="session.loginForm.provider = 'github'">
-              <input type="radio" checked> GitHub
-            </label>
-            <label class="btn btn-default" ng-click="session.loginForm.provider = 'bitbucket'">
-              <input type="radio"> BitBucket
-            </label>
-          </span>
-          <span>
-            <input type="text" ng-model="session.loginForm.uid" class="form-control" placeholder="{{session.loginForm.provider + ' username'}}">
-          </span>
-          <span>
-            <input type="password" ng-model="session.loginForm.pw" class="form-control" placeholder="password">
-          </span>
-          <span class="input-group-btn">
-            <button type="submit" ng-disabled="session.loginForm.busy" class="btn btn-success">Go</button>  
-          </span>
-        </div>
-      </form>
     </ul>
   </div>
 </div>
