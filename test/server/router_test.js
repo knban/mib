@@ -270,6 +270,12 @@ describe("Router", function() {
         .to.eq(json.columns.length);
       });
 
+      describe("repo links", function() {
+        it("remain intact", function() {
+          expect(board.links).to.deep.eq(json.links);
+        });
+      });
+
       describe("column #1", function() {
         var strip = function(c) {
           return _.omit(c, [

@@ -84,6 +84,7 @@ boardSchema.statics.createViaImport = function (data, attributes) {
       _.each(columns, function (column) {
         board.columns.push(column);
       });
+      board.links = data.links;
       board.save(function(err, board) {
         if (err) reject(err);
         else resolve(board)
