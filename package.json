@@ -7,7 +7,8 @@
     "start": "node server.js",
     "test": "mocha --recursive test -R spec",
     "tdd": "mocha -w --recursive test -R spec",
-    "cover": "istanbul cover _mocha -- --recursive test"
+    "cover": "istanbul cover _mocha -- --recursive test",
+    "samples": "mocha --recursive test -R supersamples"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "nock": "^0.42.1",
     "simple-stacktrace": "^0.1.0",
     "sinon": "^1.10.2",
+    "supersamples": "^0.3.1",
     "supertest": "~0.13.0"
   },
   "dependencies": {
