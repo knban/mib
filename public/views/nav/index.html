@@ -37,7 +37,7 @@
       <li ng-show="board.loaded"><a href="#" ng-click="board.deleteBoard()">Delete</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-      <li ng-show="session.loggedIn" style="padding:20px">
+      <li ng-show="session.loggedIn" id="my_user_id">
       <small ng-tooltip="Share your user ID with others to be added to their boards.">
         {{session.user._id}}
       </small>

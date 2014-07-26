@@ -10,7 +10,10 @@ table tr td:last-child {
   border-right: none;
 }
 
-
+li#my_user_id {
+  padding-top: 15px;
+  padding-right: 10px;
+}
 
 .column {
   height: 100%;
