@@ -28,16 +28,16 @@ function loginRequired(req, res, next) {
     User.findOne({ token: token }).exec(function (err, user) {
       if (err) {
         logger.error(err.message)
-        res.send(500)
+        res.status(500).end();
       } else if (user) {
         req.user = user;
         next();
       } else {
-        res.send(401);
+        res.status(401).end();
       }
     })
   } else {
-    res.send(401)
+    res.status(401).end();
   }
 };
 
@@ -49,9 +49,9 @@ function getSession(req, res, next) {
 function createSession(req, res, next) {
   User.findOrCreateByAuthorization(req.body, providers, function (err, user) {
     if (err) {
-      res.send(401);
+      res.status(401).end();
     } else {
-      res.send(201, { token: user.token, _id: user._id });
+      res.status(201).send({ token: user.token, _id: user._id });
     }
   });
 }
@@ -68,7 +68,7 @@ r.route('/boards')
 
 function myBoards(req, res, next) {
   Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
-    if (err) { res.send(500) }
+    if (err) { res.status(500).end() }
     else { res.send({boards: boards}) }
   });
 };
@@ -79,20 +79,20 @@ function createBoard(req, res, next) {
       name: req.body.name,
       authorizedUsers: [req.user._id]
     }).then(function (board) {
-      res.send(201, { board: { _id: board._id }});
+      res.status(201).send({ board: { _id: board._id }});
     }).catch(function (err) {
       logger.error(err.message);
-      res.send(500);
+      res.status(500).end();
     });
   } else {
     Board.createWithDefaultColumns({
       name: req.body.name,
       authorizedUsers: [req.user._id]
     }).then(function (board) {
-      res.send(201, { board: { _id: board._id }});
+      res.status(201).send({ board: { _id: board._id }});
     }).catch(function (err) {
       logger.error(err.message);
-      res.send(500);
+      res.status(500).end();
     });
   }
 };
@@ -113,10 +113,10 @@ function initializeBoard(req, res, next) {
     req.board = board;
     next();
   }).error(function () {
-    res.send(404);
+    res.status(404).end();
   }).catch(Error, function (err) {
     logger.error(err.message);
-    res.send(500);
+    res.status(500).end();
   })
 };
 
@@ -128,9 +128,9 @@ function deleteBoard(req, res, next) {
   req.board.remove(function(err) {
     if (err) {
       logger.error(err.message);
-      res.send(500)
+      res.status(500).end();
     } else {
-      res.send(204);
+      res.status(204).end();
     }
   });
 }
@@ -157,7 +157,7 @@ function updateBoardLinks(req, res, next) {
     board.links[req.params.provider][repo.id] = repo;
   });
   Board.update({ _id: board._id }, { links: board.links }, function(err) {
-    if (err) { res.send(500, err.message); }
+    if (err) { res.status(500).send(err.message); }
     else { res.send({ links: board.links }) }
   });
 };
@@ -182,7 +182,7 @@ function initializeFirstColumn(req, res, next) {
   .exec(function (err, column) {
     if (err) {
       logger.error(err.message);
-      res.send(500);
+      res.status(500).end();
     } else {
       req.first_column = column;
       next();
@@ -206,7 +206,7 @@ function importCardsViaProvider(req, res, next) {
 function saveCardsViaPromises(req, res, next) {
   Promise.all(req.promises).spread(function () {
     req.board.update({ columns: req.board.columns }, function(err) {
-      if (err) res.send(500, err.message);
+      if (err) res.status(500).send(err.message);
       else next()
     });
   });
@@ -232,7 +232,7 @@ r.route('/boards/:_id/cards')
 function updateCardsRemoteObjects(req, res, next) {
   Promise.all(_.map(req.body.cards, function (card) {
     return Card.updateRemoteObject(card);
-  })).then(function () { res.send(200) });
+  })).then(function () { res.status(200).end() });
 };
 
 /*
@@ -251,10 +251,10 @@ function performCardMove(req, res, next) {
       column.cards.splice(column.cards.indexOf(req.params.card_id), 1);
       column.cards.splice(req.body.new_index, 0, req.params.card_id);
     }).then(function () {
-      res.send(204)
+      res.status(204).end();
     }).catch(function (err) {
       logger.error(err.message);
-      res.send(500)
+      res.status(500).end();
     });
   } else {
     Promise.all([
@@ -265,10 +265,10 @@ function performCardMove(req, res, next) {
         column.cards.splice(req.body.new_index, 0, req.params.card_id);
       })
     ]).then(function () {
-      res.send(204)
+      res.status(204).end();
     }).catch(function (err) {
       logger.error(err.message);
-      res.send(500)
+      res.status(500).end();
     });
   }
 };
@@ -306,17 +306,17 @@ function addAuthorizedUser(req, res, next) {
   try {
     var user_id = ObjectId(req.params.user_id);
     if (req.board.authorizedUsers.indexOf(user_id) >= 0) {
-      res.send(400, 'user already authorized');
+      res.status(400).send('user already authorized');
     } else {
       req.board.authorizedUsers.push(user_id);
       req.board.save(function(err, board) {
-        if (err) { res.send(500, err.message); }
+        if (err) { res.status(500).send(err.message); }
         else { res.send({ authorizedUsers: board.authorizedUsers }) }
       });
     }
   } catch (err) {
     logger.error('addAuthorizedUser 400', err.message);
-    res.send(400, err.message);
+    res.status(400).send(err.message);
   }
 };
 
@@ -327,15 +327,15 @@ function removeAuthorizedUser(req, res, next) {
     if (index >= 0) {
       req.board.authorizedUsers.splice(index, 1);
       req.board.save(function(err, board) {
-        if (err) { res.send(500, err.message); }
+        if (err) { res.status(500).send(err.message); }
         else { res.send({ authorizedUsers: board.authorizedUsers }) }
       });
     } else {
-      res.send(404, 'user not authorized');
+      res.status(404).send('user not authorized');
     }
   } catch (err) {
     logger.error('removeAuthorizedUser 400', err.message);
-    res.send(400, err.message);
+    res.status(400).send(err.message);
   }
 };
 
@@ -358,7 +358,7 @@ function initializeLastColumn(req, res, next) {
   .exec(function (err, column) {
     if (err) {
       logger.error(err.message);
-      res.send(500);
+      res.status(500).end();
     } else {
       req.last_column = column;
       next();
@@ -373,15 +373,15 @@ function consumeWebhook(req, res, next) {
     Card.create(attrs, function (err, card) {
       if (err) {
         logger.error(err.message);
-        res.send(500)
+        res.status(500).end();
       } else {
         req.first_column.cards.push(card)
         req.first_column.save(function (err) {
           if (err) {
             logger.error(err.message);
-            res.send(500);
+            res.status(500).end();
           } else {
-            res.send(204);
+            res.status(204).end();
           }
         });
       }
@@ -389,12 +389,12 @@ function consumeWebhook(req, res, next) {
   } else if (action === "created" || action === "closed" || action === "reopened") {
     // TODO closed move to last column, reopened move to first column
     Card.findOne({ 'remoteObject.id': req.body.issue.id }, function (err, card) {
-      if (err) { res.send(404) } else { 
+      if (err) { res.status(404).end(); } else { 
         card.remoteObject = req.body.issue;
         card.save(function (err) {
           if (err) {
             logger.error(err.message);
-            res.send(500);
+            res.status(500).end();
           } else {
             if (action === "closed") {
               Promise.all([
@@ -405,13 +405,13 @@ function consumeWebhook(req, res, next) {
                   column.cards.splice(0, 0, card._id);
                 })
               ]).then(function () {
-                res.send(204)
+                res.status(204).end();
               }).catch(function (err) {
                 logger.error(err.message);
-                res.send(500)
+                res.status(500).end();
               });
             } else {
-              res.send(204);
+              res.status(204).end();
             }
           }
         });
@@ -419,9 +419,9 @@ function consumeWebhook(req, res, next) {
     })
   } else if (action) {
     logger.warn("webhook action '"+action+"' unhandled");
-    res.send(501)
+    res.status(501).end();
   } else {
-    res.send(204)
+    res.status(204).end();
   }
 };
 
@@ -436,7 +436,7 @@ r.route('/users')
 
 function createUserAndSession(req, res, next) {
   User.findOne({ email: req.body.email }, function (err, user) {
-    if (user) res.send(406, 'email is in use. forgot password not yet implemented'); // TODO
+    if (user) res.status(406).send('email is in use. forgot password not yet implemented'); // TODO
     else {
       User.create({
         uid: req.body.email,
@@ -445,7 +445,7 @@ function createUserAndSession(req, res, next) {
         token: Math.random().toString(22).substring(2)
       }, function(err, user) {
         if (err) throw err;
-        res.send(201, { token: user.token, _id: user._id });
+        res.status(201).send({ token: user.token, _id: user._id });
       });
     }
   })
