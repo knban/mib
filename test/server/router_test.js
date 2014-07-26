@@ -565,6 +565,14 @@ describe("Router", function() {
     });
   });
 
+  describe("PUT /boards/:id/cards", function() {
+    it("updates multiple cards at once");
+  });
+
+  describe("PUT /boards/:id/users", function() {
+    it("updates a board's authorized users list");
+  });
+
   describe("PUT /boards/:id/cards/:card_id/move", function() {
     beforeEach(function (done) {
       setupUserAndBoard(function () {
@@ -814,5 +822,10 @@ describe("Router", function() {
         })
       });
     });
+  });
+  describe("POST /users", function() {
+    it("rejects with 406 if email is taken");
+    it("creates a new user");
+    it("returns the user token and user id");
   });
 });
