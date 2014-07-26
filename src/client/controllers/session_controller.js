@@ -1,4 +1,6 @@
 var logger = require('winston');
+var LoginForm = require('../login_form.js');
+var SignupForm = require('../signup_form.js');
 
 module.exports = ['$http', function($http) {
   session = this;
@@ -55,19 +57,7 @@ module.exports = ['$http', function($http) {
   if (session.loggedIn) {
     app.loadLastBoard();
   } else {
-    var LoginForm = require('../login_form.js');
-    var SignupForm = require('../signup_form.js');
-
-    session.loginForm = new LoginForm({
-      $http: $http,
-      close: function () {
-        session.loginForm = null;
-      },
-      reloadSession: session.load
-    });
-
-    session.signupForm = new SignupForm({
-      $http: $http
-    });
+    session.loginForm = new LoginForm(this);
+    session.signupForm = new SignupForm(this);
   }
 }];

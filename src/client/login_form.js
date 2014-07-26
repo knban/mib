@@ -1,30 +1,24 @@
-function LoginForm(opts) {
-  var $http = opts.$http,
-  close = opts.close;
+function LoginForm(session) {
   var form = this;
 
   this.submit = function () {
+    form.errors = null;
     form.busy = true;
     if (! this.uid || ! this.pw) {
+      form.errors = "please log in";
       form.busy = false;
     } else {
       try {
-        var self = this;
-        console.log('go');
-        /*
-         * POST /sessions/:provider
-         */
         api.post('session', {
-          provider: this.provider,
+          provider: 'local',
           uid: this.uid,
           pw: this.pw
         }).success(function (data, status, headers, config) {
           localStorage.token = data.token;
-          opts.reloadSession();
-          close();
+          session.load();
         }).error(function (err) {
-          console.error(err);
-          self.busy = false;
+          form.errors = err.toString();
+          form.busy = false;
         });
       } finally {
         pw = null;

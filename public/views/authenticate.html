@@ -8,7 +8,9 @@
 
       <div style="padding-top:30px" class="panel-body" >
 
-        <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
+        <div ng-show="session.loginForm.errors" id="login-alert" class="alert alert-danger col-sm-12">
+          <span>{{session.loginForm.errors}}</span>
+        </div>
 
         <form id="loginform" class="form-horizontal" role="form" ng-submit="session.loginForm.submit()">
 
@@ -45,7 +47,7 @@
             <div class="col-md-12 control">
               <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
                 Don't have an account! 
-                <a href="#" onClick="$('#loginbox').hide(); $('#signupbox').show()">
+                <a href="#" onClick="$('#loginbox').hide(); $('#signupbox').show(); $('#signupemail').focus()">
                   Sign Up Here
                 </a>
               </div>
@@ -65,64 +67,41 @@
         <div style="float:right; font-size: 85%; position: relative; top:-10px"><a id="signinlink" href="#" onclick="$('#signupbox').hide(); $('#loginbox').show()">Sign In</a></div>
       </div>  
       <div class="panel-body" >
-        <form id="signupform" class="form-horizontal" role="form">
+        <form id="signupform" class="form-horizontal" role="form" ng-submit="session.signupForm.submit()">
 
-          <div id="signupalert" style="display:none" class="alert alert-danger">
-            <p>Error:</p>
-            <span></span>
+          <div id="signupalert" class="alert alert-danger"
+            ng-show="session.signupForm.errors">
+            <span>{{session.signupForm.errors}}</span>
           </div>
-
-
 
           <div class="form-group">
             <label for="email" class="col-md-3 control-label">Email</label>
             <div class="col-md-9">
-              <input type="text" class="form-control" name="email" placeholder="Email Address">
+              <input id="signupemail" type="email" class="form-control" name="email" placeholder="Email Address" ng-model="session.signupForm.email">
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="firstname" class="col-md-3 control-label">First Name</label>
-            <div class="col-md-9">
-              <input type="text" class="form-control" name="firstname" placeholder="First Name">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="lastname" class="col-md-3 control-label">Last Name</label>
-            <div class="col-md-9">
-              <input type="text" class="form-control" name="lastname" placeholder="Last Name">
-            </div>
-          </div>
           <div class="form-group">
             <label for="password" class="col-md-3 control-label">Password</label>
             <div class="col-md-9">
-              <input type="password" class="form-control" name="passwd" placeholder="Password">
+              <input type="password" class="form-control" name="password" placeholder="Password" ng-model="session.signupForm.password">
             </div>
           </div>
 
           <div class="form-group">
-            <label for="icode" class="col-md-3 control-label">Invitation Code</label>
+            <label for="password_confirmation" class="col-md-3 control-label">Password Confirmation</label>
             <div class="col-md-9">
-              <input type="text" class="form-control" name="icode" placeholder="">
+              <input type="password" class="form-control" name="passwordd_confirmation" placeholder="Password Confirmation" ng-model="session.signupForm.password_confirmation">
             </div>
           </div>
 
           <div class="form-group">
             <!-- Button -->                                        
             <div class="col-md-offset-3 col-md-9">
-              <button id="btn-signup" type="button" class="btn btn-info"><i class="icon-hand-right"></i> &nbsp Sign Up</button>
-              <span style="margin-left:8px;">or</span>  
+              <input type="submit" id="btn-signup" type="button" class="btn btn-info" value="Sign Up">
+              <img ng-show="session.signupForm.busy" src="images/ajax-loader.gif"></img>
             </div>
           </div>
-
-          <div style="border-top: 1px solid #999; padding-top:20px"  class="form-group">
-
-            <div class="col-md-offset-3 col-md-9">
-              <button id="btn-fbsignup" type="button" class="btn btn-primary"><i class="icon-facebook"></i>   Sign Up with Github</button>
-            </div>                                           
-
-          </div>
-
 
 
         </form>
