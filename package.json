@@ -6,9 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "mocha --recursive test -R spec",
-    "tdd": "mocha -w --recursive test -R spec",
-    "cover": "istanbul cover _mocha -- --recursive test",
-    "samples": "mocha --recursive test -R supersamples"
+    "tdd": "mocha -w --recursive test -R min",
+    "docs": "istanbul cover --dir docs/coverage _mocha -- --recursive test -R supersamples"
   },
   "repository": {
     "type": "git",
