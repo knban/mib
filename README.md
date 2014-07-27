@@ -1,11 +1,22 @@
 # Modular Issue Board
 
-[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
-[![Build Status][strider-build-status-img]][strider-build-status-link]
-[![Build Status](https://drone.io/github.com/keyvanfatehi/mib/status.png)](https://drone.io/github.com/keyvanfatehi/mib/latest)
+[![NPM][npm-badge-img]][npm-badge-link]
+
 [![Dependency Status][dep-img]][dep-link]
 [![devDependency Status][dev-dep-img]][dev-dep-link]
-[![NPM][npm-badge-img]][npm-badge-link]
+
+[![Build Status][strider-build-status-img]][strider-build-status-link]
+[![Build Status](https://drone.io/github.com/keyvanfatehi/mib/status.png)](https://drone.io/github.com/keyvanfatehi/mib/latest)
+[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
+
+[dev-dep-img]: https://david-dm.org/keyvanfatehi/mib/dev-status.svg
+[dev-dep-link]: https://david-dm.org/keyvanfatehi/mib#info=devDependencies
+[dep-img]: https://david-dm.org/keyvanfatehi/mib.svg
+[dep-link]: https://david-dm.org/keyvanfatehi/mib
+[npm-badge-img]: https://nodei.co/npm/mib.png?downloads=true&stars=true
+[npm-badge-link]: https://nodei.co/npm/mib/
+[strider-build-status-img]: https://strider.critiqueapp.com/keyvanfatehi/mib/badge
+[strider-build-status-link]: https://strider.critiqueapp.com/keyvanfatehi/mib
 
 **mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_%28development%29) board that uses Github issues as cards.
 
@@ -25,29 +36,6 @@ Webhooks are automatically installed to keep cards and issues in sync, however G
 * Export board data as a JSON file
 * Import board data via JSON file
 * 3rd party integrations via plugin system
-
-## Plugins
-
-Plugins provide 3rd party integrations, add API routes, provide webhooks, or otherwise extend **mib**.
-
-Documentation will be available soon after the [github plugin is stabilized and extracted](https://github.com/keyvanfatehi/mib/issues/23).
-
-### github
-
-* link repositories to boards
-  * imports existing issues as cards
-  * creates a webhook entry on the repository
-* adds webhook consumer route for card/issue updates
-* automatically updates card data on board load
-* custom card template
-
-### bitbucket
-
-on the roadmap!
-
-### gitlab
-
-on the roadmap!
 
 ## Usage
 
@@ -96,19 +84,30 @@ It's easy to get started hacking features (maybe you want to help get Bitbucket/
 * Examine the tests and go from there
 * Pull request!
 
-## Community
+# Resources
 
-There isn't one yet. Reach out by creating an issue and I'll put some effort into creating one, like setting up an IRC channel.
+## Online Documentation
 
-## Special Thanks
+[View](https://keyvanfatehi.github.com/mib)
 
-DigitalFilm Tree & DFTi
+## Coverage Report
 
-[dev-dep-img]: https://david-dm.org/keyvanfatehi/mib/dev-status.svg
-[dev-dep-link]: https://david-dm.org/keyvanfatehi/mib#info=devDependencies
-[dep-img]: https://david-dm.org/keyvanfatehi/mib.svg
-[dep-link]: https://david-dm.org/keyvanfatehi/mib
-[npm-badge-img]: https://nodei.co/npm/mib.png?downloads=true&stars=true
-[npm-badge-link]: https://nodei.co/npm/mib/
-[strider-build-status-img]: https://strider.critiqueapp.com/keyvanfatehi/mib/badge
-[strider-build-status-link]: https://strider.critiqueapp.com/keyvanfatehi/mib
+[View](https://keyvanfatehi.github.com/mib/coverage/lcov-report/)
+
+# Plugins
+
+Plugins provide 3rd party integrations, add API routes, provide webhooks, or otherwise extend **mib**.
+
+Documentation will be available soon after the [github plugin is stabilized and extracted](https://github.com/keyvanfatehi/mib/issues/23).
+
+## mib-github
+
+Currently integrated into **mib** pending [#23](https://github.com/keyvanfatehi/mib/issues/23)
+
+* link repositories to boards
+  * imports existing issues as cards
+  * creates a webhook entry on the repository
+* adds webhook consumer route for card/issue updates
+* automatically updates card data on board load
+* custom card template
+
