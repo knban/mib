@@ -8,7 +8,7 @@ sinon = helper.sinon,
 _ = helper._;
 
 
-describe("Router", function() {
+describe("API v1 Routes", function() {
   var app = null,
   board = null,
   user = null,
