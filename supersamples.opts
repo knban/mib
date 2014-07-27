@@ -7,7 +7,7 @@
 
 
   // Base URL for all API calls (used in CURL examples)
-  "baseUrl": "http://my-api.com",
+  "baseUrl": "http://localhost:3000",
 
 
   //
@@ -27,11 +27,11 @@
       "outputFolder": "docs",
 
       // Documentation page title
-      "title": "API documentation"
+      "title": "mib docs",
 
       // Optional Markdown document used at the top of the docs
       // Heading levels 1 and 2 are appended to the navigation
-      //"intro": "example/docs/intro.md",
+      "intro": "README.md"
 
       // Extra files to be copied into the output folder (css, logos, htaccess...)
       // <key> is a glob pattern to a list of files
@@ -46,34 +46,6 @@
       //  "custom.css"
       //]
 
-    },
-
-
-    //
-    // Single JSON file with all the samples metadata
-    //
-
-    "json": {
-
-      // Output file path
-      "outputFile": "docs/samples.json",
-      "includeBuffers": false
-
-    },
-
-
-    //
-    // Single Markdown file
-    //
-
-    "markdown": {
-
-      // Output file path
-      "outputFile": "docs/samples.md"
-
     }
-
-
   }
-
 }
