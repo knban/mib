@@ -4,6 +4,8 @@ var SignupForm = require('../signup_form.js');
 
 module.exports = ['$http', function($http) {
   session = this;
+  session.loginForm = new LoginForm(this);
+  session.signupForm = new SignupForm(this);
 
   var configureEndpoint = function () {
     api.setClient('angular', $http, {
@@ -27,6 +29,7 @@ module.exports = ['$http', function($http) {
       }
       session.loggedIn = true;
       session.getBoardList();
+      app.loadLastBoard();
     }).error(function () {
       session.destroy();
     });
@@ -53,11 +56,4 @@ module.exports = ['$http', function($http) {
       app.loadBoardById(localStorage.lastBoardId);
     }
   };
-
-  if (session.loggedIn) {
-    app.loadLastBoard();
-  } else {
-    session.loginForm = new LoginForm(this);
-    session.signupForm = new SignupForm(this);
-  }
 }];
