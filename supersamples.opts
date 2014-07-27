@@ -27,7 +27,7 @@
       "outputFolder": "docs",
 
       // Documentation page title
-      "title": "mib docs",
+      "title": "Documentation",
 
       // Optional Markdown document used at the top of the docs
       // Heading levels 1 and 2 are appended to the navigation
