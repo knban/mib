@@ -1,4 +1,4 @@
-# mib
+# Modular Issue Board
 
 [![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 [![Build Status][strider-build-status-img]][strider-build-status-link]
@@ -7,9 +7,7 @@
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 [![NPM][npm-badge-img]][npm-badge-link]
 
-### Modular Issue Board
-
-**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_(development)) board that uses Github issues as cards.
+**mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_%28development%29) board that uses Github issues as cards.
 
 An important distinction made by this project versus other implementations is that it refuses to create a 1:1 relation between a board and repositories.
 
@@ -17,20 +15,39 @@ This results in a design in which projects from multiple providers can collect i
 
 Webhooks are automatically installed to keep cards and issues in sync, however Github does not perform hookshots for every action (e.g. assignee change, label change).
 
-## Supported Providers
+## Features
 
-Currently only Github is implemented, but I plan to work towards adding more in the future.
-
-- [x] Github
-- [ ] Gitlab
-- [ ] Bitbucket
-
-## Freedom Features
-
-I believe your data should always be portable, as such import/export is first-class.
-
+* Add/remove boards
+* Add/remove columns [#40](https://github.com/keyvanfatehi/mib/issues/40)
+* Add/remove cards [#47](https://github.com/keyvanfatehi/mib/issues/47)
+* Drag and drop cards
+* Grant users access to your board(s)
 * Export board data as a JSON file
 * Import board data via JSON file
+* 3rd party integrations via plugin system
+
+## Plugins
+
+Plugins provide 3rd party integrations, add API routes, provide webhooks, or otherwise extend **mib**.
+
+Documentation will be available soon after the [github plugin is stabilized and extracted](https://github.com/keyvanfatehi/mib/issues/23).
+
+### github
+
+* link repositories to boards
+  * imports existing issues as cards
+  * creates a webhook entry on the repository
+* adds webhook consumer route for card/issue updates
+* automatically updates card data on board load
+* custom card template
+
+### bitbucket
+
+on the roadmap!
+
+### gitlab
+
+on the roadmap!
 
 ## Usage
 
@@ -43,6 +60,8 @@ There are (will be) two ways to use **mib**
 Open source projects will be 100% free of charge at the downstream entity.
 
 More information coming soon, once **mib** is stable.
+
+I'm looking for people to help me with this -- reach out to me at keyvan[at]kebcom[dot]com if you're interested!
 
 ### Self-Hosting
 
@@ -68,8 +87,6 @@ Better (read: more opinionated) instructions can be provided if requested.
 ## Development
 
 **mib** uses the MEAN stack (MongoDB, Express, Angular, NodeJS)
-
-Mobile development is being done with [Ionic](http://ionicframework.com/).
 
 It's easy to get started hacking features (maybe you want to help get Bitbucket/Gitlab supported sooner?)
 
