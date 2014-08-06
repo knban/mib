@@ -3,7 +3,7 @@ sinon = helper.sinon,
 expect = helper.expect;
 
 var BoardController = helper.require('client/controllers/board_controller');
-var Provider = helper.require('providers/github').cardProvider;
+var Provider = require('mib-github').cardProvider;
 
 var li = require('li');
 

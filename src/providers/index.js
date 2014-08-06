@@ -1,5 +1,5 @@
 var providers = {
-  github: require('./github'),
+  github: require('mib-github'),
   local: require('./local')
 };
 
