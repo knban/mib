@@ -84,16 +84,6 @@ It's easy to get started hacking features (maybe you want to help get Bitbucket/
 * Examine the tests and go from there
 * Pull request!
 
-# Resources
-
-## Online Documentation
-
-[View](https://keyvanfatehi.github.com/mib)
-
-## Coverage Report
-
-[View](https://keyvanfatehi.github.com/mib/coverage/lcov-report/)
-
 # Plugins
 
 Plugins provide 3rd party integrations, add API routes, provide webhooks, or otherwise extend **mib**.
