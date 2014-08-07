@@ -5,6 +5,19 @@
     </h4>
     <p>{{board.projectLinker._Help}}</p>
 
+
+    <div ng-show="board.projectLinker._ShowAuthorizationForm">
+      <form role="form" ng-submit="board.projectLinker._AuthorizationFunction()">
+        <div class="form-group">
+          <label for="id">{{board.projectLinker._Provider.info.displayName}} Username</label>
+          <input type="text" class="form-control" name="{{board.projectLinker._Provider.info.name}}-username" ng-model="board.projectLinker._auth_username" value="" placeholder="">
+          <label for="id">{{board.projectLinker._Provider.info.displayName}} Password</label>
+          <input type="password" class="form-control" name="{{board.projectLinker._Provider.info.name}}-password" ng-model="board.projectLinker._auth_password" value="" placeholder="">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>  
+      </form>
+    </div>
+
     <button href="#"
       class="btn btn-default"
       ng-tooltip="{{provider.info.displayName}}"

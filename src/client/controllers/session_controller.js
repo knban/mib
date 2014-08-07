@@ -21,12 +21,12 @@ module.exports = ['$http', function($http) {
     configureEndpoint();
     api.get('session').success(function(data) {
       session.user = data;
-      try {
-        localStorage.github = data.authorizations.github.token;
-      } catch (e) {
-        logger.warn("no github authorization");
-        localStorage.removeItem('github');
-      }
+      //try {
+      //  localStorage.github = data.authorizations.github.token;
+      //} catch (e) {
+      //  logger.warn("no github authorization");
+      //  localStorage.removeItem('github');
+      //}
       session.loggedIn = true;
       session.getBoardList();
       app.loadLastBoard();
