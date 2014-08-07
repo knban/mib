@@ -160,6 +160,16 @@ describe("API v1 Routes", function() {
             done(); 
           });
         });
+
+        it("returns the provider token", function (done) {
+          mockGithub();
+          loginViaGithub().end(function (err, res) {
+            if (err) throw err;
+            expect(res.body.token).to.be.ok;
+            expect(res.body.provider.token).to.eq('ghtoken');
+            done(); 
+          });
+        })
       });
 
       describe("existing user", function() {

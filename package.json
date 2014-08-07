@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "mocha --recursive test -R spec",
-    "tdd": "mocha -w --recursive test -R min",
+    "tdd": "mocha -w --recursive test -R min 2>&1 | simple-stacktrace",
     "docs": "istanbul cover --dir docs/coverage _mocha -- --recursive test -R supersamples"
   },
   "repository": {
