@@ -98,11 +98,9 @@ It's easy to get started hacking features (maybe you want to help get Bitbucket/
 
 Plugins provide 3rd party integrations, add API routes, provide webhooks, or otherwise extend **mib**.
 
-Documentation will be available soon after the [github plugin is stabilized and extracted](https://github.com/keyvanfatehi/mib/issues/23).
-
 ## mib-github
 
-Currently integrated into **mib** pending [#23](https://github.com/keyvanfatehi/mib/issues/23)
+[![NPM](https://nodei.co/npm/mib-github.png?mini=true)](https://nodei.co/npm/mib-github/)
 
 * link repositories to boards
   * imports existing issues as cards
