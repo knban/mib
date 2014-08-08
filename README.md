@@ -49,7 +49,7 @@ Open source projects will be 100% free of charge at the downstream entity.
 
 More information coming soon, once **mib** is stable.
 
-I'm looking for people to help me with this -- reach out to me at keyvan[at]kebcom[dot]com if you're interested!
+I'm looking for people to help me with this -- reach out to me at keyvan[at]mindynamics[dot]com if you're interested!
 
 ### Self-Hosting
 
