@@ -10,11 +10,9 @@ var userSchema = require('./../schemata/user');
 userSchema.statics.findOrCreateByAuthorization = function(data, providers, callback) {
   var authorizer = providers[data.provider].authorizer;
   authorizer(data.uid, data.pw)(function (err, providerData) {
-    console.log(providerData);
     if (err) {
       callback(new Error("Login Failed"));
     } else {
-      console.log("authorized via "+data.provider);
       if (data.provider === 'local') {
         var user = providerData.user;
         user.token = uuid.v4();
