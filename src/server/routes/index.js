@@ -1,128 +1,45 @@
-var express = require('express');
-var r = module.exports = express.Router();
-var _ = require('lodash');
-var logger = require('winston');
-var Promise = require('bluebird');
+var express = require('express')
+  , r = module.exports = express.Router()
+  , _ = require('lodash')
+  , logger = require('winston')
+  , Promise = require('bluebird')
+  , ObjectId = require('mongoose').Types.ObjectId
 
-var ObjectId = require('mongoose').Types.ObjectId; 
-var Models = require('./models'),
-Board = Models.Board,
-Column = Models.Column,
-Card = Models.Card,
-User = Models.User;
+  , Models = require('../models')
+  , Board = Models.Board
+  , Column = Models.Column
+  , Card = Models.Card
+  , User = Models.User
 
-var providers = require('../providers');
+  , providers = require('../../providers')
 
-/*
- * GET /session -- get your user session
- * POST /session -- get your token
- */
+  , loginRequired = require('./middleware/loginRequired')
+  , getSession = require('./middleware/getSession')
+  , createSession = require('./middleware/createSession')
+  , myBoards = require('./middleware/myBoards')
+  , createBoard = require('./middleware/createBoard')
+  , initializeBoard = require('./middleware/initializeBoard')
 
 r.route('/session')
+// GET /session -- get your user session
 .get(loginRequired, getSession)
+// POST /session -- get your token
 .post(createSession);
-
-function loginRequired(req, res, next) {
-  var token = req.headers['x-auth-token'] || req.query.token;
-  if (token) {
-    User.findOne({ token: token }).exec(function (err, user) {
-      if (err) {
-        logger.error(err.message)
-        res.status(500).end();
-      } else if (user) {
-        req.user = user;
-        next();
-      } else {
-        res.status(401).end();
-      }
-    })
-  } else {
-    res.status(401).end();
-  }
-};
-
-
-function getSession(req, res, next) {
-  res.send(req.user);
-};
-
-function createSession(req, res, next) {
-  User.findOrCreateByAuthorization(req.body, providers, function (err, user, providerData) {
-    if (err) {
-      res.status(401).send('invalid credentials');
-    } else {
-      res.status(201).send({
-        token: user.token,
-        _id: user._id,
-        provider: providerData
-      });
-    }
-  });
-}
-
-/*
- * GET /boards
- * POST /boards
- */
 
 r.route('/boards')
 .all(loginRequired)
+// GET /boards
 .get(myBoards)
+// POST /boards { name: "" }
 .post(createBoard);
-
-function myBoards(req, res, next) {
-  Board.find({ authorizedUsers: req.user._id }, { name:1 }, function (err, boards) {
-    if (err) { res.status(500).end() }
-    else { res.send({boards: boards}) }
-  });
-};
-
-function createBoard(req, res, next) {
-  if (req.body.jsonImport) {
-    Board.createViaImport(req.body.jsonImport, {
-      name: req.body.name,
-      authorizedUsers: [req.user._id]
-    }).then(function (board) {
-      res.status(201).send({ board: { _id: board._id }});
-    }).catch(function (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    });
-  } else {
-    Board.createWithDefaultColumns({
-      name: req.body.name,
-      authorizedUsers: [req.user._id]
-    }).then(function (board) {
-      res.status(201).send({ board: { _id: board._id }});
-    }).catch(function (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    });
-  }
-};
-
-
-/*
- * GET /boards/:_id
- */
 
 r.route('/boards/:_id')
 .all(loginRequired)
 .all(initializeBoard)
+// GET /boards/:_id
 .get(getBoard)
+// DELETE /boards/:_id
 .delete(deleteBoard);
-
-function initializeBoard(req, res, next) {
-  Board.findOneAndPopulate({ _id: req.params._id }).then(function (board) {
-    req.board = board;
-    next();
-  }).error(function () {
-    res.status(404).end();
-  }).catch(Error, function (err) {
-    logger.error(err.message);
-    res.status(500).end();
-  })
-};
 
 function getBoard(req, res, next) {
   res.send({ board: req.board });
@@ -454,3 +371,11 @@ function createUserAndSession(req, res, next) {
     }
   })
 };
+
+/*
+ * POST /columns/:id/cards
+ * Creates a card at the top of a column
+ */
+
+r.route('/column/:id/cards')
+
