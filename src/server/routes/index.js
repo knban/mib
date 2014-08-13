@@ -19,42 +19,48 @@ var express = require('express')
   , myBoards = require('./middleware/myBoards')
   , createBoard = require('./middleware/createBoard')
   , initializeBoard = require('./middleware/initializeBoard')
+  , getBoard = require('./middleware/getBoard')
+  , deleteBoard = require('./middleware/deleteBoard')
 
 r.route('/session')
-// GET /session -- get your user session
-.get(loginRequired, getSession)
-// POST /session -- get your token
+/*
+ * POST /session
+ * Login and get back your token
+ * Token must be sent in subsequent API requests via header X-Auth-Token
+ * Request { provider: "local|github|etc", uid: "user", pw: "pass" }
+ * Response { token: "..." }
+ */
 .post(createSession);
+/*
+ * GET /session
+ * Get the contents of your session; i.e. 3rd party authorizations
+ * Requires Header X-Auth-Token
+ * Response { session: { authorizations: { github: { token: "..." } } } }
+ */
+.get(loginRequired, getSession)
 
 r.route('/boards')
 .all(loginRequired)
-// GET /boards
+/*
+ * GET /boards
+ */
 .get(myBoards)
-// POST /boards { name: "" }
+/* 
+ * POST /boards { name: "" }
+ */
 .post(createBoard);
 
 r.route('/boards/:_id')
 .all(loginRequired)
 .all(initializeBoard)
-// GET /boards/:_id
+/*
+ * GET /boards/:_id
+ */
 .get(getBoard)
-// DELETE /boards/:_id
+/*
+ * DELETE /boards/:_id
+ */
 .delete(deleteBoard);
-
-function getBoard(req, res, next) {
-  res.send({ board: req.board });
-}
-
-function deleteBoard(req, res, next) {
-  req.board.remove(function(err) {
-    if (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    } else {
-      res.status(204).end();
-    }
-  });
-}
 
 /*
  * PUT /boards/:_id/links/:provider
