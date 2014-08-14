@@ -42,3 +42,11 @@ table ul {
     cursor: inherit;
     display: block;
 }
+
+/* --------------- */
+
+table th a {
+  font-size: 80%;
+  text-decoration: none !important;
+  font-weight: normal;
+}
