@@ -21,6 +21,14 @@ var express = require('express')
   , initializeBoard = require('./middleware/initializeBoard')
   , getBoard = require('./middleware/getBoard')
   , deleteBoard = require('./middleware/deleteBoard')
+  , updateBoardLinks = require('./middleware/updateBoardLinks')
+  , initializeFirstColumn = require('./middleware/initializeFirstColumn')
+  , initializeCardHandler = require('./middleware/initializeCardHandler')
+  , importCardsViaProvider = require('./middleware/importCardsViaProvider')
+  , saveCardsViaPromises = require('./middleware/saveCardsViaPromises')
+  , sendBoardColumns = require('./middleware/sendBoardColumns')
+  , updateCardsRemoteObjects = require('./middleware/updateCardsRemoteObjects')
+  , performCardMove = require('./middleware/performCardMove')
 
 r.route('/session')
 /*
@@ -29,12 +37,12 @@ r.route('/session')
  * Token must be sent in subsequent API requests via header X-Auth-Token
  * Request { provider: "local|github|etc", uid: "user", pw: "pass" }
  * Response { token: "..." }
+ * Use this token via HTTP Header "X-Auth-Token" in all subsequent requests
  */
-.post(createSession);
+.post(createSession)
 /*
  * GET /session
  * Get the contents of your session; i.e. 3rd party authorizations
- * Requires Header X-Auth-Token
  * Response { session: { authorizations: { github: { token: "..." } } } }
  */
 .get(loginRequired, getSession)
@@ -62,39 +70,20 @@ r.route('/boards/:_id')
  */
 .delete(deleteBoard);
 
+r.route('/boards/:_id/links/:provider')
+.all(loginRequired)
+.all(initializeBoard)
 /*
  * PUT /boards/:_id/links/:provider
  * Link a board with remote objects (e.g. repositories) from a provider
  */
-
-r.route('/boards/:_id/links/:provider')
-.all(loginRequired)
-.all(initializeBoard)
 .put(updateBoardLinks);
 
-function updateBoardLinks(req, res, next) {
-  var board = req.board;
-  if (! board.links ) {
-    board.links = {};
-  }
-  if (! board.links[req.params.provider]) {
-    board.links[req.params.provider] = {}
-  }
-  _.each(req.body[req.params.provider], function (repo) {
-    board.links[req.params.provider][repo.id] = repo;
-  });
-  Board.update({ _id: board._id }, { links: board.links }, function(err) {
-    if (err) { res.status(500).send(err.message); }
-    else { res.send({ links: board.links }) }
-  });
-};
-
+r.route('/boards/:_id/cards/:provider')
 /*
  * POST /boards/:id/cards/:provider
  * Import cards into the board using the provider
  */
-
-r.route('/boards/:_id/cards/:provider')
 .post(loginRequired,
       initializeBoard,
       initializeFirstColumn,
@@ -104,63 +93,17 @@ r.route('/boards/:_id/cards/:provider')
       initializeBoard,
       sendBoardColumns);
 
-function initializeFirstColumn(req, res, next) {
-  Column.findOne({ board: req.board._id, role: 1 })
-  .exec(function (err, column) {
-    if (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    } else {
-      req.first_column = column;
-      next();
-    }
-  });
-};
-
-function initializeCardHandler(req, res, next) {
-  req.handler = providers[req.params.provider].cardHandler;
-  next();
-};
-
-function importCardsViaProvider(req, res, next) {
-  req.promises = [];
-  req.handler.batchImport(req.board, req.body, function (attributes) {
-    attributes.column = req.first_column._id;
-    req.promises.push(Card.create(attributes))
-  }, next);
-};
-
-function saveCardsViaPromises(req, res, next) {
-  Promise.all(req.promises).spread(function () {
-    req.board.update({ columns: req.board.columns }, function(err) {
-      if (err) res.status(500).send(err.message);
-      else next()
-    });
-  });
-};
-
-function sendBoardColumns(req, res, next) {
-  res.send({ board: { columns: req.board.columns } });
-};
-
-
+r.route('/boards/:_id/cards')
 /*
  * PUT /boards/:id/cards
  * Batch update cards
  *
  * TODO regression test
+ * TODO docs
  */
-
-r.route('/boards/:_id/cards')
 .put(loginRequired,
      initializeBoard,
      updateCardsRemoteObjects);
-
-function updateCardsRemoteObjects(req, res, next) {
-  Promise.all(_.map(req.body.cards, function (card) {
-    return Card.updateRemoteObject(card);
-  })).then(function () { res.status(200).end() });
-};
 
 /*
  * PUT /boards/:id/cards/:card_id/move
@@ -171,34 +114,6 @@ r.route('/boards/:_id/cards/:card_id/move')
 .put(loginRequired,
      initializeBoard,
      performCardMove);
-
-function performCardMove(req, res, next) {
-  if (req.body.old_column === req.body.new_column) {
-    Column.findByIdAndMutate(req.body.old_column, function (column) {
-      column.cards.splice(column.cards.indexOf(req.params.card_id), 1);
-      column.cards.splice(req.body.new_index, 0, req.params.card_id);
-    }).then(function () {
-      res.status(204).end();
-    }).catch(function (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    });
-  } else {
-    Promise.all([
-      Column.findByIdAndMutate(req.body.old_column, function (column) {
-        column.cards.splice(column.cards.indexOf(req.params.card_id), 1);
-      }),
-      Column.findByIdAndMutate(req.body.new_column, function (column) {
-        column.cards.splice(req.body.new_index, 0, req.params.card_id);
-      })
-    ]).then(function () {
-      res.status(204).end();
-    }).catch(function (err) {
-      logger.error(err.message);
-      res.status(500).end();
-    });
-  }
-};
 
 /*
  * GET /boards/:id/export.json
