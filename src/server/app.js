@@ -44,7 +44,7 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain);
 app.use(bodyParser.json({limit: '10mb'}));
-app.use('/api/v1/', require('./router'));
+app.use('/api/v1/', require('./routes'));
 
 var mongoose = require('mongoose');
 var mongodb_uri = process.env.MONGODB_URI || "mongodb://localhost/mib";

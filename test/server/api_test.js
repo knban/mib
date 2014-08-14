@@ -20,7 +20,7 @@ describe("API v1 Routes", function() {
     mongoose.models = {};
     mongoose.modelSchemas = {};
     mongoose.connect(helper.mongoDB, function () {
-      app = helper.appWithRouter('server/router');
+      app = helper.appWithRouter('server/routes');
       User = mongoose.model('User');
       done();                                                  
     })
@@ -833,9 +833,36 @@ describe("API v1 Routes", function() {
       });
     });
   });
+
   describe("POST /users", function() {
     it("rejects with 406 if email is taken");
     it("creates a new user");
     it("returns the user token and user id");
+  });
+
+  describe.skip("POST /columns/:id/cards", function() {
+    it("rejects unauthorized users", function(done) {
+      request(app)
+      .post('/columns/1/cards')
+      .expect(401)
+      .end(done);
+    });
+
+    describe("adding a card to the 2nd column", function() {
+      beforeEach(setupUserAndBoard);
+
+      it("works", function(done) {
+        console.log(board);
+        request(app)
+        .post('/columns/1/cards', {
+          provider: "local",
+          remoteObject: {
+            title: "sup"
+          }
+        })
+        .expect(401)
+        .end(done);
+      });
+    });
   });
 });
