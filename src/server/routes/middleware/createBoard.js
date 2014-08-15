@@ -1,4 +1,5 @@
 var Board = require('../../models').Board
+var logger = require('winston')
 
 module.exports = function createBoard(req, res, next) {
   if (req.body.jsonImport) {
