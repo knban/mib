@@ -854,10 +854,11 @@ describe("API v1 Routes", function() {
       it("works", function(done) {
         
         reloadBoard(function() {
-          console.log(board.columns[1].cards);
           var id = board.columns[1]._id;
           request(app)
-          .post('/columns/' + id + '/cards', {
+          .post('/columns/' + id + '/cards')
+          .set('X-Auth-Token', user.token)
+          .send({
             provider: "local",
             remoteObject: {
               title: "sup"
@@ -867,11 +868,9 @@ describe("API v1 Routes", function() {
           .end(function(err, res) { 
             if(err) throw err;
             reloadBoard(function() {
-              // console.log(board.columns[1]);
-              var column = _.findOne(board.columns, { _id: id });
-        
-              // console.log(column.cards);
-              // expect();
+              var column = _.find(board.columns, { _id: id });
+              expect(column.cards).to.have.length(1);
+              expect(column.cards[0].remoteObject.title).to.eq("sup");
               done();
             });
           });
