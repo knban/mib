@@ -5,3 +5,4 @@ public/js/.bundle.js
 public/js/config.js
 logs/*
 docs/*
+.floo*

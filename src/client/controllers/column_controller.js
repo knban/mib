@@ -20,5 +20,6 @@ module.exports = [function() {
     this.newCard = null;
     // Keep a spinner going next to it
     // Fire off an async call
+    // api.post('')
   }
 }];

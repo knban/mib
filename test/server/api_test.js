@@ -840,7 +840,7 @@ describe("API v1 Routes", function() {
     it("returns the user token and user id");
   });
 
-  describe.skip("POST /columns/:id/cards", function() {
+  describe.only("POST /columns/:id/cards", function() {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/columns/1/cards')
@@ -852,16 +852,31 @@ describe("API v1 Routes", function() {
       beforeEach(setupUserAndBoard);
 
       it("works", function(done) {
-        console.log(board);
-        request(app)
-        .post('/columns/1/cards', {
-          provider: "local",
-          remoteObject: {
-            title: "sup"
-          }
-        })
-        .expect(401)
-        .end(done);
+        
+        reloadBoard(function() {
+          console.log(board.columns[1].cards);
+          var id = board.columns[1]._id;
+          request(app)
+          .post('/columns/' + id + '/cards', {
+            provider: "local",
+            remoteObject: {
+              title: "sup"
+            }
+          })
+          .expect(201)
+          .end(function(err, res) { 
+            if(err) throw err;
+            reloadBoard(function() {
+              // console.log(board.columns[1]);
+              var column = _.findOne(board.columns, { _id: id });
+        
+              // console.log(column.cards);
+              // expect();
+              done();
+            });
+          });
+
+        });
       });
     });
   });
