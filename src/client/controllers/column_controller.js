@@ -16,10 +16,18 @@ module.exports = [function() {
     if (!this.newCard.remoteObject.title) return;
     // Turn this into a new card on the UI immediately
     // by splicing it into the cards collection
-    this.column.cards.push(this.newCard);
-    this.newCard = null;
+    var card = null;
+    card = this.newCard;
+    this.column.cards.push(card);
+    this.newCard = null; // controls if the form is displayed
     // Keep a spinner going next to it
     // Fire off an async call
-    // api.post('')
+    api.post('columns/' + this.column._id + "/cards", {
+      provider: card.provider,
+      remoteObject: card.remoteObject
+    }).success(function(data) {
+      card._id = data.card._id;
+      card.isSyncing = false;
+    });
   }
 }];

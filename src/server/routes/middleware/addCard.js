@@ -12,7 +12,7 @@ module.exports = function addCard(req, res, next) {
       res.status(500).send(err);
       return;
     }
-    res.status(201).end();
+    res.status(201).send({card: card});
   })
   
 }

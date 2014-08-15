@@ -871,6 +871,7 @@ describe("API v1 Routes", function() {
               var column = _.find(board.columns, { _id: id });
               expect(column.cards).to.have.length(1);
               expect(column.cards[0].remoteObject.title).to.eq("sup");
+              expect(res.body.card).to.deep.eq(column.cards[0]);
               done();
             });
           });
