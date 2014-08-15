@@ -714,10 +714,11 @@ describe("API v1 Routes", function() {
             board = res.body.board;
             var column = res.body.board.columns[0];
             var cards = column.cards;
-            expect(cards[0].remoteObject.test).to.eq('1')
-            expect(cards[1].remoteObject.test).to.eq('2')
-            expect(cards[2].remoteObject.test).to.eq('3')
-            expect(cards[3].remoteObject.test).to.eq('4')
+            var stuff = _.pluck(_.pluck(cards, 'remoteObject'), 'test')
+            expect(stuff).to.contain('1')
+            expect(stuff).to.contain('2')
+            expect(stuff).to.contain('3')
+            expect(stuff).to.contain('4')
             done();
           });
         });
