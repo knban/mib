@@ -840,7 +840,7 @@ describe("API v1 Routes", function() {
     it("returns the user token and user id");
   });
 
-  describe.only("POST /columns/:id/cards", function() {
+  describe("POST /columns/:id/cards", function() {
     it("rejects unauthorized users", function(done) {
       request(app)
       .post('/columns/1/cards')
