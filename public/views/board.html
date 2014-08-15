@@ -24,6 +24,12 @@
     class="column"
     ng-repeat="column in board.attributes.columns"
     width="{{(100/board.attributes.columns.length)}}%">
+    <form role="form" ng-show="column.$controller.newCard" ng-submit="column.$controller.createCard(this)">
+      <div class="form-group">
+        <input type="text" ng-model="column.$controller.newCard.remoteObject.title" autofocus class="form-control">
+      </div>
+      <button type="submit" class="btn btn-default">Create</button>  
+    </form>
     <ul ng-sortable
       id="column_{{$index}}"
       class="list-group"
@@ -31,13 +37,6 @@
       data-added="board.addCardToColumn($index, $event)"
       data-removed="board.removeCardFromColumn($index, $event)"
       data-group="columns">
-
-      <form role="form" ng-show="column.$controller.newCard" ng-submit="column.$controller.createCard(this)">
-        <div class="form-group">
-          <input type="text" ng-model="column.$controller.newCard.remoteObject.title" autofocus class="form-control">
-        </div>
-        <button type="submit" class="btn btn-default">Create</button>  
-      </form>
 
       <li class="list-group-item card"
         ng-init="row = $index"
