@@ -100,3 +100,4 @@ Plugins provide 3rd party integrations, add API routes, provide webhooks, or oth
 * automatically updates card data on board load
 * custom card template
 
+
