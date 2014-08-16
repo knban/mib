@@ -1,10 +1,6 @@
 process.env.GITHUB_CLIENT_ID = "stubs";
 process.env.GITHUB_CLIENT_SECRET = "stubs";
 
-require('simple-stacktrace')({
-  root: require('path').resolve(__dirname, '..')
-})
-
 var chai = require('chai');
 var sinon = require('sinon');
 var mongoose = require('mongoose');
