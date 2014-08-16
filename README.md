@@ -5,19 +5,19 @@
 [![Dependency Status][dep-img]][dep-link]
 [![devDependency Status][dev-dep-img]][dev-dep-link]
 
+[![Code Climate](https://codeclimate.com/github/knban/mib/badges/gpa.svg)](https://codeclimate.com/github/knban/mib)
 [![Test Coverage](https://codeclimate.com/github/knban/mib/badges/coverage.svg)](https://codeclimate.com/github/knban/mib)
 [![Build Status][strider-build-status-img]][strider-build-status-link]
-[![Build Status](https://drone.io/github.com/keyvanfatehi/mib/status.png)](https://drone.io/github.com/keyvanfatehi/mib/latest)
-[![Stories in Ready](https://badge.waffle.io/keyvanfatehi/mib.png?label=ready&title=Ready)](https://waffle.io/keyvanfatehi/mib)
 
+[strider-build-status-img]: https://strider.knban.com/knban/mib/badge
+[strider-build-status-link]: https://strider.knban.com/knban/mib
 [dev-dep-img]: https://david-dm.org/keyvanfatehi/mib/dev-status.svg
 [dev-dep-link]: https://david-dm.org/keyvanfatehi/mib#info=devDependencies
 [dep-img]: https://david-dm.org/keyvanfatehi/mib.svg
 [dep-link]: https://david-dm.org/keyvanfatehi/mib
 [npm-badge-img]: https://nodei.co/npm/mib.png?downloads=true&stars=true
 [npm-badge-link]: https://nodei.co/npm/mib/
-[strider-build-status-img]: https://strider.critiqueapp.com/keyvanfatehi/mib/badge
-[strider-build-status-link]: https://strider.critiqueapp.com/keyvanfatehi/mib
+
 
 **mib** is a [kanban](http://en.wikipedia.org/wiki/Kanban_%28development%29) board that uses Github issues as cards.
 
