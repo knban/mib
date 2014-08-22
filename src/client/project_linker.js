@@ -13,6 +13,7 @@ module.exports = function (board, $http) {
   this.reset = function () {
     this.view = 'views/project_linker.html';
     this._Provider = null;
+    this._ShowAuthorizationForm = null;
     this._PersonalOrOrg = null;
     this._Orgs = null;
     this._Repos = null;
