@@ -51,4 +51,9 @@ var mongodb_uri = process.env.MONGODB_URI || "mongodb://localhost/mib";
 mongoose.connect(mongodb_uri);
 var db = mongoose.connection;
 db.on('error', logger.error.bind(logger, 'connection error '+mongodb_uri));
-module.exports = http;
+
+module.exports = {
+  http: http,
+  app: app,
+  io: io
+}
