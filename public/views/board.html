@@ -22,19 +22,22 @@
     class="column"
     ng-repeat="column in board.attributes.columns"
     width="{{(100/board.attributes.columns.length)}}%">
-    <form class="well clearfix" role="form" ng-show="column.$controller.newCard" ng-submit="column.$controller.createCard(this)">
+    <form class="well clearfix" role="form"
+      ng-show="column.$controller.newCard"
+      ng-submit="column.$controller.createCard(this)">
       <div class="form-group">
-        <input type="text" ng-model="column.$controller.newCard.remoteObject.title" autofocus class="form-control">
+        <input type="text" autofocus class="form-control"
+        ng-model="column.$controller.newCard.remoteObject.title">
       </div>
       <button type="submit" class="pull-right btn btn-success">Create</button>  
     </form>
-    <ul id="column_{{$index}}" class="list-group" ng-sortable
+    <ul id="column_{{$index}}" class="list-group" ng-dragndrop
       data-updated="column.$controller.moveCardWithinColumn($index, $event)"
       data-added="column.$controller.addCardToColumn($index, $event)"
       data-removed="column.$controller.removeCardFromColumn($index, $event)"
       data-group="columns">
-
       <li class="list-group-item card"
+        draggable="true"
         ng-init="row = $index"
         ng-repeat="card in column.cards"
         data-id="{{card._id}}"
