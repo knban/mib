@@ -99,5 +99,3 @@ Plugins provide 3rd party integrations, add API routes, provide webhooks, or oth
 * adds webhook consumer route for card/issue updates
 * automatically updates card data on board load
 * custom card template
-
-
