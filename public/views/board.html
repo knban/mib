@@ -1,11 +1,9 @@
 <thead>
   <th style="text-align:center"
     ng-controller="ColumnController as colCtrl"
-    ng-init="colCtrl.init(column)"
-    ng-mouseover="colCtrl.showActions = true"
-    ng-mouseout="colCtrl.showActions = null"
+    ng-init="colCtrl.init(column, board)"
     ng-repeat="column in board.attributes.columns">
-    <div ng-show="colCtrl.showActions">
+    <div>
       <a href="#" ng-click="column.$controller.initNewCard()" ng-hide="column.$controller.newCard">
         New Card
       </a>
@@ -24,18 +22,16 @@
     class="column"
     ng-repeat="column in board.attributes.columns"
     width="{{(100/board.attributes.columns.length)}}%">
-    <form role="form" ng-show="column.$controller.newCard" ng-submit="column.$controller.createCard(this)">
+    <form class="well clearfix" role="form" ng-show="column.$controller.newCard" ng-submit="column.$controller.createCard(this)">
       <div class="form-group">
         <input type="text" ng-model="column.$controller.newCard.remoteObject.title" autofocus class="form-control">
       </div>
-      <button type="submit" class="btn btn-default">Create</button>  
+      <button type="submit" class="pull-right btn btn-success">Create</button>  
     </form>
-    <ul ng-sortable
-      id="column_{{$index}}"
-      class="list-group"
-      data-updated="board.moveCardWithinColumn($index, $event)"
-      data-added="board.addCardToColumn($index, $event)"
-      data-removed="board.removeCardFromColumn($index, $event)"
+    <ul id="column_{{$index}}" class="list-group" ng-sortable
+      data-updated="column.$controller.moveCardWithinColumn($index, $event)"
+      data-added="column.$controller.addCardToColumn($index, $event)"
+      data-removed="column.$controller.removeCardFromColumn($index, $event)"
       data-group="columns">
 
       <li class="list-group-item card"

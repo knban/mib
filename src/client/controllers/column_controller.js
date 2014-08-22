@@ -1,5 +1,15 @@
+var _ = {
+  map: require('lodash.map'),
+  find: require('lodash.find')
+}
+
+var colJustRemovedFrom = null;
+
 module.exports = [function() {
-  this.init = function (column) {
+  var board = null;
+
+  this.init = function (column, _board) {
+    board = _board;
     this.column = column;
     column.$controller = this;
   };
@@ -30,4 +40,71 @@ module.exports = [function() {
       card.isSyncing = false;
     });
   }
+
+  /*
+   * Drag and Drop 
+   * */
+  this.moveCardWithinColumn = function ($col, $event) {
+    var column = board.attributes.columns[$col];
+    column.isSyncing = true;
+    var cards = column.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(cards, function (c, i) {
+      oldIndex = i;
+      return c._id === id;
+    });
+    var movedCard = cards.splice(oldIndex, 1);
+    cards.splice(newIndex, 0, movedCard[0]);
+    api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
+      old_column: column._id,
+      new_column: column._id,
+      new_index: newIndex
+    }).success(function(){
+      column.isSyncing = false;
+    }).error(function () {
+      alert('something is wrong');
+    });
+  };
+
+  // removeCardFromColumn is always hit first in
+  // a cross-column card drag event
+  this.removeCardFromColumn = function ($col, $event) {
+    colJustRemovedFrom = $col;
+    // The event we get out of this is the <ul>
+    // and so we cannot identify the card until the
+    // addCardToColumn method is hit.
+  };
+
+  this.addCardToColumn = function ($col, $event) {
+    var column1 = board.attributes.columns[colJustRemovedFrom];
+    column1.isSyncing = true;
+    var column2 = board.attributes.columns[$col];
+    column2.isSyncing = true;
+    var oldDeck = column1.cards;
+    var newDeck = column2.cards;
+    var $el = $($event.target);
+    var newIndex = $el.index();
+    var id = $($el).data('id');
+    var oldIndex = null;
+    var card = _.find(oldDeck, function (c, i) {
+      oldIndex = i;
+      return c._id === id;
+    });
+    oldDeck.splice(oldIndex, 1);
+    newDeck.splice(newIndex, 0, card);
+    api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
+      old_column: column1._id,
+      new_column: column2._id,
+      new_index: newIndex
+    }).success(function(){
+      column1.isSyncing = false;
+      column2.isSyncing = false;
+    }).error(function (e) {
+      console.error(e);
+      alert("Error: "+e.message);
+    });
+  };
 }];
