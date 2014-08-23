@@ -31,13 +31,13 @@
       </div>
       <button type="submit" class="pull-right btn btn-success">Create</button>  
     </form>
-    <ul id="column_{{$index}}" class="list-group" ng-dragndrop
+    <ul id="column_{{$index}}" class="list-group"
       data-updated="column.$controller.moveCardWithinColumn($index, $event)"
       data-added="column.$controller.addCardToColumn($index, $event)"
       data-removed="column.$controller.removeCardFromColumn($index, $event)"
       data-group="columns">
       <li class="list-group-item card"
-        draggable="true"
+        ng-dragndrop
         ng-init="row = $index"
         ng-repeat="card in column.cards"
         data-id="{{card._id}}"
