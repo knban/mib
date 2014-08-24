@@ -3,7 +3,8 @@ var _ = {
 }
 
 var dragEl =
-  sameParent = null;
+  sameParent =
+  null
 
 function swapNodes(a, b) {
   if (a === b) return false;
@@ -37,19 +38,19 @@ module.exports = ['$parse', function ($parse) {
         };
 
         if (options.dropzone) {
-          var dzone = options.dropzone.dragndrop
-          if (! dzone) throw new Error("Dropzone must define 'dragndrop'")
+          $el.get(0).dropzone = options.dropzone;
+
           // Item enters the column
           events.dragenter = function (e) {
             if (dragEl) {
               sameParent = dragEl.parent().get(0) === $el.get(0)
               if (sameParent) return false;
+              dragEl.parent().get(0).dropzone.removed(dragEl)
               $el.append(dragEl)
-              console.log('moved node to column');
+              dragEl.parent().get(0).dropzone.added(dragEl)
             }
           }
         } else {
-          $el.prop('draggable', true);
           events.dragstart = function (e) {
             dragEl = $el;
             this.style.opacity = '0.4';
@@ -59,8 +60,6 @@ module.exports = ['$parse', function ($parse) {
 
           events.dragend = function () {
             this.style.opacity = '1';
-            dragEl = null;
-            console.log('done');
           }
 
           // Item enters another item
@@ -69,15 +68,17 @@ module.exports = ['$parse', function ($parse) {
             // Logically this occurs after entering the column,
             // the setTimeout enforces this order in the event loop
             setTimeout(function () {
-              sameParent = dragEl.parent().get(0) === $el.parent().get(0)
-              if (sameParent) {
+              var parent = dragEl.parent().get(0)
+              var parentb = $el.parent().get(0)
+              if (parent === parentb) {
                 if (swapNodes(dragEl[0], $el[0])) {
-                  console.log('swapped nodes');
+                  parent.dropzone.swapped(dragEl, $el);
                 }
               }
             }, 0);
           }
 
+          $el.prop('draggable', true);
         }
         _.map(events, function (fn, name) {
           $el.get(0).addEventListener(name, fn, false);

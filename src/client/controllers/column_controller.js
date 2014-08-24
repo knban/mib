@@ -45,11 +45,18 @@ module.exports = [function() {
    * Drag and Drop 
    * */
 
-  this.dragndrop = {
-    moved: function () {
-      console.log('moved', arguments);
+  this.dropzone = {
+    swapped: function ($1, $2) {
+      console.log('swapped', $1.text(), $2.text());
+    },
+    added: function ($el) {
+      console.log('added', $el.text());
+    },
+    removed: function ($el) {
+      console.log('removed', $el.text());
     }
   }
+
 
   this.moveCardWithinColumn = function ($col, $event) {
     var column = board.attributes.columns[$col];
