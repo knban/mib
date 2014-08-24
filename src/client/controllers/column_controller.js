@@ -7,10 +7,11 @@ var colJustRemovedFrom = null;
 
 module.exports = [function() {
   var board = null;
+  var column = null;
 
-  this.init = function (column, _board) {
+  this.init = function (_column, _board) {
     board = _board;
-    this.column = column;
+    this.column = column = _column;
     column.$controller = this;
   };
 
@@ -44,16 +45,15 @@ module.exports = [function() {
   /*
    * Drag and Drop 
    * */
-
   this.dropzone = {
     swapped: function ($1, $2) {
-      console.log('swapped', $1.text(), $2.text());
+      console.log('col '+column._id+' swapped', $1.text(), $2.text());
     },
     added: function ($el) {
-      console.log('added', $el.text());
+      console.log('col '+column._id+'added', $el.text());
     },
     removed: function ($el) {
-      console.log('removed', $el.text());
+      console.log('col '+column._id+'removed', $el.text());
     }
   }
 
