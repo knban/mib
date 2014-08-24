@@ -20,68 +20,63 @@ module.exports = ['$parse', function ($parse) {
         , options = null;
 
       return function (scope, $el) {
-        var events = null;
         if (json) {
           options = $parse(json)(scope);
         } else {
           options = { dropzone: false }
         }
 
+        var events = {
+          // Common
+          dragover: function (e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+          }
+        };
+
         if (options.dropzone) {
-          events = {
-
-            // Card dragging over a column
-            dragenter: function (e) {
-              if (dragEl) {
-                if (dragEl.parent().get(0) === $el.get(0)) {
-                  sameParent = true;
-                } else {
-                  sameParent = false;
-                  $el.prepend(dragEl)
-                }
-              } else {
-                console.log('nothing to drag');
-              }
-            },
-
-            dragover: function (e) {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'move';
-              return false;
+          // Item enters the column
+          events.dragenter = function (e) {
+            if (dragEl) {
+              sameParent = dragEl.parent().get(0) === $el.get(0)
+              if (sameParent) return;
+              $el.append(dragEl)
+            } else {
+              console.log('nothing to drag');
             }
-
           }
         } else {
-          events = {
-
-            dragstart: function (e) {
-              dragEl = $el;
-              this.style.opacity = '0.4';
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData('text/plain', $el.text());
-            },
-
-            // Card dragging over another card
-            dragover: function (e) {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'move';
-              return false;
-            },
-
-            dragend: function () {
-              this.style.opacity = '1';
-              dragEl = null;
-              console.log('done');
-            },
-
-            dragenter: function () {
-              if (sameParent)
-                swapNodes(dragEl[0], $el[0]);
-              // If new parent, don't swap
-            }
-
-          }
           $el.prop('draggable', true);
+          events.dragstart = function (e) {
+            dragEl = $el;
+            this.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData('text/plain', $el.text());
+          }
+
+          events.dragend = function () {
+            this.style.opacity = '1';
+            dragEl = null;
+            console.log('done');
+          }
+
+          // Item enters another item
+          events.dragenter = function () {
+            if (dragEl) {
+              // Logically this occurs after entering the column,
+              // the setTimeout enforces this order in the event loop
+              setTimeout(function () {
+                sameParent = dragEl.parent().get(0) === $el.parent().get(0)
+                if (sameParent) {
+                  swapNodes(dragEl[0], $el[0]);
+                }
+              }, 0);
+            } else {
+              console.log('nothing to drag');
+            }
+          }
+
         }
         _.map(events, function (fn, name) {
           $el.get(0).addEventListener(name, fn, false);
