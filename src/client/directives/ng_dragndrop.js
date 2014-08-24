@@ -15,6 +15,8 @@ function swapNodes(a, b) {
   return true;
 }
 
+function swap(a, b) { return swapNodes(a.get(0), b.get(0)) }
+
 module.exports = ['$parse', function ($parse) {
   return {
     compile: function ($el, attr) {
@@ -70,10 +72,8 @@ module.exports = ['$parse', function ($parse) {
             setTimeout(function () {
               var parent = dragEl.parent().get(0)
               var parentb = $el.parent().get(0)
-              if (parent === parentb) {
-                if (swapNodes(dragEl[0], $el[0])) {
-                  parent.dropzone.swapped(dragEl, $el);
-                }
+              if (parent === parentb && swap(dragEl, $el)) {
+                parent.dropzone.swapped(dragEl, $el);
               }
             }, 0);
           }
@@ -84,29 +84,6 @@ module.exports = ['$parse', function ($parse) {
           $el.get(0).addEventListener(name, fn, false);
         })
       }
-
-
-
-      /*
-      var opts = {}
-      var group = attr['group'];
-      var onAdd = $parse(attr['added']);
-      var onRemove = $parse(attr['removed']);
-      var onUpdate = $parse(attr['updated']);
-      return function (scope, element) {
-        var bind = function (fn) {
-          return function (event) {
-            scope.$apply(function() {
-              fn(scope, {$event:event});
-            });
-          }
-        };
-        if (group)    opts.group    = group;
-        if (onAdd)    opts.onAdd    = bind(onAdd);
-        if (onRemove) opts.onRemove = bind(onRemove);
-        if (onUpdate) opts.onUpdate = bind(onUpdate);
-      };
-      */
     }
   }
 }];
