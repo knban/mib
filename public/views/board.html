@@ -32,10 +32,7 @@
       <button type="submit" class="pull-right btn btn-success">Create</button>  
     </form>
     <ul id="column_{{$index}}" class="list-group"
-      data-updated="column.$controller.moveCardWithinColumn($index, $event)"
-      data-added="column.$controller.addCardToColumn($index, $event)"
-      data-removed="column.$controller.removeCardFromColumn($index, $event)"
-      data-group="columns">
+      ng-dragndrop='{ dropzone: true }'>
       <li class="list-group-item card"
         ng-dragndrop
         ng-init="row = $index"
