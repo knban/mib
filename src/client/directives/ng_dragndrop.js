@@ -11,6 +11,7 @@ function swapNodes(a, b) {
   var asibling= a.nextSibling===b? a : a.nextSibling;
   b.parentNode.insertBefore(a, b);
   aparent.insertBefore(b, asibling);
+  return true;
 }
 
 module.exports = ['$parse', function ($parse) {
@@ -40,10 +41,9 @@ module.exports = ['$parse', function ($parse) {
           events.dragenter = function (e) {
             if (dragEl) {
               sameParent = dragEl.parent().get(0) === $el.get(0)
-              if (sameParent) return;
+              if (sameParent) return false;
               $el.append(dragEl)
-            } else {
-              console.log('nothing to drag');
+              console.log('moved node to column');
             }
           }
         } else {
@@ -63,18 +63,17 @@ module.exports = ['$parse', function ($parse) {
 
           // Item enters another item
           events.dragenter = function () {
-            if (dragEl) {
-              // Logically this occurs after entering the column,
-              // the setTimeout enforces this order in the event loop
-              setTimeout(function () {
-                sameParent = dragEl.parent().get(0) === $el.parent().get(0)
-                if (sameParent) {
-                  swapNodes(dragEl[0], $el[0]);
+            if (!dragEl) return false;
+            // Logically this occurs after entering the column,
+            // the setTimeout enforces this order in the event loop
+            setTimeout(function () {
+              sameParent = dragEl.parent().get(0) === $el.parent().get(0)
+              if (sameParent) {
+                if (swapNodes(dragEl[0], $el[0])) {
+                  console.log('swapped nodes');
                 }
-              }, 0);
-            } else {
-              console.log('nothing to drag');
-            }
+              }
+            }, 0);
           }
 
         }
