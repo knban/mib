@@ -47,13 +47,13 @@ module.exports = [function() {
    * */
   this.dropzone = {
     swapped: function ($1, $2) {
-      console.log('col '+column._id+' swapped', $1.text(), $2.text());
+      console.log('col '+column._id+' swap', $1.text().trim(), $2.text().trim());
     },
-    added: function ($el) {
-      console.log('col '+column._id+'added', $el.text());
+    appended: function ($el) {
+      console.log('col '+column._id+'add', $el.text());
     },
     removed: function ($el) {
-      console.log('col '+column._id+'removed', $el.text());
+      console.log('col '+column._id+'remove', $el.text());
     }
   }
 

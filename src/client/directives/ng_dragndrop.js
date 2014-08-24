@@ -49,7 +49,7 @@ module.exports = ['$parse', function ($parse) {
               if (sameParent) return false;
               dragEl.parent().get(0).dropzone.removed(dragEl)
               $el.append(dragEl)
-              dragEl.parent().get(0).dropzone.added(dragEl)
+              dragEl.parent().get(0).dropzone.appended(dragEl)
             }
           }
         } else {
