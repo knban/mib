@@ -23,27 +23,45 @@ module.exports = ['$parse', function ($parse) {
         }
 
         if (options.dropzone) {
-          $el.on('dragenter', function () {
-            if (dragEl.parent().get(0).isSameNode($el.get(0))) {
-              console.log('samenode');
+          function dropZoneEnter(e) {
+            console.log('wtf');
+            if (dragEl) {
+              if (dragEl.parent().get(0) === $el.get(0)) {
+                console.log("same parent");
+              } else {
+                console.log('appending');
+                $el.prepend(dragEl)
+              }
             } else {
-              $el.append(dragEl)
+              console.log('nothing to drag');
             }
-          });
+          }; 
+          $el.get(0).addEventListener('dragenter', dropZoneEnter, true);
         } else {
-          $el.prop('draggable', true);
-          $el.on('dragstart', function () {
+          function dragStart(e) {
             dragEl = $el;
             this.style.opacity = '0.4';
-          });
-          $el.on('dragend', function () {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData('text/plain', $el.text());
+          }
+
+          function dragOver(e) {
+          }
+
+          function dragEnd(e) {
             this.style.opacity = '1';
-          });
-          $el.on('dragenter', function () {
-            swapNodes(dragEl[0], $el[0]);
-            //console.log(dragEl.text());
-            //console.log($el.text());
-          });
+            dragEl = null;
+          }
+
+          function dragEnter(e) {
+            //swapNodes(dragEl[0], $el[0]);
+          }
+
+          $el.get(0).addEventListener('dragstart', dragStart, false);
+          $el.get(0).addEventListener('dragover', dragOver, false);
+          $el.get(0).addEventListener('dragend', dragEnd, false);
+          $el.get(0).addEventListener('dragenter', dragEnter, false);
+          $el.prop('draggable', true);
         }
       };
 
