@@ -1,6 +1,12 @@
-var dragEl = null
+var _ = {
+  map: require('lodash.map')
+}
+
+var dragEl =
+  sameParent = null;
 
 function swapNodes(a, b) {
+  if (a === b) return false;
   var aparent= a.parentNode;
   var asibling= a.nextSibling===b? a : a.nextSibling;
   b.parentNode.insertBefore(a, b);
@@ -14,6 +20,7 @@ module.exports = ['$parse', function ($parse) {
         , options = null;
 
       return function (scope, $el) {
+        var events = null;
         if (json) {
           options = $parse(json)(scope);
         } else {
@@ -21,45 +28,65 @@ module.exports = ['$parse', function ($parse) {
         }
 
         if (options.dropzone) {
-          function dropZoneEnter(e) {
-            if (dragEl) {
-              if (dragEl.parent().get(0) === $el.get(0)) {
-                console.log('same parent');
+          events = {
+
+            // Card dragging over a column
+            dragenter: function (e) {
+              if (dragEl) {
+                if (dragEl.parent().get(0) === $el.get(0)) {
+                  sameParent = true;
+                } else {
+                  sameParent = false;
+                  $el.prepend(dragEl)
+                }
               } else {
-                $el.prepend(dragEl)
+                console.log('nothing to drag');
               }
-            } else {
-              console.log('nothing to drag');
+            },
+
+            dragover: function (e) {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              return false;
             }
-          }; 
-          $el.get(0).addEventListener('dragenter', dropZoneEnter, true);
+
+          }
         } else {
-          function dragStart(e) {
-            dragEl = $el;
-            this.style.opacity = '0.4';
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData('text/plain', $el.text());
-          }
+          events = {
 
-          function dragOver(e) {
-          }
+            dragstart: function (e) {
+              dragEl = $el;
+              this.style.opacity = '0.4';
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData('text/plain', $el.text());
+            },
 
-          function dragEnd(e) {
-            this.style.opacity = '1';
-            dragEl = null;
-          }
+            // Card dragging over another card
+            dragover: function (e) {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              return false;
+            },
 
-          function dragEnter(e) {
-            //swapNodes(dragEl[0], $el[0]);
-          }
+            dragend: function () {
+              this.style.opacity = '1';
+              dragEl = null;
+              console.log('done');
+            },
 
-          $el.get(0).addEventListener('dragstart', dragStart, false);
-          $el.get(0).addEventListener('dragover', dragOver, false);
-          $el.get(0).addEventListener('dragend', dragEnd, false);
-          $el.get(0).addEventListener('dragenter', dragEnter, false);
+            dragenter: function () {
+              if (sameParent)
+                swapNodes(dragEl[0], $el[0]);
+              // If new parent, don't swap
+            }
+
+          }
           $el.prop('draggable', true);
         }
-      };
+        _.map(events, function (fn, name) {
+          $el.get(0).addEventListener(name, fn, false);
+        })
+      }
 
 
 
