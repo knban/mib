@@ -17,19 +17,15 @@ module.exports = ['$parse', function ($parse) {
         if (json) {
           options = $parse(json)(scope);
         } else {
-          options = {
-            dropzone: false
-          }
+          options = { dropzone: false }
         }
 
         if (options.dropzone) {
           function dropZoneEnter(e) {
-            console.log('wtf');
             if (dragEl) {
               if (dragEl.parent().get(0) === $el.get(0)) {
-                console.log("same parent");
+                console.log('same parent');
               } else {
-                console.log('appending');
                 $el.prepend(dragEl)
               }
             } else {
