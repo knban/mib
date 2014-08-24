@@ -44,6 +44,13 @@ module.exports = [function() {
   /*
    * Drag and Drop 
    * */
+
+  this.dragndrop = {
+    moved: function () {
+      console.log('moved', arguments);
+    }
+  }
+
   this.moveCardWithinColumn = function ($col, $event) {
     var column = board.attributes.columns[$col];
     column.isSyncing = true;

@@ -37,6 +37,8 @@ module.exports = ['$parse', function ($parse) {
         };
 
         if (options.dropzone) {
+          var dzone = options.dropzone.dragndrop
+          if (! dzone) throw new Error("Dropzone must define 'dragndrop'")
           // Item enters the column
           events.dragenter = function (e) {
             if (dragEl) {
