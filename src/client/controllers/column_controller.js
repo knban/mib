@@ -49,7 +49,34 @@ module.exports = ['$scope', function($scope) {
    * Drag and Drop 
    * */
   this.commitDrag = function (drag) {
+    // drag object can contain transfer and/or swaps
+    // you should always process the transfer first
+    // and then process any swaps
+    $scope.$apply(function () {
+      
     console.log(drag);
+    if (drag.transfer) {
+      var column1 = drag.start.column;
+      column1.isSyncing = true;
+      var column2 = drag.end.column;
+      column2.isSyncing = true;
+      //var oldDeck = column1.cards;
+      //var newDeck = column2.cards;
+      //var $el = $($event.target);
+      //var newIndex = $el.index();
+      //var id = $($el).data('id');
+      //var oldIndex = null;
+      //var card = _.find(oldDeck, function (c, i) {
+      //  oldIndex = i;
+      //  return c._id === id;
+      //});
+      //oldDeck.splice(oldIndex, 1);
+      //newDeck.splice(newIndex, 0, card);
+    }
+    if (drag.swaps) {
+
+    }
+    })
   }
 
   function popCard(id, cb) {
