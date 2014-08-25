@@ -15,7 +15,7 @@ module.exports = ['$scope', function($scope) {
     board = _board;
     this.column = column = _column;
     column.$controller = this;
-    this.dropzone = new Dropzone(board, column);
+    this.dropzone = new Dropzone(this);
   };
 
   this.initNewCard = function () {
@@ -48,6 +48,9 @@ module.exports = ['$scope', function($scope) {
   /*
    * Drag and Drop 
    * */
+  this.commitDrag = function (drag) {
+    console.log(drag);
+  }
 
   function popCard(id, cb) {
     $scope.$apply(function () {
@@ -82,15 +85,6 @@ module.exports = ['$scope', function($scope) {
     }).error(function () {
       alert('something is wrong');
     });
-  };
-
-  // removeCardFromColumn is always hit first in
-  // a cross-column card drag event
-  this.removeCardFromColumn = function ($col, $event) {
-    colJustRemovedFrom = $col;
-    // The event we get out of this is the <ul>
-    // and so we cannot identify the card until the
-    // addCardToColumn method is hit.
   };
 
   this.addCardToColumn = function ($col, $event) {

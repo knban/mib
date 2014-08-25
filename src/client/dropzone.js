@@ -1,73 +1,47 @@
 var _ = {
-  map: require('lodash.map'),
-  find: require('lodash.find'),
-  remove: require('lodash.remove'),
-  uniq: require('lodash.uniq')
+  remove: require('lodash.remove')
 }
 
-function Dropzone(board, column) {
-  this.board = board;
-  this.column = column;
+function Dropzone(columnCtrl) {
+  this.controller = columnCtrl
+  this.column = columnCtrl.column;
 }
 
 var drag = null;
 
 Dropzone.prototype = {
   start: function (e) {
-    drag = { events: [] }
-    drag.events.push({
-      type: 'start',
+    drag = {
       card: $(e.item).data('id'),
-      index: $(e.item).index(),
-      column: this.column._id
-    });
+      start: {
+        index: $(e.item).index(),
+        column: this.column._id
+      }
+    };
   },
   swapped: function ($1, $2) {
-    drag.events.push({
-      type: 'swap',
-      column: this.column._id,
-      cards: [$1.data('id'), $2.data('id')]
-    });
-    this.optimize();
+    drag.swaps = drag.swaps || []
+    drag.swaps.push([$1.data('id'), $2.data('id')])
   },
   removed: function ($el) {
-    drag.temp = {
-      type: 'removed',
-      card: $el.data('id'),
+    drag.swaps = null;
+    delete drag.swaps;
+  },
+  appended: function ($el) {
+    drag.transfer = {
       index: $el.index(),
       column: this.column._id
     }
   },
-  appended: function ($el) {
-    drag.events.push({
-      type: 'move',
-      card: $el.data('id'),
-      prevIndex: drag.temp.index,
-      newIndex: $el.index(),
-      prevColumn: drag.temp.column,
-      newColumn: this.column._id
-    })
-    drag.temp = null;
-    this.optimize();
-  },
-  optimize: function () {
-    _.remove(drag.events, function (e) {
-      if (e.type === 'swap') {
-        if (e.column !== this.column._id) return false;
-        // remove swaps that cancel each other out
-      } else if (e.type === 'move') {
-        // remove moves that cancel each other out
-      }
-    }.bind(this));
-  },
   end: function (e) {
-    drag.events.push({
-      type: 'end',
-      card: $(e.item).data('id'),
+    drag.end = {
       index: $(e.item).index(),
       column: this.column._id
-    });
-    drag = null;
+    };
+    // drag object can contain transfer and/or swaps
+    // you should always process the transfer first
+    // and then process all the swaps, if any
+    this.controller.commitDrag(drag); 
   }
 }
 
