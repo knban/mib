@@ -5,8 +5,6 @@ var _ = {
   uniq: require('lodash.uniq')
 }
 
-var Dropzone = require('../dropzone');
-
 module.exports = ['$scope', function($scope) {
   var board = null;
   var column = null;
@@ -15,7 +13,6 @@ module.exports = ['$scope', function($scope) {
     board = _board;
     this.column = column = _column;
     column.$controller = this;
-    this.dropzone = new Dropzone(this);
   };
 
   this.initNewCard = function () {
@@ -49,11 +46,11 @@ module.exports = ['$scope', function($scope) {
    * Drag and Drop 
    * */
   this.commitDrag = function (drag) {
-    // drag object can contain transfer and/or swaps
-    // you should always process the transfer first
-    // and then process any swaps
-    console.log(drag);
-    var requests = []
+    function swapArrayElements(array_object, index_a, index_b) {
+      var temp = array_object[index_a];
+      array_object[index_a] = array_object[index_b];
+      array_object[index_b] = temp;
+    }
     var a = drag.start.column;
     var b = drag.end.column;
     var card = _.find(a.cards, function (c, i) {
@@ -62,13 +59,18 @@ module.exports = ['$scope', function($scope) {
     a.isSyncing = b.isSyncing = true;
 
     if (drag.transfer) {
-      drag.el.remove()
       a.cards.splice(drag.start.index, 1);
-      b.cards.splice(drag.end.index, 0, card);
-      $scope.$digest();
+      b.cards.push(card);
+      if (drag.swaps) {
+        startIndex = b.cards.length-1;
+        endIndex = drag.end.index;
+        swapArrayElements(b.cards, startIndex, endIndex);
+      }
+    } else if (drag.swaps) {
+      startIndex = drag.start.index;
+      endIndex = drag.end.index;
+      swapArrayElements(b.cards, startIndex, endIndex);
     }
-
-    console.log(_.map(a.cards, function (c) {return c.remoteObject.title}))
 
     api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
       old_column: a._id,
