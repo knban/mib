@@ -53,88 +53,32 @@ module.exports = ['$scope', function($scope) {
     // you should always process the transfer first
     // and then process any swaps
     console.log(drag);
-    $scope.$apply(function () {
-      if (drag.transfer) {
-        var a = drag.start.column;
-        var b = drag.end.column;
-        var card = _.find(a.cards, function (c, i) {
-          return c._id === drag.id;
-        });
-        a.isSyncing = b.isSyncing = true;
-        a.cards.splice(drag.start.index, 1);
-        drag.el.remove()
-        b.cards.splice(drag.end.index, 0, card);
-        // ajax request goes here...
-        a.isSyncing = b.isSyncing = false;
-      }
-      if (drag.swaps) {
-
-      }
-    })
-  }
-
-  function popCard(id, cb) {
-    $scope.$apply(function () {
-      var res = _.remove(column.cards, function (c, i) {
-        return c._id === id;
-      });
-      if (!res) cb(new Error('Card not found, _id: '+id));
-      else cb(null, res[0])
-    })
-  }
-
-  this.moveCardWithinColumn = function ($col, $event) {
-    var column = board.attributes.columns[$col];
-    column.isSyncing = true;
-    var cards = column.cards;
-    var $el = $($event.target);
-    var newIndex = $el.index();
-    var id = $($el).data('id');
-    var oldIndex = null;
-    var card = _.find(cards, function (c, i) {
-      oldIndex = i;
-      return c._id === id;
+    var requests = []
+    var a = drag.start.column;
+    var b = drag.end.column;
+    var card = _.find(a.cards, function (c, i) {
+      return c._id === drag.id;
     });
-    var movedCard = cards.splice(oldIndex, 1);
-    cards.splice(newIndex, 0, movedCard[0]);
+    a.isSyncing = b.isSyncing = true;
+
+    if (drag.transfer) {
+      drag.el.remove()
+      a.cards.splice(drag.start.index, 1);
+      b.cards.splice(drag.end.index, 0, card);
+      $scope.$digest();
+    }
+
+    console.log(_.map(a.cards, function (c) {return c.remoteObject.title}))
+
     api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
-      old_column: column._id,
-      new_column: column._id,
-      new_index: newIndex
+      old_column: a._id,
+      new_column: b._id,
+      new_index: drag.end.index
     }).success(function(){
-      column.isSyncing = false;
-    }).error(function () {
-      alert('something is wrong');
-    });
-  };
-
-  this.addCardToColumn = function ($col, $event) {
-    var column1 = board.attributes.columns[colJustRemovedFrom];
-    column1.isSyncing = true;
-    var column2 = board.attributes.columns[$col];
-    column2.isSyncing = true;
-    var oldDeck = column1.cards;
-    var newDeck = column2.cards;
-    var $el = $($event.target);
-    var newIndex = $el.index();
-    var id = $($el).data('id');
-    var oldIndex = null;
-    var card = _.find(oldDeck, function (c, i) {
-      oldIndex = i;
-      return c._id === id;
-    });
-    oldDeck.splice(oldIndex, 1);
-    newDeck.splice(newIndex, 0, card);
-    api.put('boards/'+board.attributes._id+'/cards/'+card._id+'/move', {
-      old_column: column1._id,
-      new_column: column2._id,
-      new_index: newIndex
-    }).success(function(){
-      column1.isSyncing = false;
-      column2.isSyncing = false;
+      a.isSyncing = b.isSyncing = false;
     }).error(function (e) {
       console.error(e);
       alert("Error: "+e.message);
     });
-  };
+  }
 }];
