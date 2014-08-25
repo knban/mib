@@ -18,7 +18,7 @@ module.exports = ['$scope', function($scope) {
   this.initNewCard = function () {
     this.newCard = {
       isSyncing: true,
-      provider: "internal",
+      provider: "local",
       remoteObject: {}
     }
   };
