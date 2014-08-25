@@ -29,7 +29,7 @@ module.exports = ['$scope', function($scope) {
     // by splicing it into the cards collection
     var card = null;
     card = this.newCard;
-    this.column.cards.push(card);
+    this.column.cards.splice(0, 0, card);
     this.newCard = null; // controls if the form is displayed
     // Keep a spinner going next to it
     // Fire off an async call
