@@ -39,6 +39,7 @@ module.exports = ['$scope', function($scope) {
     }).success(function(data) {
       card._id = data.card._id;
       card.isSyncing = false;
+      column.$component.renderCards();
     });
   }
 

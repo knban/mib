@@ -5,6 +5,9 @@ var info = {
 
 module.exports = {
   info:info,
-  authorizer: require('./authorizer')
+  authorizer: require('./authorizer'),
+  component: function (name) {
+    return require('./components')[name]
+  }
 };
 
