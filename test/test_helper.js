@@ -8,6 +8,15 @@ var _ = require('lodash');
 var stubbedModels = [];
 module.exports = {
   _:_,
+  createDOM: function (cb) {
+    var $ = require('jquery');
+    var jsdom = require('jsdom').jsdom;
+    var doc = jsdom('<body>test</body>');
+    var window = doc.parentWindow;
+    jsdom.jQueryify(window, $, function () {
+      cb(window)
+    });
+  },
   mongoDB: 'mongodb://localhost/mib-test',
   mongoose: mongoose,
   sinon: sinon,
