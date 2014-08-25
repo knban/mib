@@ -14,7 +14,9 @@ try {
   dotenv.load();
 } catch (e) {}
 
-app.use('/js/bundle.js', browserify(__dirname+'/../client/app.js'));
+app.use('/js/bundle.js', browserify(__dirname+'/../client/app.js', {
+  transform: ['reactify']
+}));
 app.use(express.static(__dirname + '/../../public'));
 
 if (process.env.NODE_ENV === "development") {
