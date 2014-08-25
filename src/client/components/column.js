@@ -1,8 +1,7 @@
 /**
 * @jsx React.DOM
 */
-var _ = { map: require('lodash.map') }
-  , dragndrop = require('dragndrop')
+var dragndrop = require('dragndrop')
   , Card = require('./card')
 
 var Column = React.createClass({
@@ -10,8 +9,8 @@ var Column = React.createClass({
     this.setProps({ cards: this.props.cards })
   },
   render: function() {
-    var cards = _.map(this.props.cards, function (card) {
-      return <Card card={card} />
+    var cards = this.props.cards.map(function (card) {
+      return <Card key={card._id} card={card} />
     })
     return <ul className='list-group'>{cards}</ul>
   },
