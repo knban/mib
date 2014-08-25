@@ -28,10 +28,14 @@ Dropzone.prototype = {
     delete drag.swaps;
   },
   appended: function ($el) {
-    drag.transfer = {
+    var tx = {
       index: $el.index(),
       column: this.column._id
     }
+    if (drag.start.column !== tx.column)
+      drag.transfer = tx;
+    else
+      delete drag.transfer;
   },
   end: function (e) {
     drag.end = {
