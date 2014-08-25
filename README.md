@@ -75,7 +75,7 @@ Better (read: more opinionated) instructions can be provided if requested.
 
 ## Development
 
-**mib** uses the MEAN stack (MongoDB, Express, Angular, NodeJS)
+**mib** uses the MEANR stack (MongoDB, Express, Angular, NodeJS, ReactJS)
 
 It's easy to get started hacking features (maybe you want to help get Bitbucket/Gitlab supported sooner?)
 
