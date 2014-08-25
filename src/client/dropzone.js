@@ -41,7 +41,8 @@ Dropzone.prototype = {
     // drag object can contain transfer and/or swaps
     // you should always process the transfer first
     // and then process all the swaps, if any
-    this.controller.commitDrag(drag); 
+    if (drag.transfer || drag.swaps)
+      this.controller.commitDrag(drag); 
   }
 }
 
