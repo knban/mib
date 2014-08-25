@@ -11,7 +11,7 @@ Dropzone.prototype = {
   start: function (e) {
     drag = null;
     drag = {
-      card: $(e.item).data('id'),
+      id: $(e.item).data('id'),
       start: {
         index: $(e.item).index(),
         column: this.column
@@ -43,6 +43,7 @@ Dropzone.prototype = {
       delete drag.transfer;
   },
   end: function (e) {
+    drag.el = e.item;
     drag.end = {
       index: $(e.item).index(),
       column: this.column
