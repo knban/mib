@@ -27,6 +27,8 @@ Dropzone.prototype = {
       if (_.isEqual(swap, lastSwap)) {
         // Cancels out, remove it and don't add this swap.
         drag.swaps.splice(lastIndex, 1)
+        if (drag.swaps.length === 0)
+          delete drag.swaps;
         return false;
       }
     }
