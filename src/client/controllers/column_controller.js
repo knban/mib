@@ -1,11 +1,13 @@
 var _ = {
   map: require('lodash.map'),
-  find: require('lodash.find')
+  find: require('lodash.find'),
+  remove: require('lodash.remove'),
+  uniq: require('lodash.uniq')
 }
 
-var colJustRemovedFrom = null;
+var Dropzone = require('../dropzone');
 
-module.exports = [function() {
+module.exports = ['$scope', function($scope) {
   var board = null;
   var column = null;
 
@@ -13,6 +15,7 @@ module.exports = [function() {
     board = _board;
     this.column = column = _column;
     column.$controller = this;
+    this.dropzone = new Dropzone(board, column);
   };
 
   this.initNewCard = function () {
@@ -45,18 +48,16 @@ module.exports = [function() {
   /*
    * Drag and Drop 
    * */
-  this.dropzone = {
-    swapped: function ($1, $2) {
-      console.log('col '+column._id+' swap', $1.text().trim(), $2.text().trim());
-    },
-    appended: function ($el) {
-      console.log('col '+column._id+'add', $el.text());
-    },
-    removed: function ($el) {
-      console.log('col '+column._id+'remove', $el.text());
-    }
-  }
 
+  function popCard(id, cb) {
+    $scope.$apply(function () {
+      var res = _.remove(column.cards, function (c, i) {
+        return c._id === id;
+      });
+      if (!res) cb(new Error('Card not found, _id: '+id));
+      else cb(null, res[0])
+    })
+  }
 
   this.moveCardWithinColumn = function ($col, $event) {
     var column = board.attributes.columns[$col];
