@@ -2,7 +2,7 @@
 * @jsx React.DOM
 */
 var Dropzone = require('../dropzone');
-var Column = require('../components').Column;
+var Column = require('../components').Column(React);
 
 module.exports = ['$parse', function ($parse) {
   return {
