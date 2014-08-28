@@ -5,6 +5,8 @@ var _ = {
   uniq: require('lodash.uniq')
 }
 
+var NewCardForm = require('../components/new_card_form');
+
 module.exports = ['$scope', function($scope) {
   var board = null;
   var column = null;
@@ -24,23 +26,6 @@ module.exports = ['$scope', function($scope) {
   };
 
   this.createCard = function () {
-    if (!this.newCard.remoteObject.title) return;
-    // Turn this into a new card on the UI immediately
-    // by splicing it into the cards collection
-    var card = null;
-    card = this.newCard;
-    this.column.cards.splice(0, 0, card);
-    this.newCard = null; // controls if the form is displayed
-    // Keep a spinner going next to it
-    // Fire off an async call
-    api.post('columns/' + this.column._id + "/cards", {
-      provider: card.provider,
-      remoteObject: card.remoteObject
-    }).success(function(data) {
-      card._id = data.card._id;
-      card.isSyncing = false;
-      column.$component.renderCards();
-    });
   }
 
   /*

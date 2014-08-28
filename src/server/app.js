@@ -17,22 +17,15 @@ try {
 app.use('/js/bundle.js', browserify(__dirname+'/../client/app.js', {
   transform: ['reactify']
 }));
+
 app.use(express.static(__dirname + '/../../public'));
 
 if (process.env.NODE_ENV === "development") {
   logger.info('development mode');
-  app.use('/cov', express.static(__dirname + '/../../coverage/lcov-report'));
-
   app.use(function (req, res, next) {
     logger.info(req.method + " " + req.path);
     next();
   });
-
-  global.debug = function (obj) {
-    var beautify = require('js-beautify').js_beautify;
-    output = beautify(JSON.stringify(obj), { indent_size: 2});
-    logger.info(output);
-  };
 }
 
 // Cross Domain
@@ -55,6 +48,7 @@ var db = mongoose.connection;
 db.on('error', logger.error.bind(logger, 'connection error '+mongodb_uri));
 
 module.exports = {
+  logger: logger,
   http: http,
   app: app,
   io: io

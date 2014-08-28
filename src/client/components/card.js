@@ -15,7 +15,7 @@ module.exports = function (React) {
 
       return (
         <li data-id={this.props.card._id} className='list-group-item card'>
-          <Loader show={this.props.card.isSyncing} />
+          <Loader show={this.props.syncing} />
           <CardFace data={this.props.card.remoteObject} />
         </li>
       )

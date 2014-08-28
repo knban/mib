@@ -4,10 +4,10 @@
     ng-init="colCtrl.init(column, board)"
     ng-repeat="column in board.attributes.columns">
     <div>
-      <a href="#" ng-click="column.$controller.initNewCard()" ng-hide="column.$controller.newCard">
+      <a href="#" ng-click="column.$newcard = true" ng-hide="column.$newcard">
         New Card
       </a>
-      <a href="#" ng-click="column.$controller.newCard = null" ng-show="column.$controller.newCard">
+      <a href="#" ng-click="column.$newcard = null" ng-show="column.$newcard">
         Cancel
       </a>
     </div>
@@ -21,27 +21,8 @@
   <td class="column"
     ng-repeat="column in board.attributes.columns track by column._id"
     width="{{(100/board.attributes.columns.length)}}%">
-    <form class="well clearfix" role="form"
-      ng-show="column.$controller.newCard"
-      ng-submit="column.$controller.createCard(this)">
-      <div class="form-group">
-        <input type="text" autofocus class="form-control"
-        ng-model="column.$controller.newCard.remoteObject.title">
-      </div>
-      <button type="submit" class="pull-right btn btn-success">Create</button>
-    </form>
-
-    <div react-column="column" />
-
-    <!--ul id="column_{{$index}}" class="list-group"
-      ng-dragndrop='{ dropzone: column.$controller.dropzone }'
-      ng-init="column.$controller.loadCards(this)">
-      <li class="list-group-item card"
-        ng-dragndrop
-        ng-repeat="card in column.cards track by card._id"
-        data-id="{{card._id}}"
-        ng-include="'views/'+card.provider+'/card.html'"></li>
-    </ul-->
+    <div react-newcard data-column="column" ng-show="column.$newcard"></div>
+    <div react-column="column"></div>
   </td>
 </tr>
 </tbody>
