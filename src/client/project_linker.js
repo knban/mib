@@ -14,6 +14,7 @@ module.exports = function (board, $http) {
     this.view = 'views/project_linker.html';
     this._Provider = null;
     this._PersonalOrOrg = null;
+    this._ShowAuthorizationForm = false;
     this._Orgs = null;
     this._Repos = null;
     this._ReposToImport = [];
