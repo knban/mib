@@ -1,2 +1,2 @@
-<a href="#">{{card.remoteObject.title}}</a>
+<span ng-bind-html='board.trusted(card.remoteObject.title.autoLink({ target: "_blank", rel: "nofollow" }))'></span>
 <img ng-show="card.isSyncing" src="images/ajax-loader.gif"></img>

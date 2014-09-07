@@ -7,7 +7,7 @@ ProjectLinker = require('../project_linker'),
 BoardCreator = require('../board_creator'),
 UserMod = require('../user_mod');
 
-module.exports = ['$http', function($http) {
+module.exports = ['$http', '$sce', function($http, $sce) {
   var board = this;
   board.loaded = false;
   this.providers = providers.prepare(localStorage, $http, this, window.api);
@@ -48,6 +48,9 @@ module.exports = ['$http', function($http) {
     });
   }
 
+  this.trusted = function (html) {
+    return $sce.trustAsHtml(html)
+  };
 
   this.logCard = function(card) {
     console.log(card);
